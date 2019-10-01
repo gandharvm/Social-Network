@@ -26,8 +26,7 @@ class User(models.Model):
         self.wallet_money+=amount
     
     def send_money(self,amount,UserId):
-
-
+        pass
 
 class Friendship(models.Model):
     from_friend=models.ForeignKey(User,related_name='friend_set',on_delete=models.CASCADE)
