@@ -1,0 +1,9 @@
+<h1>User List</h1>
+<br>
+<form action="{% url "getUser" %}" method="POST">
+    {% csrf_token %}
+    {% for name in usersList %}
+        <input type="radio" value="{{name}}" name="username">{{name}}<br>
+    {% endfor %}
+    <input type="submit" value="Submit">
+</form>
