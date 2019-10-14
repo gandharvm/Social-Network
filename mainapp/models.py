@@ -1,4 +1,5 @@
 from django.db import models
+from math import inf
 
 
 class MoneyRequest(models.Model):
@@ -50,6 +51,7 @@ class User(models.Model):
         to_user.money_requests.add(r)
         self.save()
         to_user.save()
+<<<<<<< HEAD
 
     def accept_money(self, tid):
         r = MoneyRequest.objects.get(pk=tid)
@@ -57,6 +59,15 @@ class User(models.Model):
         u = User.objects.get(pk=r.from_user)
         u.transactions += 1
         u.wallet_money -= r.amount
+=======
+        
+    def accept_money(self,tid):
+        r=MoneyRequest.objects.get(pk=tid)
+        self.wallet_money+=r.amount
+        u=User.objects.get(pk=r.from_user)
+        u.transactions+=1
+        u.wallet_money-=r.amount
+>>>>>>> 2213185e6a796e5b68aa879f3493f73bba9c69d7
         u.save()
         self.money_requests.remove(tid)
         self.save()
@@ -65,9 +76,12 @@ class User(models.Model):
         self.money_requests.remove(tid)
         self.save()
 
+<<<<<<< HEAD
     def __str__(self):
         return ("%s" % self.pk)
 
+=======
+>>>>>>> 2213185e6a796e5b68aa879f3493f73bba9c69d7
     def send_message(self, UserId, content):
         from_user = self
         to_user = User.objects.get(pk=UserId)
@@ -92,12 +106,55 @@ class Friendship(models.Model):
         unique_together = (("to_friend", "from_friend"),)
 
 
+class CasualUser(User):
+    def paymentCycleInMonths(self):
+        return 1
+    
+    def amountToPay(self):
+        return 0
+    
+    def maxTransactions(self):
+        return 15
+    
+    def toPremium(self,plan):
+        fields = [f.name for f in User._meta.fields if f.name != 'id']
+        values = dict( [(x, getattr(self, x)) for x in fields] )
+        new_instance = PremiumUser(**values)
+        # new_instance.User_ptr = self.User_ptr #re-assign related parent
+        self.delete()
+        new_instance.plan=plan
+        new_instance.save()
+        return(new_instance)
+
+
 class PremiumUser(User):
-    pass
+    plansMap={'silver':0,'gold':1,'platinum':1}
+    planCosts=[50,100,150]
+    plansMaxGroups=[2,4,inf]
+    plan = models.CharField(max_length=10, default="silver")
+    
+    def amountToPay(self):
+        return(planCosts[plansMap[self.plan.lower()]])
+    
+    def paymentCycleInMonths(self):
+        return 1
+    
+    def maxTransactions(self):
+        return 30
+    
+    def maxGroups(self):
+        return(plansMaxGroups[plansMap[self.plan.lower()]])
 
 
-class CommercialUser(PremiumUser):
-    pass
+class CommercialUser(User):
+    def amountToPay(self):
+        return 5000
+    
+    def paymentCycleInMonths(self):
+        return 12
+    
+    def maxTransactions(self):
+        return inf
 
 
 class Private_Message(models.Model):
