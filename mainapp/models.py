@@ -1,5 +1,8 @@
 from django.db import models
 from math import inf
+import logging
+
+logger = logging.getLogger('MAINAPP')
 
 
 class MoneyRequest(models.Model):
@@ -13,32 +16,40 @@ class User(models.Model):
     friend_requests = models.ManyToManyField("self")
     wallet_money = models.FloatField(default=0)
     transactions = models.IntegerField(default=0)
+    username = models.CharField(max_length=30, unique=True)
     others_can_post = models.BooleanField(default="False")
-    username = models.CharField(max_length=50, default="Abc")
     money_requests = models.ManyToManyField(MoneyRequest)
 
     @classmethod
     def create(cls, username):
+        # logger.info("user " + username + " created")
         return cls(username=username)
 
     def send_friend_request(self, UserId):
         to_user = User.objects.get(pk=UserId)
         from_user = self.pk
         to_user.friend_requests.add(from_user)
+        # logger.info('user '+str(self) +
+        #             ' sent friend request to '+str(to_user))
         self.save()
         to_user.save()
 
     def accept_friend_request(self, UserId):
         self.friends.add(UserId)
         self.friend_requests.remove(UserId)
+        # logger.info('user '+str(User.objects.get(pk=UserId)) +
+        #             ' and '+str(self)+' are friends')
         self.save()
 
     def reject_friend_request(self, UserId):
         self.friend_requests.remove(UserId)
+        # logger.info('user '+str(self) + ' rejected friend request from ' +
+        #             str(User.objects.get(pk=UserId)))
         self.save()
 
     def deposit_money(self, amount):
         self.wallet_money += amount
+        logger.info(str(self)+' deposited '+str(amount)+' to their wallet')
         self.save()
 
     def send_money(self, amount, UserId):
@@ -47,6 +58,8 @@ class User(models.Model):
         r = MoneyRequest(amount=amount, from_user=from_user)
         r.save()
         to_user.money_requests.add(r)
+        logger.info(str(self)+' sent money request to ' +
+                    str(to_user)+' for '+str(amount)+' amount')
         self.save()
         to_user.save()
 
@@ -58,10 +71,16 @@ class User(models.Model):
         self.wallet_money += r.amount
         u.save()
         self.money_requests.remove(tid)
+        logger.info(str(self)+' accepted money request from ' +
+                    str(u)+' for '+str(r.amount)+' amount')
         self.save()
 
     def reject_money(self, tid):
         self.money_requests.remove(tid)
+        r = MoneyRequest.objects.get(pk=tid)
+        u = User.objects.get(pk=r.from_user)
+        logger.info(str(self)+' rejected money request from ' +
+                    str(u)+' for '+str(r.amount)+' amount')
         self.save()
 
     def send_message(self, UserId, content):
