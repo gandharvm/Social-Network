@@ -1,0 +1,41 @@
+<form name=signUp action="{% url 'createUser' %}" method="POST" onsubmit="return valid_username_form()">
+    {% csrf_token %}
+    UserName:<br>
+    <input type="text" name="username" required><br>
+    Password:<br>
+    <input type="password" name="password" required><br>
+    ConfirmPassword:<br>
+    <input type="password" name="confirmPassword" required><br>
+    Email:<br>
+    <input type="text" name="email" required><br>
+    <select name="category">
+        <option value="casual">Casual</option>
+        <option value="premium">Premium</option>
+        <option value="commercial">Commercial</option>
+    </select>
+    <input type="submit" value="Sign Up" ><br>
+</form>
+
+<p id="error" style="color: red;"></p>
+
+
+<script type="text/javascript" >
+function valid_username_form() {
+    var name = document.signUp.username.value;
+    var my_list = {{ names|safe }};
+    var i=0;
+    var flag = false;
+    for (;i<'{{len}}';i++) {
+        if (name == my_list[i]){
+            document.getElementById("error").innerHTML="Username already exists!";
+            flag=true;
+        }
+    }
+    if (flag==true){
+        return false;
+    }
+    else {
+        return document.signUp.submit();
+    }
+}
+</script>
