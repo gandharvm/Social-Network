@@ -7,5 +7,6 @@ urlpatterns = [
     path('auth/',views.authentication,name='auth'),
     path('createUser/',views.createUser,name='createUser'),
     path('logout/',views.logout_view,name='logout'),
+    path('signUp/otp/',views.otp_page,name='otp'),
     
 ]
