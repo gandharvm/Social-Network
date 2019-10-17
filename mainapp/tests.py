@@ -18,10 +18,10 @@ class Private_Messages_Test(TestCase):
 
 class User_Test(TestCase):
     def test_friend_request(self):
-        u1 = User.create("A")
+        u1 = User.create("C")
         u1.save()
         k1 = u1.pk
-        u2 = User.create("B")
+        u2 = User.create("D")
         u2.save()
         k2 = u2.pk
         u2.send_friend_request(k1)
@@ -33,10 +33,10 @@ class User_Test(TestCase):
         self.assertIn(u1, u2.friends.all())
 
     def test_send_money(self):
-        u1 = User()
+        u1 = User.create('E')
         u1.save()
         k1 = u1.pk
-        u2 = User()
+        u2 = User.create('F')
         u2.save()
         k2 = u2.pk
         u2.send_friend_request(k1)
