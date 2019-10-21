@@ -12,18 +12,31 @@ class MoneyRequest(models.Model):
 
 class User(models.Model):
     category = models.CharField(max_length=20)
+    money_requests = models.ManyToManyField(MoneyRequest)
+    username = models.CharField(max_length=30, unique=True)
+
+    # private info
+    date_of_birth = models.DateField()
+    email_id = models.EmailField()
     friends = models.ManyToManyField("self")
     friend_requests = models.ManyToManyField("self")
     wallet_money = models.FloatField(default=0)
     transactions = models.IntegerField(default=0)
-    username = models.CharField(max_length=30, unique=True)
+
+    # privacy settings
     others_can_post = models.BooleanField(default="False")
-    money_requests = models.ManyToManyField(MoneyRequest)
+    others_can_see_friends = models.BooleanField(default='False')
+    others_can_see_email = models.BooleanField(default='True')
+    others_can_see_dob = models.BooleanField(default='False')
 
     @classmethod
-    def create(cls, username):
+    def create(cls, username, dob, email_id):
         # logger.info("user " + username + " created")
-        return cls(username=username)
+        user = cls(username=username, date_of_birth=dob, email_id=email_id)
+        user.save()
+        timeline = Timeline(timeline_of=user)
+        timeline.save()
+        return user
 
     def send_friend_request(self, UserId):
         to_user = User.objects.get(pk=UserId)
@@ -90,6 +103,28 @@ class User(models.Model):
                               to_user=to_user, content=content)
         msg.save()
         return msg
+
+    def post_on_own_timeline(self, content):
+        post = Post(posted_by=self, content=content, posted_on=self)
+        post.save()
+        timeline = Timeline.objects.get(timeline_of=self)
+        timeline.posts.add(post)
+        timeline.save()
+        return post
+
+    def post_on_other_timeline(self, UserId, content):
+        user = User.objects.get(pk=UserId)
+        post = Post(posted_by=self, content=content, posted_on=user)
+        if(user.others_can_post and self in user.friends.all()):
+            post.save()
+            print(post.pk)
+            timeline = Timeline.objects.get(timeline_of=user)
+            timeline.posts.add(post)
+            timeline.save()
+        else:
+            # cannot post on this user's timeline
+            pass
+        return post
 
     def __str__(self):
         return self.username
@@ -179,3 +214,25 @@ class Private_Message(models.Model):
 
     def __eq__(self, other):
         return str(self) == str(other)
+
+
+class Post(models.Model):
+    posted_by = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='posted_by')
+    content = models.CharField(max_length=500)
+    time = models.DateTimeField(auto_now=True)
+    posted_on = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='posted_on')
+
+    def __str__(self):
+        return (self.content)
+
+
+class Timeline(models.Model):
+    timeline_of = models.OneToOneField(User, on_delete=models.CASCADE)
+    posts = models.ManyToManyField(Post)
+
+
+class Page(models.Model):
+    admin = models.ManyToManyField(CommercialUser)
+    Content = models.CharField(max_length=500)
