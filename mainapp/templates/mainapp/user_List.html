@@ -1,9 +1,7 @@
 <h1>{{title}}</h1>
 <br>
 
-{% with "{/% url /"|add:returnFunction|add:/" /%/}" as actionName %}
-{% include actionName %}
-<form action=actionName method="POST">
+<form action="{% url returnFunction %}" method="POST">
     {% csrf_token %}
     {% load index %}
     {% load makeList %}
@@ -19,5 +17,3 @@
     {% endif %}
 
 </form>
-
-{% endwith %}
