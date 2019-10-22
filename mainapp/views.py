@@ -27,7 +27,7 @@ def display_Menu(request,mainRequest) :
         "returnFunction":returnFunction,
         "responseType":responseType
     }
-    return render(mainRequest,"mainapp/user_List.html",context=context)
+    return render(mainRequest,"mainapp/models_List.html",context=context)
 
 # display Main Menu
 def displayMainMenu(request):
@@ -38,7 +38,7 @@ def displayMainMenu(request):
     modelList.append(menuItem("Send private message",1))
     modelList.append(menuItem("Display friend list",2))
     modelList.append(menuItem("Add post",3))
-    attr={'list':modelList,'title':'What to do next?','submitText':'Go!','responseType':'single','returnFunction':"getMenuResponse" }
+    attr={'list':modelList,'title':'What to do next?','submitText':'Go!','responseType':'multi','returnFunction':"getMenuResponse" }
     return display_Menu(attr,request)
 
 def getIndexList(string):
@@ -52,10 +52,18 @@ def getMenuResponse(request):
     # check if user is authenticated 
     # if not request.user.is_authenticated:
     #     return HttpResponseRedirect(reverse('loginPage'))
-    indexList = getIndexList(request.POST['indexList'])
+    
+    responseType = request.POST['responseType']
+    indexList = []
+    if (responseType=='single') :        
+        indexList = getIndexList(request.POST['indexList'])    
+    elif(responseType=='multi') :
+        indexList = request.POST.getlist('indexList')
+
     responseList=[]
     for index in indexList:
         responseList.append(modelList[int(index)])
+    
     print(str(responseList))
     # TODO currently to test code
     return HttpResponse(responseList)
