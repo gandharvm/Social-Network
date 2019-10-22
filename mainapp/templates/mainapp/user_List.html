@@ -1,9 +1,23 @@
-<h1>User List</h1>
+<h1>{{title}}</h1>
 <br>
-<form action="{% url "getUser" %}" method="POST">
+
+{% with "{/% url /"|add:returnFunction|add:/" /%/}" as actionName %}
+{% include actionName %}
+<form action=actionName method="POST">
     {% csrf_token %}
-    {% for name in usersList %}
-        <input type="radio" value="{{name}}" name="username">{{name}}<br>
-    {% endfor %}
-    <input type="submit" value="Submit">
+    {% load index %}
+    {% load makeList %}
+    {% if responseType == 'single' %}
+        {% for i in rangeList %}
+            <input type="radio" value={% to_list i %} name="indexList">{{ displayList|index:i }}<br>
+        {% endfor %}
+        <input type="submit" value={{submitText}}>
+    {% endif %}
+
+    {% if responseType == 'multi' %}
+            
+    {% endif %}
+
 </form>
+
+{% endwith %}

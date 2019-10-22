@@ -1,6 +1,7 @@
 from django.db import models
 from math import inf
 import logging
+import datetime
 
 logger = logging.getLogger('MAINAPP')
 
@@ -16,7 +17,7 @@ class User(models.Model):
     username = models.CharField(max_length=30, unique=True)
 
     # private info
-    date_of_birth = models.DateField()
+    date_of_birth = models.DateField(default=datetime.date.today)
     email_id = models.EmailField()
     friends = models.ManyToManyField("self")
     friend_requests = models.ManyToManyField("self")

@@ -64,7 +64,7 @@ def createUser(request):
         user = PremiumUser(username=username,category=category)
     elif(category=="commercial"):
         user = CommercialUser(username=username,category=category)
-    user.is_active = False
+    # user.is_active = False
     user.save()
     
     generated_token = otp_mail.generate_token()
