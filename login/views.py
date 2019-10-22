@@ -13,7 +13,7 @@ from django.template.loader import render_to_string
 from django.contrib.auth.models import User
 from django.core.mail import EmailMessage
 
-from .models import otp_mail
+from .utils import otp_mail
 
 # show login Page
 def loginPage(request) :
