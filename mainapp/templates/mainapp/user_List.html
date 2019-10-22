@@ -1,6 +1,6 @@
 <h1>{{title}}</h1>
 <br>
-<form action="{% url "getMenuResponse" %}" method="POST">
+<form action="{% url returnFunction %}" method="POST">
     {% csrf_token %}
     {% load index %}
     {% load makeList %}
