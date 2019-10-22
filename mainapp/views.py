@@ -31,24 +31,29 @@ def display_Menu(request,mainRequest) :
 
 
 def displayMainMenu(request):
-    items=[]
-    items.append(menuItem("Send friend request",1))
-    items.append(menuItem("Send private message",2))
-    items.append(menuItem("Display friend list",3))
-    items.append(menuItem("Add post",4))
-    attr={'list':items,'title':'What to do next?','submitText':'Go!','responseType':'single','returnFunction':"getMenuResponse"}
+    modelList.append(menuItem("Send friend request",1))
+    modelList.append(menuItem("Send private message",2))
+    modelList.append(menuItem("Display friend list",3))
+    modelList.append(menuItem("Add post",4))
+    attr={'list':modelList,'title':'What to do next?','submitText':'Go!','responseType':'single','returnFunction':"{% url \"getMenuResponse\" %}" }
 
     return display_Menu(attr,request)
 
+def getIndexList(string):
+    k=[]
+    for i in range(1,len(string)-1,2):
+        k.append(int(string[i]))
+    return(k)
+
 # view user profile
-def getMenuResponse(request) :
+def getMenuResponse(request):
     # check if user is authenticated 
     # if not request.user.is_authenticated:
     #     return HttpResponseRedirect(reverse('loginPage'))
-    indexList = request.POST['indexList']
+    indexList = getIndexList(request.POST['indexList'])
     responseList=[]
     for index in indexList:
-        responseList.append(modelList[index])
-    print(responseList)
+        responseList.append(modelList[int(index)])
+    print(str(responseList))
     # return HttpResponse(responseList)
     
