@@ -3,18 +3,6 @@ from .models import *
 from datetime import datetime
 
 
-class Private_Messages_Test(TestCase):
-    def test_message(self):
-        u1 = User.create("A", datetime.today(), 'a@x.com')
-        u2 = User.create("B", datetime.today(), 'b@x.com')
-        k2 = u2.pk
-        msg = u1.send_message(k2, "Hello World!")
-        self.assertIn(
-            Private_Message(from_user=u1, to_user=u2, content="Hello World!"),
-            Private_Message.objects.all(),
-        )
-
-
 class User_Test(TestCase):
     def test_friend_request(self):
         u1 = User.create("C", datetime.today(), 'c@x.com')
@@ -73,3 +61,18 @@ class User_Test(TestCase):
         self.assertNotIn(post3, timeline2.posts.all())
         self.assertIn(post4, Post.objects.all())
         self.assertIn(post4, timeline1.posts.all())
+
+
+class Private_Messages_Test(TestCase):
+    def test_message(self):
+        u1 = User.create("A", datetime.today(), 'a@x.com')
+        k1 = u1.pk
+        u2 = User.create("B", datetime.today(), 'b@x.com')
+        k2 = u2.pk
+        u1.send_friend_request(k2)
+        u2.accept_friend_request(k1)
+        msg = u1.send_message(k2, "Hello World!")
+        self.assertIn(
+            Private_Message(from_user=u1, to_user=u2, content="Hello World!"),
+            Private_Message.objects.all(),
+        )

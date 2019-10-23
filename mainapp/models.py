@@ -39,8 +39,11 @@ class User(models.Model):
         return user
 
     def send_friend_request(self, UserId):
-        to_user = User.objects.get(pk=UserId)
-        from_user = self.pk
+        to_user = User.objects.filter(pk=UserId)
+        if not to_user.exists():
+            return
+        to_user = to_user[0]
+        from_user = self
         to_user.friend_requests.add(from_user)
         # logger.info('user '+str(self) +
         #             ' sent friend request to '+str(to_user))
@@ -48,6 +51,9 @@ class User(models.Model):
         to_user.save()
 
     def accept_friend_request(self, UserId):
+        fr = self.friend_requests.filter(pk=UserId)
+        if not fr.exists():
+            return
         self.friends.add(UserId)
         self.friend_requests.remove(UserId)
         # logger.info('user '+str(User.objects.get(pk=UserId)) +
@@ -55,6 +61,9 @@ class User(models.Model):
         self.save()
 
     def reject_friend_request(self, UserId):
+        fr = self.friend_requests.filter(pk=UserId)
+        if not fr.exists():
+            return
         self.friend_requests.remove(UserId)
         # logger.info('user '+str(self) + ' rejected friend request from ' +
         #             str(User.objects.get(pk=UserId)))
@@ -66,7 +75,10 @@ class User(models.Model):
         self.save()
 
     def send_money(self, amount, UserId):
-        to_user = User.objects.get(pk=UserId)
+        to_user = self.friends.filter(pk=UserId)
+        if not to_user.exists():
+            return
+        to_user = to_user[0]
         from_user = self.pk
         r = MoneyRequest(amount=amount, from_user=from_user)
         r.save()
@@ -77,28 +89,45 @@ class User(models.Model):
         to_user.save()
 
     def accept_money(self, tid):
-        r = MoneyRequest.objects.get(pk=tid)
-        u = User.objects.get(pk=r.from_user)
-        u.transactions += 1
-        u.wallet_money -= r.amount
-        self.wallet_money += r.amount
-        u.save()
-        self.money_requests.remove(tid)
-        logger.info(str(self)+' accepted money request from ' +
-                    str(u)+' for '+str(r.amount)+' amount')
-        self.save()
+        r = self.money_requests.filter(pk=tid)
+        if not r.exists():
+            return
+        r = r[0]
+        u = User.objects.filter(pk=r.from_user)
+        if not u.exists():
+            self.money_requests.remove(tid)
+            r.delete()
+            self.save()
+        else:
+            u = u[0]
+            u.transactions += 1
+            u.wallet_money -= r.amount
+            self.wallet_money += r.amount
+            u.save()
+            self.money_requests.remove(tid)
+            logger.info(str(self)+' accepted money request from ' +
+                        str(u)+' for '+str(r.amount)+' amount')
+            self.save()
 
     def reject_money(self, tid):
+        r = MoneyRequest.objects.filter(pk=tid)
+        if not r.exists():
+            return
+        r = r[0]
         self.money_requests.remove(tid)
-        r = MoneyRequest.objects.get(pk=tid)
-        u = User.objects.get(pk=r.from_user)
-        logger.info(str(self)+' rejected money request from ' +
-                    str(u)+' for '+str(r.amount)+' amount')
+        r.delete()
+        if r.from_user in User.objects.all():
+            u = u[0]
+            logger.info(str(self)+' rejected money request from ' +
+                        str(u)+' for '+str(r.amount)+' amount')
         self.save()
 
     def send_message(self, UserId, content):
+        to_user = self.friends.filter(pk=UserId)
+        if not to_user.exists():
+            return
+        to_user = to_user[0]
         from_user = self
-        to_user = User.objects.get(pk=UserId)
         msg = Private_Message(from_user=from_user,
                               to_user=to_user, content=content)
         msg.save()
@@ -113,11 +142,13 @@ class User(models.Model):
         return post
 
     def post_on_other_timeline(self, UserId, content):
-        user = User.objects.get(pk=UserId)
+        user = self.friends.filter(pk=UserId)
+        if not user.exists():
+            return
+        user = user[0]
         post = Post(posted_by=self, content=content, posted_on=user)
-        if(user.others_can_post and self in user.friends.all()):
+        if(user.others_can_post):
             post.save()
-            print(post.pk)
             timeline = Timeline.objects.get(timeline_of=user)
             timeline.posts.add(post)
             timeline.save()
@@ -128,6 +159,15 @@ class User(models.Model):
 
     def __str__(self):
         return self.username
+
+    def send_join_request(self, GroupId):
+        group = Group.objects.filter(pk=GroupId)
+        if not group.exists():
+            return
+        group = group[0]
+        if(group.can_send_join_requests):
+            group.join_requests.add(self)
+            group.save()
 
 
 class Friendship(models.Model):
@@ -164,25 +204,33 @@ class CasualUser(User):
 
 
 class PremiumUser(User):
-    plansMap = {'silver': 0, 'gold': 1, 'platinum': 1}
-    planCosts = [50, 100, 150]
-    plansMaxGroups = [2, 4, inf]
-    plan = models.CharField(max_length=10, default="silver")
+    __plansMap = {'silver': 0, 'gold': 1, 'platinum': 1}
+    __planCosts = [50, 100, 150]
+    __plansMaxGroups = [2, 4, inf]
+    __plan = models.CharField(max_length=10, default="silver")
 
-    def amountToPay(self):
+    def __amountToPay(self):
         return(planCosts[plansMap[self.plan.lower()]])
 
-    def paymentCycleInMonths(self):
+    def __paymentCycleInMonths(self):
         return 1
 
-    def maxTransactions(self):
+    def __maxTransactions(self):
         return 30
 
-    def maxGroups(self):
+    def __maxGroups(self):
         return(plansMaxGroups[plansMap[self.plan.lower()]])
 
+    def create_group(self, group_name):
+        if(self in GroupAdmin.objects.all()):
+            admin = GroupAdmin.objects.get(user=self)
+        else:
+            admin = GroupAdmin(user=self)
+            admin.save()
+        admin.create_group(username)
 
-class CommercialUser(User):
+
+class CommercialUser(PremiumUser):
     def amountToPay(self):
         return 5000
 
@@ -191,6 +239,10 @@ class CommercialUser(User):
 
     def maxTransactions(self):
         return inf
+
+    def create_page(self, content):
+        page = Page(admin, content=content)
+        page.save()
 
 
 class Private_Message(models.Model):
@@ -234,5 +286,107 @@ class Timeline(models.Model):
 
 
 class Page(models.Model):
-    admin = models.ManyToManyField(CommercialUser)
+    admin = models.ForeignKey(CommercialUser, on_delete=models.CASCADE)
     Content = models.CharField(max_length=500)
+
+
+class GroupAdmin(models.Model):
+    user = models.OneToOneField(PremiumUser, on_delete=models.CASCADE)
+
+    def create_group(self, group_name, max_num, can_send):
+        if(max_num_of_members < 3):
+            max_num_of_members = 20
+        group = Group(admin=self, name=group_name,
+                      max_num_of_members=max_num, can_send_join_requests=can_send)
+        group.save()
+
+    def delete_group(self, GroupId):
+        group = Group.objects.filter(pk=GroupId)
+        if not group.exists():
+            return
+        group = group[0]
+        if group.admin == self:
+            group.delete()
+        else:
+            return
+
+    def add_member(self, UserId, GroupId):
+        user = User.objects.filter(pk=UserId)
+        if not user.exists():
+            return
+        user = user[0]
+        group = Group.objects.filter(pk=GroupId)
+        if not group.exists():
+            return
+        group = group[0]
+        if group.admin == self:
+            group.members.add(user)
+            group.save()
+
+    def remove_member(self, UserId, GroupId):
+        group = Group.objects.filter(pk=GroupId)
+        if not group.exists():
+            return
+        group = group[0]
+        user = group.members.filter(pk=UserId)
+        if not user.exists():
+            return
+        user = user[0]
+        if group.admin == self:
+            group.members.remove(UserId)
+            group.save()
+
+    def accept_join_request(self, GroupId, joinId):
+        group = Group.objects.filter(pk=GroupId)
+        if not group.exists():
+            return
+        group = group[0]
+        user = group.join_requests.filter(pk=joinId)
+        if group.admin == self:
+            if not user.exists() or user not in User.objects.all():
+                return
+
+            user = user[0]
+            group.members.add(user)
+            group.join_requests.remove(UserId)
+            group.save()
+
+    def reject_join_request(self, GroupId, joinId):
+        group = Group.objects.filter(pk=GroupId)
+        if not group.exists():
+            return
+        group = group[0]
+        user = group.join_requests.filter(pk=joinId)
+        if group.admin == self:
+            if not user.exists():
+                return
+
+            user = user[0]
+            group.join_requests.remove(UserId)
+            group.save()
+
+    def inc_people(self, GroupId, num):
+        group = Group.objects.filter(pk=GroupId)
+        if not group.exists():
+            return
+        group = group[0]
+        if group.admin == self and num > group.max_num_of_members:
+            group.max_num_of_members = num
+
+    def change_join_settings(self, GroupId, setting):
+        group = Group.objects.filter(pk=GroupId)
+        if not group.exists():
+            return
+        group = group[0]
+        if(group.admin == self):
+            group.can_send_join_requests = setting
+
+
+class Group(models.Model):
+    admin = models.ForeignKey(GroupAdmin, on_delete=models.CASCADE)
+    members = models.ManyToManyField(User, related_name='member_of')
+    name = models.CharField(max_length=20, default='New Group')
+    join_requests = models.ManyToManyField(
+        User, related_name='sent_join_request_to')
+    max_num_of_members = models.IntegerField(default=20)
+    can_send_join_requests = models.BooleanField(default=False)
