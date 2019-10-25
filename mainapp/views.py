@@ -1,16 +1,18 @@
 from django.shortcuts import render, render_to_response,HttpResponse
 from django.http import HttpResponse, HttpResponseRedirect, HttpRequest
 from django.urls import reverse, resolve
-from mainapp.models import User
+from mainapp.models import *
 from mainapp.utils import *
 
 modelList=[]
+u=PremiumUser()
 
 # view models list
 def display_Menu(request,mainRequest) :
     # check if user is authenticated 
     # if not request.user.is_authenticated:
     #     return HttpResponseRedirect(reverse('loginPage'))
+    global modelList
     modelList=request['list']
     title=request['title']
     submitText=request['submitText']
@@ -34,11 +36,14 @@ def displayMainMenu(request):
     # check if user is authenticated 
     # if not request.user.is_authenticated:
     #     return HttpResponseRedirect(reverse('loginPage'))
-    modelList.append(menuItem("Send friend request",0))
-    modelList.append(menuItem("Send private message",1))
-    modelList.append(menuItem("Add post",2))
-    modelList.append(menuItem("Add post",3))
-    attr={'list':modelList,'title':'What to do next?','submitText':'Go!','responseType':'multi','returnFunction':"getMenuResponse" }
+    l=[]
+    if(isinstance(u,CasualUser)):
+        l=menuListCasual
+    if(isinstance(u,PremiumUser)):
+        l=menuListPremium
+    if(isinstance(u,CommercialUser)):
+        l=menuListCommercial
+    attr={'list':l,'title':'What to do next?','submitText':'Go!','responseType':'single','returnFunction':"getMenuResponse" }
     return display_Menu(attr,request)
 
 def getIndexList(string):
@@ -47,7 +52,28 @@ def getIndexList(string):
         k.append(int(string[i]))
     return(k)
 
-# 
+def sendFriendRequest(request):
+    l=CasualUser.objects.all()
+    attr={'list':l,'title':'Select a person to send friend request','submitText':'Send request','responseType':'single','returnFunction':"getFriendRequestResponse" }
+    return display_Menu(attr,request)
+
+def getFriendRequestResponse(request):
+    responseType = request.POST['responseType']
+    print(modelList)
+    indexList = []
+    if (responseType=='single') :        
+        indexList = getIndexList(request.POST['indexList'])    
+    elif(responseType=='multi') :
+        indexList = request.POST.getlist('indexList')
+
+    responseList=[]
+    for index in indexList:
+        responseList.append(modelList[int(index)])
+
+    u.send_friend_request(responseList[0].pk)
+    return HttpResponse(responseList)   
+
+
 def getMenuResponse(request):
     # check if user is authenticated 
     # if not request.user.is_authenticated:
@@ -64,7 +90,12 @@ def getMenuResponse(request):
     for index in indexList:
         responseList.append(modelList[int(index)])
     
-    print(str(responseList))
-    # TODO currently to test code
+    # print(str(responseList))
+    # # TODO currently to test code
+
+    response=responseList[0]
+    if(response.index==1):
+        return sendFriendRequest(request)
+
     return HttpResponse(responseList)
     

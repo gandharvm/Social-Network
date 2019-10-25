@@ -1,3 +1,10 @@
+class menuItem:
+    def __init__(self,title,index): 
+        self.title = title
+        self.index = index 
+    def __str__(self):
+        return(""+self.title)
+
 menuListCasual=[]
 menuListPremium=[]
 menuListCommercial=[]
@@ -18,16 +25,9 @@ menuListCasual.append(menuItem("View profile",13))
 menuListCasual.append(menuItem("Upgrade account",14))
 
 
-menuListPremium.append(menuListCasual)
+menuListPremium+=(menuListCasual)
 menuListPremium.append(menuItem("Send private message",15))
 menuListPremium.append(menuItem("Create a group",16))
 
-menuListCommercial.append(menuListPremium)
-menuListPremium.append(menuItem("Create commercial page"))
-
-class menuItem:
-    def __init__(self,title,index): 
-        self.title = title
-        self.index = index 
-    def __str__(self):
-        return(""+self.title)
+menuListCommercial+=(menuListPremium)
+menuListPremium.append(menuItem("Create commercial page",17))

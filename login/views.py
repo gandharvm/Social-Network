@@ -1,7 +1,7 @@
 from django.shortcuts import render, render_to_response,HttpResponse, redirect
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse, resolve
-from mainapp.models import CasualUser, PremiumUser, CommercialUser, User
+from mainapp.models import CasualUser, PremiumUser, CommercialUser
 from django.contrib.auth import authenticate, login, logout, models, logout
 import json
 
