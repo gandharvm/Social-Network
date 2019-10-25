@@ -5,9 +5,9 @@ from datetime import datetime
 
 class User_Test(TestCase):
     def test_friend_request(self):
-        u1 = User.create("C", datetime.today(), 'c@x.com')
+        u1 = CasualUser.create("C", datetime.today(), 'c@x.com')
         k1 = u1.pk
-        u2 = User.create("D", datetime.today(), 'd@x.com')
+        u2 = CasualUser.create("D", datetime.today(), 'd@x.com')
         k2 = u2.pk
         u2.send_friend_request(k1)
         self.assertIn(
@@ -18,31 +18,30 @@ class User_Test(TestCase):
         self.assertIn(u1, u2.friends.all())
 
     def test_send_money(self):
-        u1 = User.create('E', datetime.today(), 'e@x.com')
+        u1 = CasualUser.create('E', datetime.today(), 'e@x.com')
         k1 = u1.pk
-        u2 = User.create('F', datetime.today(), 'f@x.com')
+        u2 = CasualUser.create('F', datetime.today(), 'f@x.com')
         k2 = u2.pk
         u2.send_friend_request(k1)
         u1.accept_friend_request(k2)
 
         u1.deposit_money(1000)
         self.assertEqual(1000, u1.wallet_money)
-
         u1.send_money(100, k2)
         money_request = u2.money_requests.first()
         money_request = money_request.pk
         u2.accept_money(money_request)
 
-        u1 = User.objects.get(pk=k1)
+        u1 = CasualUser.objects.get(pk=k1)
 
         self.assertEqual(u2.wallet_money, 100)
         self.assertEqual(u1.wallet_money, 900)
         self.assertEqual(u1.transactions, 1)
 
     def test_posts(self):
-        u1 = User.create('E', datetime.today(), 'e@x.com')
+        u1 = CasualUser.create('E', datetime.today(), 'e@x.com')
         u1.others_can_post = True
-        u2 = User.create('F', datetime.today(), 'f@x.com')
+        u2 = PremiumUser.create('F', datetime.today(), 'f@x.com', 'silver')
         u2.send_friend_request(u1.pk)
         u1.accept_friend_request(u2.pk)
         post1 = u1.post_on_own_timeline('Hello World. Post on own timeline')
@@ -65,9 +64,9 @@ class User_Test(TestCase):
 
 class Private_Messages_Test(TestCase):
     def test_message(self):
-        u1 = User.create("A", datetime.today(), 'a@x.com')
+        u1 = PremiumUser.create("A", datetime.today(), 'a@x.com', 'gold')
         k1 = u1.pk
-        u2 = User.create("B", datetime.today(), 'b@x.com')
+        u2 = PremiumUser.create("B", datetime.today(), 'b@x.com', 'platinum')
         k2 = u2.pk
         u1.send_friend_request(k2)
         u2.accept_friend_request(k1)
