@@ -36,7 +36,7 @@ def displayMainMenu(request):
     #     return HttpResponseRedirect(reverse('loginPage'))
     modelList.append(menuItem("Send friend request",0))
     modelList.append(menuItem("Send private message",1))
-    modelList.append(menuItem("Display friend list",2))
+    modelList.append(menuItem("Add post",2))
     modelList.append(menuItem("Add post",3))
     attr={'list':modelList,'title':'What to do next?','submitText':'Go!','responseType':'multi','returnFunction':"getMenuResponse" }
     return display_Menu(attr,request)
