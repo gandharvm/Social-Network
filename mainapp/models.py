@@ -20,6 +20,7 @@ class CasualUser(models.Model):
     date_of_birth = models.DateField()
     email_id = models.EmailField()
     friends = models.ManyToManyField("self")
+    pot_friends=models.ManyToManyField("self")
     friend_requests = models.ManyToManyField("self")
     wallet_money = models.FloatField(default=0)
     transactions = models.IntegerField(default=0)
@@ -44,6 +45,7 @@ class CasualUser(models.Model):
         if not to_user.exists():
             return
         to_user = to_user[0]
+        self.pot_friends.add(to_user);
         from_user = self
         to_user.friend_requests.add(from_user)
         # logger.info('user '+str(self) +
@@ -53,11 +55,14 @@ class CasualUser(models.Model):
 
     def accept_friend_request(self, UserId):
         fr = self.friend_requests.filter(pk=UserId)
+        k=CasualUser.objects.get(pk=UserId)
         if not fr.exists():
             return
         self.friends.add(UserId)
+        k.pot_friends.remove(self)
         self.friend_requests.remove(UserId)
         self.save()
+        k.save()
 
     def reject_friend_request(self, UserId):
         fr = self.friend_requests.filter(pk=UserId)
@@ -65,6 +70,16 @@ class CasualUser(models.Model):
             return
         self.friend_requests.remove(UserId)
         self.save()
+    
+    def unfriend(self,UserId):
+        fr = self.friend_requests.filter(pk=UserId)
+        k=CasualUser.objects.get(pk=UserId)
+        if not fr.exists():
+            return
+        self.friends.remove(fr)
+        k.friends.remove(self)
+        self.save()
+        k.save()
 
     def deposit_money(self, amount):
         self.wallet_money += amount
@@ -420,6 +435,8 @@ class GroupAdmin(models.Model):
         if(group.admin == self):
             group.can_send_join_requests = setting
 
+class intHolder(models.Model):
+    num=models.IntegerField(default=0)
 
 class Group(models.Model):
     admin = models.ForeignKey(GroupAdmin, on_delete=models.CASCADE)

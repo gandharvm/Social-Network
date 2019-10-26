@@ -5,7 +5,9 @@ from mainapp.models import *
 from mainapp.utils import *
 
 modelList=[]
-u=PremiumUser()
+u=CasualUser.objects.get(username="Harsimar")
+# u=CasualUser()
+
 
 # view models list
 def display_Menu(attr,request) :
@@ -53,13 +55,44 @@ def getIndexList(string):
     return(k)
 
 def sendFriendRequest(request):
+    global u
     l=CasualUser.objects.all()
-    attr={'list':l,'title':'Select a person to send friend request','submitText':'Send request','responseType':'single','returnFunction':"getFriendRequestResponse" }
+    m=u.pot_friends.all()
+    m2=u.friends.all()
+    l2=[]
+    for element in l:
+        if element not in m and element not in m2 and element!=u:
+            l2.append(element)
+    attr={'list':l2,'title':'Select a person to send friend request','submitText':'Send request','responseType':'single','returnFunction':"getFriendRequestResponse" }
     return display_Menu(attr,request)
 
-def getFriendRequestResponse(request):
+def sendMoneyRequest(request):
+    global u
+    l=u.friends.all()
+    attr={'list':l,'title':'Select a person to send money request','submitText':'Send request','responseType':'single','returnFunction':"getMoneyRequestResponse1" }
+    return display_Menu(attr,request)
+
+def acceptFriendRequest(request):
+    global u
+    l=u.friend_requests.all()
+    attr={'list':l,'title':'Select a friend request to accept','submitText':'accept request','responseType':'single','returnFunction':"getFRAResponse" }
+    return display_Menu(attr,request)
+
+def declineFriendRequest(request):
+    global u
+    l=u.friend_requests.all()
+    attr={'list':l,'title':'Select a friend request to decline','submitText':'decline request','responseType':'single','returnFunction':"getFRDResponse" }
+    return display_Menu(attr,request)
+
+def unfriend(request):
+    global u
+    l=u.friends.all()
+    attr={'list':l,'title':'Select a friend to unfriend','submitText':'unfriend','responseType':'single','returnFunction':"getUnfriendResponse" }
+    return display_Menu(attr,request)
+
+
+def getResponseList(request):
     responseType = request.POST['responseType']
-    print(modelList)
     indexList = []
     if (responseType=='single') :        
         indexList = getIndexList(request.POST['indexList'])    
@@ -69,9 +102,41 @@ def getFriendRequestResponse(request):
     responseList=[]
     for index in indexList:
         responseList.append(modelList[int(index)])
+    return(responseList)
 
+def getFriendRequestResponse(request):
+    responseList=getResponseList(request)
     u.send_friend_request(responseList[0].pk)
-    return HttpResponse(responseList)   
+    return displayMainMenu(request)
+
+
+def getMoneyRequestResponse1(request):
+    responseList=getResponseList(request)
+    l=intHolder.objects.get(pk=1)
+    l.num=responseList[0].pk
+    l.save()
+    return acceptMoneyResponse2(request)
+
+def getMoneyRequestResponse2(request):
+    amount=request.POST['text']
+    l=intHolder.objects.get(pk=1)
+    u.send_money(float(amount),l.num)
+    return displayMainMenu(request)
+
+def getFRAResponse(request):
+    responseList=getResponseList(request)
+    u.accept_friend_request(responseList[0].pk)
+    return displayMainMenu(request)
+
+def getFRDResponse(request):
+    responseList=getResponseList(request)
+    u.reject_friend_request(responseList[0].pk)
+    return displayMainMenu(request)
+
+def getUnfriendResponse(request):
+    responseList=getResponseList(request)
+    u.unfriend(responseList[0].pk)
+    return displayMainMenu(request)
 
 
 def getMenuResponse(request):
@@ -96,6 +161,18 @@ def getMenuResponse(request):
     response=responseList[0]
     if(response.index==1):
         return sendFriendRequest(request)
+    if(response.index==2):
+        return acceptFriendRequest(request)
+    if(response.index==3):
+        return declineFriendRequest(request)
+    if(response.index==4):
+        return unfriend(request)
+    if(response.index==5):
+        return depositMoney(request)
+    if(response.index==6):
+        return sendMoneyRequest(request)
+    
+    
 
     return HttpResponse(responseList)
 
@@ -111,6 +188,19 @@ def display_textbox(attr,request) :
         "returnFunction":returnFunction,
     }
     return render(request,"mainapp/textform.html",context)
+
+def depositMoney(request):
+    attr={'title':"Enter amount to deposit",'submitText':"Deposit",'returnFunction':'getDepositResponse'}
+    return display_textbox(attr,request)
+
+def acceptMoneyResponse2(request):
+    attr={'title':"Enter amount to send",'submitText':"Send",'returnFunction':'getMoneyRequestResponse2'}
+    return display_textbox(attr,request)
+
+def getDepositResponse(request):
+    amount=request.POST['text']
+    u.deposit_money(float(amount))
+    return displayMainMenu(request)
 
 # receive text response
 def getTextResponse(request):
