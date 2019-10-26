@@ -5,7 +5,7 @@ from mainapp.models import *
 from mainapp.utils import *
 
 modelList=[]
-u=CasualUser.objects.get(username="Harsimar")
+u=CasualUser.objects.get(username="Udayaan")
 # u=CasualUser()
 
 
@@ -90,6 +90,17 @@ def unfriend(request):
     attr={'list':l,'title':'Select a friend to unfriend','submitText':'unfriend','responseType':'single','returnFunction':"getUnfriendResponse" }
     return display_Menu(attr,request)
 
+def acceptMoneyRequest(request):
+    global u
+    l = u.money_requests.all()
+    attr = {'list':l,'title':'Accept money from a friend','submitText':'accept','responseType':'single','returnFunction':"getAccept_MoneyRequestResponse" }
+    return display_Menu(attr,request)
+
+def declineMoneyRequest(request):
+    global u
+    l = u.money_requests.all()
+    attr = {'list':l,'title':'Accept money from a friend','submitText':'accept','responseType':'single','returnFunction':"getDecline_MoneyRequestResponse" }
+    return display_Menu(attr,request)
 
 def getResponseList(request):
     responseType = request.POST['responseType']
@@ -115,7 +126,7 @@ def getMoneyRequestResponse1(request):
     l=intHolder.objects.get(pk=1)
     l.num=responseList[0].pk
     l.save()
-    return acceptMoneyResponse2(request)
+    return enterMoneytoSend(request)
 
 def getMoneyRequestResponse2(request):
     amount=request.POST['text']
@@ -138,7 +149,16 @@ def getUnfriendResponse(request):
     u.unfriend(responseList[0].pk)
     return displayMainMenu(request)
 
+def getAccept_MoneyRequestResponse(request):
+    responseList=getResponseList(request)
+    u.accept_money(responseList[0].pk)
+    return HttpResponseRedirect(reverse('displayMainMenu'))
 
+def getDecline_MoneyRequestResponse(request):
+    responseList=getResponseList(request)
+    u.reject_money(responseList[0].pk)
+    return HttpResponseRedirect(reverse('displayMainMenu'))
+    
 def getMenuResponse(request):
     # check if user is authenticated 
     # if not request.user.is_authenticated:
@@ -155,9 +175,7 @@ def getMenuResponse(request):
     for index in indexList:
         responseList.append(modelList[int(index)])
     
-    # print(str(responseList))
-    # # TODO currently to test code
-
+    #TODO
     response=responseList[0]
     if(response.index==1):
         return sendFriendRequest(request)
@@ -171,7 +189,10 @@ def getMenuResponse(request):
         return depositMoney(request)
     if(response.index==6):
         return sendMoneyRequest(request)
-    
+    if(response.index==7):
+        return acceptMoneyRequest(request)
+    if(response.index==8):
+        return declineMoneyRequest(request)
     
 
     return HttpResponse(responseList)
@@ -193,7 +214,7 @@ def depositMoney(request):
     attr={'title':"Enter amount to deposit",'submitText':"Deposit",'returnFunction':'getDepositResponse'}
     return display_textbox(attr,request)
 
-def acceptMoneyResponse2(request):
+def enterMoneytoSend(request):
     attr={'title':"Enter amount to send",'submitText':"Send",'returnFunction':'getMoneyRequestResponse2'}
     return display_textbox(attr,request)
 

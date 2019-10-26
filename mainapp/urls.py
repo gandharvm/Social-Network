@@ -11,6 +11,7 @@ urlpatterns = [
     path("getFRDResponse/",views.getFRDResponse,name="getFRDResponse"),
     path("getUnfriendResponse/",views.getFRDResponse,name="getUnfriendResponse"),
     path("getDepositResponse/",views.getDepositResponse,name="getDepositResponse"),
+    path("getAccept_MoneyRequestResponse",views.getAccept_MoneyRequestResponse,name="getAccept_MoneyRequestResponse"),
     # below two urls for testing text box
     path("testTextBox/",views.testTextBox, name="testTextBox"),
     path("getTextResponse/",views.getTextResponse,name="getTextResponse"),

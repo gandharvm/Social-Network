@@ -8,7 +8,7 @@
     {% if responseType == 'single' %}
         {% for i in rangeList %}
             <input type="radio" value={% to_list i %} name="indexList">{{ displayList|index:i }}<br>
-        {% endfor %}
+        {% endfor %}<br>
         <input type="submit" value={{submitText}}>
     {% endif %}
 
@@ -17,10 +17,11 @@
             {% for i in rangeList %}
                 <option value="{{i}}">{{ displayList|index:i }}</option><br>
             {% endfor %}
-        </select><br>
+        </select><br><br>
         <input type="submit" value={{submitText}}>
     {% endif %}
-
+    <br>
+    <br>
     <a class="btn btn-primary" href="{% url "displayMainMenu" %}">Go Back</a>
 
 </form>
