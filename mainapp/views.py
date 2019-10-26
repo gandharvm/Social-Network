@@ -8,16 +8,16 @@ modelList=[]
 u=PremiumUser()
 
 # view models list
-def display_Menu(request,mainRequest) :
+def display_Menu(attr,request) :
     # check if user is authenticated 
     # if not request.user.is_authenticated:
     #     return HttpResponseRedirect(reverse('loginPage'))
     global modelList
-    modelList=request['list']
-    title=request['title']
-    submitText=request['submitText']
-    responseType=request['responseType']
-    returnFunction=request['returnFunction']
+    modelList=attr['list']
+    title=attr['title']
+    submitText=attr['submitText']
+    responseType=attr['responseType']
+    returnFunction=attr['returnFunction']
     displayList = []
     for model in modelList :
         displayList.append(str(model))
@@ -29,7 +29,7 @@ def display_Menu(request,mainRequest) :
         "returnFunction":returnFunction,
         "responseType":responseType
     }
-    return render(mainRequest,"mainapp/models_List.html",context=context)
+    return render(request,"mainapp/models_List.html",context=context)
 
 # display Main Menu
 def displayMainMenu(request):
@@ -98,4 +98,33 @@ def getMenuResponse(request):
         return sendFriendRequest(request)
 
     return HttpResponse(responseList)
-    
+
+# display text box
+def display_textbox(attr,request) :
+    # TODO user.is_authenticated = ?
+    title=attr['title']
+    submitText=attr['submitText']
+    returnFunction=attr['returnFunction']
+    context = {    
+        "title": title,
+        "submitText": submitText,
+        "returnFunction":returnFunction,
+    }
+    return render(request,"mainapp/textform.html",context)
+
+# receive text response
+def getTextResponse(request):
+    # TODO user.is_authenticated = ?
+    text = request.POST['text']
+    # TODO remove next line (just for testing)
+    return HttpResponse(text)
+
+# test text box
+def testTextBox(request):
+    # TODO user.is_authenticated = ?
+    attr = {
+        "title":"Title",
+        "submitText": "submit",
+        "returnFunction":"getTextResponse",
+    }
+    return display_textbox(attr,request)
