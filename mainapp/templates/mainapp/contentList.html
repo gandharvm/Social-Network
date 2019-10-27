@@ -1,0 +1,10 @@
+<h1>{{title}}</h1>
+<br>
+
+{% for content in contentList %}
+    <p>POST:<br>{{content}}</p><br><br>
+{% endfor %}
+
+<br>
+<br>
+<a class="btn btn-primary" href="{% url "displayMainMenu" %}">Go Back</a>

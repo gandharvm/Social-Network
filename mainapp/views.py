@@ -50,7 +50,9 @@ def displayMainMenu(request):
 
 def getIndexList(string):
     k=[]
-    for i in range(1,len(string)-1,2):
+    string = string[1:len(string)-1]
+    string = string.split(',')
+    for i in range(0,len(string)-1):
         k.append(int(string[i]))
     return(k)
 
@@ -113,6 +115,11 @@ def post_OnOthersTimeline(request):
     attr = {'list':l,'title':'Post on friends Timeline','submitText':'Select','responseType':'single','returnFunction':"getPostOnOtherTimelineResponse1" }
     return display_Menu(attr,request)
 
+def send_private_message(request):
+    global u
+    l=u.friends.all()
+    attr = {'list':l,'title':'Select friend to send message','submitText':'Select','responseType':'single','returnFunction':"getSendPrivateMessageRequest1" }
+    return display_Menu(attr,request)
 
 def getResponseList(request):
     responseType = request.POST['responseType']
@@ -192,6 +199,21 @@ def getPostOnOtherTimelineResponse2(request):
     u.post_on_other_timeline(l.num,text)
     return HttpResponseRedirect(reverse('displayMainMenu'))    
 
+def getSendPrivateMessageRequest1(request):
+    responseList=getResponseList(request)
+    l=intHolder.objects.get(pk=1)
+    l.num=responseList[0].pk
+    l.save()
+    attr={'title':"Enter Messsage",'submitText':"Send",'returnFunction':'getSendPrivateMessageRequest2'}
+    return display_textbox(attr,request)
+
+def getSendPrivateMessageRequest2(request):
+    text = request.POST['text']
+    text = text[:500]
+    l=intHolder.objects.get(pk=1)
+    u.send_message(l.num,text)
+    return HttpResponseRedirect(reverse('displayMainMenu'))   
+
 def getMenuResponse(request):
     # check if user is authenticated 
     # if not request.user.is_authenticated:
@@ -230,6 +252,12 @@ def getMenuResponse(request):
         return post_OnOwnTimeline(request)
     if(response.index==10):
         return post_OnOthersTimeline(request)
+    if(response.index==11):
+        return viewMyPosts(request)
+    if(response.index==12):
+        return viewFriendsPost(request)
+    if(response.index==17):
+        return send_private_message(request)
 
     return HttpResponse(responseList)
 
@@ -259,19 +287,45 @@ def getDepositResponse(request):
     u.deposit_money(float(amount))
     return displayMainMenu(request)
 
-# receive text response
-def getTextResponse(request):
-    # TODO user.is_authenticated = ?
-    text = request.POST['text']
-    # TODO remove next line (just for testing)
-    return HttpResponse(text)
-
-# test text box
-def testTextBox(request):
-    # TODO user.is_authenticated = ?
-    attr = {
-        "title":"Title",
-        "submitText": "submit",
-        "returnFunction":"getTextResponse",
+def viewContentlist(attr,request):
+    # check if user is authenticated 
+    # if not request.user.is_authenticated:
+    #     return HttpResponseRedirect(reverse('loginPage'))
+    title=attr['title']
+    modelList=attr['list']
+    contentList=[]
+    for model in modelList :
+        contentList.append(str(model))
+    print(contentList,"-----------------------------------")
+    context = {
+        "contentList" : contentList,
+        "title": title,
     }
-    return display_textbox(attr,request)
+    return render(request,"mainapp/contentList.html",context=context)
+
+def viewMyPosts(request):
+    global u
+    mytimeline=Timeline.objects.get(timeline_of=u)
+    posts=mytimeline.posts.all()
+    attr = {
+        "list":posts,
+        "title":"Posts on your timline",
+    }
+    return viewContentlist(attr,request)
+
+def viewFriendsPost(request):
+    global u
+    l=u.friends.all()
+    attr = {'list':l,'title':'Select friend','submitText':'Select','responseType':'single','returnFunction':"getViewPostOfFriendResponse" }
+    return display_Menu(attr,request)
+
+def getViewPostOfFriendResponse(request):
+    responseList=getResponseList(request)
+    friend = responseList[0]
+    timeline = Timeline.objects.get(timeline_of=friend)
+    posts=timeline.posts.all()
+    attr = {
+        "list":posts,
+        "title":"Posts on "+ friend.username +" timline",
+    }
+    return viewContentlist(attr,request)

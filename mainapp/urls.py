@@ -13,9 +13,9 @@ urlpatterns = [
     path("getDepositResponse/",views.getDepositResponse,name="getDepositResponse"),
     path("getAccept_MoneyRequestResponse/",views.getAccept_MoneyRequestResponse,name="getAccept_MoneyRequestResponse"),
     path("getPostOnOwnTimelineResponse/",views.getPostOnOwnTimelineResponse,name="getPostOnOwnTimelineResponse"),
-    path("getPostOnOtherTimelineResponse1",views.getPostOnOtherTimelineResponse1,name="getPostOnOtherTimelineResponse1"),
-    path("getPostOnOtherTimelineResponse2",views.getPostOnOtherTimelineResponse2,name="getPostOnOtherTimelineResponse2"),
-    # below two urls for testing text box
-    path("testTextBox/",views.testTextBox, name="testTextBox"),
-    path("getTextResponse/",views.getTextResponse,name="getTextResponse"),
+    path("getPostOnOtherTimelineResponse1/",views.getPostOnOtherTimelineResponse1,name="getPostOnOtherTimelineResponse1"),
+    path("getPostOnOtherTimelineResponse2/",views.getPostOnOtherTimelineResponse2,name="getPostOnOtherTimelineResponse2"),
+    path("getSendPrivateMessageRequest1/",views.getSendPrivateMessageRequest1,name="getSendPrivateMessageRequest1"),
+    path("getSendPrivateMessageRequest2/",views.getSendPrivateMessageRequest2,name="getSendPrivateMessageRequest2"),
+    path("getViewPostOfFriendResponse",views.getViewPostOfFriendResponse,name="getViewPostOfFriendResponse"),
 ]

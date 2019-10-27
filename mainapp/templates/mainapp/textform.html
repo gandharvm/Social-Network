@@ -4,4 +4,8 @@
     {% csrf_token %}
     <input type="text" name="text"  required><br><br><br>
     <input type="submit" value={{submitText}}>
+    <br>
+    <br>
+    <a class="btn btn-primary" href="{% url "displayMainMenu" %}">Go Back</a>
+
 </form>

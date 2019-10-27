@@ -322,7 +322,7 @@ class Post(models.Model):
     time = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return (self.content)
+        return (self.content+" |Posted by: "+self.posted_by.username)
 
 
 class Timeline(models.Model):
