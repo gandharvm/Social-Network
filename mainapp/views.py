@@ -102,6 +102,18 @@ def declineMoneyRequest(request):
     attr = {'list':l,'title':'Accept money from a friend','submitText':'accept','responseType':'single','returnFunction':"getDecline_MoneyRequestResponse" }
     return display_Menu(attr,request)
 
+def post_OnOwnTimeline(request) :
+    global u
+    attr = {'title':"Type content on your Post",'submitText':"Post",'returnFunction':"getPostOnOwnTimelineResponse"}
+    return display_textbox(attr,request)
+
+def post_OnOthersTimeline(request):
+    global u
+    l=u.friends.all()
+    attr = {'list':l,'title':'Post on friends Timeline','submitText':'Select','responseType':'single','returnFunction':"getPostOnOtherTimelineResponse1" }
+    return display_Menu(attr,request)
+
+
 def getResponseList(request):
     responseType = request.POST['responseType']
     indexList = []
@@ -158,7 +170,28 @@ def getDecline_MoneyRequestResponse(request):
     responseList=getResponseList(request)
     u.reject_money(responseList[0].pk)
     return HttpResponseRedirect(reverse('displayMainMenu'))
-    
+
+def getPostOnOwnTimelineResponse(request):
+    text = request.POST['text']
+    text = text[:500]
+    u.post_on_own_timeline(text)
+    return HttpResponseRedirect(reverse('displayMainMenu'))
+
+def getPostOnOtherTimelineResponse1(request):
+    responseList=getResponseList(request)
+    l=intHolder.objects.get(pk=1)
+    l.num=responseList[0].pk
+    l.save()
+    attr={'title':"Enter Post Content",'submitText':"Post",'returnFunction':'getPostOnOtherTimelineResponse2'}
+    return display_textbox(attr,request)
+
+def getPostOnOtherTimelineResponse2(request):
+    text = request.POST['text']
+    text = text[:500]
+    l=intHolder.objects.get(pk=1)
+    u.post_on_other_timeline(l.num,text)
+    return HttpResponseRedirect(reverse('displayMainMenu'))    
+
 def getMenuResponse(request):
     # check if user is authenticated 
     # if not request.user.is_authenticated:
@@ -193,7 +226,10 @@ def getMenuResponse(request):
         return acceptMoneyRequest(request)
     if(response.index==8):
         return declineMoneyRequest(request)
-    
+    if(response.index==9):
+        return post_OnOwnTimeline(request)
+    if(response.index==10):
+        return post_OnOthersTimeline(request)
 
     return HttpResponse(responseList)
 
