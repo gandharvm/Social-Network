@@ -1,6 +1,7 @@
 from django.db import models
 from math import inf
 import logging
+from datetime import datetime
 
 logger = logging.getLogger('MAINAPP')
 
@@ -20,7 +21,6 @@ class CasualUser(models.Model):
     date_of_birth = models.DateField()
     email_id = models.EmailField()
     friends = models.ManyToManyField("self")
-    pot_friends=models.ManyToManyField("self")
     friend_requests = models.ManyToManyField("self")
     wallet_money = models.FloatField(default=0)
     transactions = models.IntegerField(default=0)
@@ -45,7 +45,6 @@ class CasualUser(models.Model):
         if not to_user.exists():
             return
         to_user = to_user[0]
-        self.pot_friends.add(to_user);
         from_user = self
         to_user.friend_requests.add(from_user)
         # logger.info('user '+str(self) +
@@ -55,14 +54,11 @@ class CasualUser(models.Model):
 
     def accept_friend_request(self, UserId):
         fr = self.friend_requests.filter(pk=UserId)
-        k=CasualUser.objects.get(pk=UserId)
         if not fr.exists():
             return
         self.friends.add(UserId)
-        k.pot_friends.remove(self)
         self.friend_requests.remove(UserId)
         self.save()
-        k.save()
 
     def reject_friend_request(self, UserId):
         fr = self.friend_requests.filter(pk=UserId)
@@ -70,16 +66,6 @@ class CasualUser(models.Model):
             return
         self.friend_requests.remove(UserId)
         self.save()
-    
-    def unfriend(self,UserId):
-        fr = self.friend_requests.filter(pk=UserId)
-        k=CasualUser.objects.get(pk=UserId)
-        if not fr.exists():
-            return
-        self.friends.remove(fr)
-        k.friends.remove(self)
-        self.save()
-        k.save()
 
     def deposit_money(self, amount):
         self.wallet_money += amount
@@ -211,6 +197,7 @@ class PremiumUser(CasualUser):
     plansMaxGroups = [2, 4, inf]
     plan = models.CharField(max_length=10, default="silver")
     max_transactions = 30
+    next_payment_premium = models.DateField(auto_now=True)
 
     @classmethod
     def create(cls, username, dob, email_id, plan):
@@ -234,13 +221,13 @@ class PremiumUser(CasualUser):
     def maxGroups(self):
         return(plansMaxGroups[plansMap[self.plan.lower()]])
 
-    def create_group(self, group_name):
+    def create_group(self, group_name, max_num, can_send):
         if(self in GroupAdmin.objects.all()):
             admin = GroupAdmin.objects.get(user=self)
         else:
             admin = GroupAdmin(user=self)
             admin.save()
-        admin.create_group(username)
+        admin.create_group(group_name, max_num, can_send)
 
     def send_message(self, UserId, content):
         to_user = self.friends.filter(pk=UserId)
@@ -253,22 +240,30 @@ class PremiumUser(CasualUser):
         msg.save()
         return msg
 
+    def pay(self):
+        if(wallet_money > self.amountToPay()):
+            wallet_money -= self.amountToPay
+            next_payment_premium = next_payment_premium + \
+                datetime.timedelta(days=30)
+
 
 class CommercialUser(PremiumUser):
     max_transactions = inf
+    next_payment = models.DateField(auto_now=True)
+    amount_to_pay = 5000
 
     @classmethod
-    def create(cls, username, dob, email_id, plan):
+    def create(cls, username, dob, email_id):
         # logger.info("user " + username + " created")
         user = cls(username=username, date_of_birth=dob,
-                   email_id=email_id, plan=plan)
+                   email_id=email_id, plan='platinum', next_payment_premium=datetime.max)
         user.save()
         timeline = Timeline(timeline_of=user)
         timeline.save()
         return user
 
     def amountToPay(self):
-        return 5000
+        return amountToPay
 
     def paymentCycleInMonths(self):
         return 12
@@ -290,6 +285,11 @@ class CommercialUser(PremiumUser):
                               to_user=to_user, content=content)
         msg.save()
         return msg
+
+    def pay(self):
+        if(wallet_money > amount_to_pay):
+            wallet_money -= amount_to_pay
+            next_payment = next_payment + datetime.timedelta(days=365)
 
 
 class Private_Message(models.Model):
@@ -322,7 +322,7 @@ class Post(models.Model):
     time = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return (self.content+" |Posted by: "+self.posted_by.username)
+        return (self.content)
 
 
 class Timeline(models.Model):
@@ -338,17 +338,17 @@ class Page(models.Model):
 
 class GroupAdmin(models.Model):
     user = models.OneToOneField(
-        PremiumUser, on_delete=models.CASCADE, related_name='user')
-    group_count = 0
+        PremiumUser, on_delete=models.CASCADE, related_name='admin')
+    group_count = models.IntegerField(default=0)
 
     def create_group(self, group_name, max_num, can_send):
         if(max_num < 3):
             max_num = 20
-        if user.group_count <= user.plansMaxGroups[plansMap[plan]]:
+        if self.group_count <= self.user.plansMaxGroups[self.user.plansMap[self.user.plan]]:
             group = Group(admin=self, name=group_name,
                           max_num_of_members=max_num,
                           can_send_join_requests=can_send)
-            group_count += 1
+            self.group_count += 1
             self.save()
             group.save()
 
@@ -387,22 +387,24 @@ class GroupAdmin(models.Model):
             return
         user = user[0]
         if group.admin == self:
-            group.members.remove(UserId)
+            group.members.remove(user)
             group.save()
 
     def accept_join_request(self, GroupId, joinId):
         group = Group.objects.filter(pk=GroupId)
         if not group.exists():
+            print('group not exists')
             return
         group = group[0]
         user = group.join_requests.filter(pk=joinId)
         if group.admin == self:
-            if not user.exists() or user not in CasualUser.objects.all():
+            if (not user.exists()):
                 return
-
+            if (user[0] not in CasualUser.objects.all()):
+                return
             user = user[0]
             group.members.add(user)
-            group.join_requests.remove(UserId)
+            group.join_requests.remove(user)
             group.save()
 
     def reject_join_request(self, GroupId, joinId):
@@ -416,7 +418,7 @@ class GroupAdmin(models.Model):
                 return
 
             user = user[0]
-            group.join_requests.remove(UserId)
+            group.join_requests.remove(user)
             group.save()
 
     def inc_people(self, GroupId, num):
@@ -435,8 +437,6 @@ class GroupAdmin(models.Model):
         if(group.admin == self):
             group.can_send_join_requests = setting
 
-class intHolder(models.Model):
-    num=models.IntegerField(default=0)
 
 class Group(models.Model):
     admin = models.ForeignKey(GroupAdmin, on_delete=models.CASCADE)
