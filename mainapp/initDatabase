@@ -1,6 +1,9 @@
 from mainapp.models import *
 import datetime
 
+
+k=intHolder()
+k.save()
 u=CommercialUser.create("Harsimar",datetime.datetime.now(),"k@g.com")
 u=CommercialUser.create("Udayaan",datetime.datetime.now(),"k@g.com")
 u=CommercialUser.create("Abhivandan",datetime.datetime.now(),"k@g.com")

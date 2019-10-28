@@ -56,13 +56,13 @@ class CasualUser(models.Model):
     
     def unfriend(self,UserId):
         fr = self.friend_requests.filter(pk=UserId)
-        k=CasualUser.objects.get(pk=UserId)
         if not fr.exists():
             return
+        fr=fr[0]        
         self.friends.remove(fr)
-        k.friends.remove(self)
+        fr.friends.remove(self)
         self.save()
-        k.save()
+        fr.save()
 
     def accept_friend_request(self, UserId):
         fr = self.friend_requests.filter(pk=UserId)

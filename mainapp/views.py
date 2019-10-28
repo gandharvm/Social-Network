@@ -5,8 +5,9 @@ from mainapp.models import *
 from mainapp.utils import *
 
 modelList=[]
-# u=CasualUser.objects.get(username="Harsimar")
-u=CasualUser()
+u=CommercialUser.objects.get(username="Udayaan")
+
+# u=CasualUser()
 
 
 # view models list
@@ -46,7 +47,7 @@ def displayMainMenu(request):
     if(isinstance(u,CommercialUser)):
         l=menuListCommercial
     buttonlist = ['GO']
-    attr={'list':l,'title':'What to do next?','responseType':'single','returnFunction':"getMenuResponse", 'buttonlist':buttonlist }
+    attr={'list':l,'title':'Welcome '+u.username,'responseType':'single','returnFunction':"getMenuResponse", 'buttonlist':buttonlist }
     return display_Menu(attr,request)
 
 # parsing string list for single responsetype
@@ -65,8 +66,8 @@ def friendRequests(request):
     return display_Menu(attr,request)
 
 def viewFriends(request):
-    l=u.friend_requests.all()
-    buttonlist=["View Profile","Unfriend","Send_Money_Request","Send_Private_Message","Post_on_timeline","Go_Back"]
+    l=u.friends.all()
+    buttonlist=["View Profile","Unfriend","Send_Money_Request","Post_on_timeline","Go_Back"]
     attr={'list':l,'title':'Here are your friends','buttonlist':buttonlist,'responseType':'single','returnFunction':"getFLResponse"}    
     return display_Menu(attr,request)
     
@@ -141,8 +142,12 @@ def post_OnOthersTimeline(request):
 
 def send_private_message(request):
     global u
-    l=u.friends.all()
-    attr = {'list':l,'title':'Select friend to send message','submitText':'Select','responseType':'single','returnFunction':"getSendPrivateMessageRequest1" }
+    if(isinstance(u,CommercialUser)):
+        l=CasualUser.objects.all()
+    elif(isinstance(u,PremiumUser)):
+        l=u.friends.all()
+    buttonlist=["Select","Go_Back"]
+    attr = {'list':l,'title':'Select a person to send message','buttonlist':buttonlist,'responseType':'single','returnFunction':"getSendPrivateMessageRequest1" }
     return display_Menu(attr,request)
 
 def getResponseList(request):
@@ -175,11 +180,11 @@ def getFriendRequestResponse(request):
         return displayMainMenu(request)
 
 
-def getMoneyRequestResponse1(responseList):
+def getMoneyRequestResponse1(request,responseList):
     l=intHolder.objects.get(pk=1)
     l.num=responseList[0].pk
     l.save()
-    return enterMoneytoSend(HttpRequest())
+    return enterMoneytoSend(request)
 
 def getMoneyRequestResponse2(request):
     amount=request.POST['text']
@@ -204,16 +209,13 @@ def getFRADResponse(request):
 def getFLResponse(request):
     responseList=getResponseList(request)
     button= request.POST['submit']
-    buttonlist=["View Profile","Unfriend","Send_Money_Request","Send_Private_Message","Post_on_timeline","Go_Back"]
     if(button=="View Profile"):
         pass
     elif(button=="Unfriend"):
         u.unfriend(responseList[0].pk)
         return HttpResponseRedirect(reverse("displayMainMenu"))
     elif(button=="Send_Money_Request"):
-        return getMoneyRequestResponse1(responseList)
-    elif(button=="Send_Private_Message"):
-        pass
+        return getMoneyRequestResponse1(request,responseList)
     elif(button=="Post_on_timeline"):
         pass
     elif(button=="Go_Back"):
@@ -268,12 +270,18 @@ def getPostOnOtherTimelineResponse2(request):
     return HttpResponseRedirect(reverse('displayMainMenu'))    
 
 def getSendPrivateMessageRequest1(request):
-    responseList=getResponseList(request)
-    l=intHolder.objects.get(pk=1)
-    l.num=responseList[0].pk
-    l.save()
-    attr={'title':"Enter Messsage",'submitText':"Send",'returnFunction':'getSendPrivateMessageRequest2'}
-    return display_textbox(attr,request)
+    buttonlist=["Select","Go_Back"]
+    button=request.POST['submit']
+    if(button==buttonlist[0]):
+        responseList=getResponseList(request)
+        l=intHolder.objects.get(pk=1)
+        l.num=responseList[0].pk
+        l.save()
+        attr={'title':"Enter Messsage",'submitText':"Send",'returnFunction':'getSendPrivateMessageRequest2'}
+        return display_textbox(attr,request)
+    else:
+        return HttpResponseRedirect(reverse('displayMainMenu'))    
+
 
 def getSendPrivateMessageRequest2(request):
     text = request.POST['text']
