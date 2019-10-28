@@ -12,11 +12,9 @@
     {% endif %}
 
     {% if responseType == 'multi' %}
-        <select name="indexList" multiple>
-            {% for i in rangeList %}
-                <option value="{{i}}">{{ displayList|index:i }}</option><br>
-            {% endfor %}
-        </select><br><br>
+        {% for i in rangeList %}
+            <input type="checkbox" name="indexList" id={% to_list i %} value={% to_list i %} >{{ displayList|index:i }}<br>
+        {% endfor %}
     {% endif %}
     {% for submitText in buttonlist %}
         <input type="submit" name="submit" value={{submitText}}><br>
