@@ -1,25 +1,25 @@
 from mainapp.models import *
 import datetime
 
-u=CasualUser()
+u=CommercialUser.create("Harsimar",datetime.datetime.now(),"k@g.com")
 u.username="Harsimar"
 u.date_of_birt=datetime.datetime.now()
 u.date_of_birth=datetime.datetime.now()
 u.save()
 
-u=CasualUser()
+u=CommercialUser.create("Harsimar",datetime.datetime.now(),"k@g.com")
 u.username="Udayaan"
 u.date_of_birt=datetime.datetime.now()
 u.date_of_birth=datetime.datetime.now()
 u.save()
 
-u=CasualUser()
+u=CommercialUser.create("Harsimar",datetime.datetime.now(),"k@g.com")
 u.username="Abhivandan"
 u.date_of_birt=datetime.datetime.now()
 u.date_of_birth=datetime.datetime.now()
 u.save()
 
-u=CasualUser()
+u=CommercialUser.create("Harsimar",datetime.datetime.now(),"k@g.com")
 u.username="Gandharv"
 u.date_of_birt=datetime.datetime.now()
 u.date_of_birth=datetime.datetime.now()

@@ -61,7 +61,7 @@ def getIndexList(string):
 def friendRequests(request):
     l=u.friend_requests.all()
     buttonlist=["Accept","Decline","Go_Back"]
-    attr={'list':l,'title':'Select a request to accept/decline','buttonlist':buttonlist,'responseType':'single','returnFunction':"getFRADResponse"}
+    attr={'list':l,'title':'Select requests to accept/decline','buttonlist':buttonlist,'responseType':'multi','returnFunction':"getFRADResponse"}
     return display_Menu(attr,request)
 
 
@@ -180,10 +180,12 @@ def getFRADResponse(request):
     responseList=getResponseList(request)
     button= request.POST['submit']
     if(button == "Accept"):
-        u.accept_friend_request(responseList[0].pk)
+        for frequest in responseList:
+            u.accept_friend_request(frequest.pk)
         return displayMainMenu(request)
     elif(button=="Decline"):
-        u.reject_friend_request(responseList[0].pk)
+        for frequest in responseList:
+            u.reject_friend_request(frequest.pk)
         return displayMainMenu(request)
     elif(button=="Go_Back"):
         return displayMainMenu(request)        
