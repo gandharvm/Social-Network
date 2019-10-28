@@ -7,6 +7,7 @@ urlpatterns = [
     path("getFriendRequestResponse/",views.getFriendRequestResponse,name="getFriendRequestResponse"),
     path("getMoneyRequestResponse1/",views.getMoneyRequestResponse1,name="getMoneyRequestResponse1"),
     path("getMoneyRequestResponse2/",views.getMoneyRequestResponse2,name="getMoneyRequestResponse2"),
+    path("getPrivacyResponse/",views.getPrivacyResponse,name="getPrivacyResponse"),
     path("getFRAResponse/",views.getFRAResponse,name="getFRAResponse"),
     path("getFRADResponse/",views.getFRADResponse,name="getFRADResponse"),
     path("getFLResponse/",views.getFLResponse,name="getFLResponse"),

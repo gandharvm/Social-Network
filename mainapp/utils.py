@@ -9,6 +9,13 @@ menuListCasual=[]
 menuListPremium=[]
 menuListCommercial=[]
 
+privacyList=[]
+privacyList.append(menuItem("Allow others to post on your timeline",1))
+privacyList.append(menuItem("Allow others to see your friends",2))
+privacyList.append(menuItem("Allow others to see your email",3))
+privacyList.append(menuItem("Allow others to see your DOB",4))
+
+
 # menuListCasual.append(menuItem("View All Users",-1))
 menuListCasual.append(menuItem("View Friend Requests",-1))
 menuListCasual.append(menuItem("View Friends",-2))

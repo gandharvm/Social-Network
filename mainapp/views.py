@@ -5,7 +5,7 @@ from mainapp.models import *
 from mainapp.utils import *
 
 modelList=[]
-u=CommercialUser.objects.get(username="Udayaan")
+u=CommercialUser.objects.get(username="Harsimar")
 
 # u=CasualUser()
 
@@ -87,7 +87,7 @@ def sendFriendRequest(request):
     m2=u.friends.all()
     l2=[]
     for element in l:
-        if element not in m2 and element!=u:
+        if element not in m2 and element.pk!=u.pk:
             l2.append(element)
     buttonlist=['Send_request',"Go_back"]
     attr={'list':l2,'title':'Select persons to send friend request','buttonlist':buttonlist,'responseType':'multi','returnFunction':"getFriendRequestResponse" }
@@ -338,6 +338,8 @@ def getMenuResponse(request):
         return viewMyPosts(request)
     if(response.index==12):
         return viewFriendsPost(request)
+    if(response.index==14):
+        return privacySettings(request)
     if(response.index==17):
         return send_private_message(request)
 
@@ -384,6 +386,38 @@ def viewContentlist(attr,request):
         "title": title,
     }
     return render(request,"mainapp/contentList.html",context=context)
+
+def privacySettings(request):
+    buttonList=["Confirm_Settings","Go_Back"]
+    l=privacyList
+    attr={'title':"Change your privacy settings here",'buttonlist':buttonList,'list':l,'responseType':'multi','returnFunction':"getPrivacyResponse"}
+    return display_Menu(attr,request)
+
+def getPrivacyResponse(request):
+    button=request.POST['submit']
+    responseList=getResponseList(request)
+    if(button=="Go_Back"):
+        return HttpResponseRedirect(reverse("displayMainMenu"))
+    elif(button=="Confirm_Settings"):
+        u.others_can_post=False
+        u.others_can_see_friends=False
+        u.others_can_see_email=False
+        u.others_can_see_dob=False
+        for r in responseList:
+            print(str(r))
+            if(r.index==1):
+                u.others_can_post=True
+            elif(r.index==2):
+                u.others_can_see_friends=True
+            elif(r.index==3):
+                u.others_can_see_email=True
+            elif(r.index==4):
+                u.others_can_see_dob=True
+        print(u.others_can_post)
+        u.save()
+        return HttpResponseRedirect(reverse("displayMainMenu"))
+
+
 
 def viewMyPosts(request):
     global u
