@@ -49,6 +49,7 @@ def displayMainMenu(request):
     attr={'list':l,'title':'What to do next?','responseType':'single','returnFunction':"getMenuResponse", 'buttonlist':buttonlist }
     return display_Menu(attr,request)
 
+# parsing string list for single responsetype
 def getIndexList(string):
     k=[]
     string = string[1:len(string)-1]
@@ -64,6 +65,13 @@ def friendRequests(request):
     return display_Menu(attr,request)
 
 
+# parsing string list for multiple responsetype
+def getIndexList_Mutli(stringList):
+    k=[]
+    for i in stringList :
+        index = getIndexList(i)
+        k.append(index[0])
+    return k
 
 def sendFriendRequest(request):
     global u
@@ -252,8 +260,9 @@ def getMenuResponse(request):
     if (responseType=='single') :        
         indexList = getIndexList(request.POST['indexList'])    
     elif(responseType=='multi') :
-        indexList = request.POST.getlist('indexList')
+        indexList = getIndexList_Mutli(request.POST.getlist('indexList')) 
 
+    print(indexList,"---------------------------")
     responseList=[]
     for index in indexList:
         responseList.append(modelList[int(index)])
