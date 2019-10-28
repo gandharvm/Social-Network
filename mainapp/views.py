@@ -20,10 +20,12 @@ def display_Menu(attr,request) :
     submitText=attr['submitText']
     responseType=attr['responseType']
     returnFunction=attr['returnFunction']
+    buttonlist=attr['buttonlist']
     displayList = []
     for model in modelList :
         displayList.append(str(model))
     context = {
+        "buttonlist" : buttonlist,
         "displayList" : displayList,
         "rangeList": range(len(displayList)),
         "title": title,
@@ -45,7 +47,8 @@ def displayMainMenu(request):
         l=menuListPremium
     if(isinstance(u,CommercialUser)):
         l=menuListCommercial
-    attr={'list':l,'title':'What to do next?','submitText':'Go!','responseType':'single','returnFunction':"getMenuResponse" }
+    buttonlist = ['go_back','logout']
+    attr={'list':l,'title':'What to do next?','submitText':'Go!','responseType':'single','returnFunction':"getMenuResponse", 'buttonlist':buttonlist }
     return display_Menu(attr,request)
 
 def getIndexList(string):
@@ -220,6 +223,8 @@ def getMenuResponse(request):
     #     return HttpResponseRedirect(reverse('loginPage'))
     
     responseType = request.POST['responseType']
+    button= request.POST['submit']
+    print(button,"---------------------------------")
     indexList = []
     if (responseType=='single') :        
         indexList = getIndexList(request.POST['indexList'])    
