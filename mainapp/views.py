@@ -93,29 +93,33 @@ def sendFriendRequest(request):
     attr={'list':l2,'title':'Select persons to send friend request','buttonlist':buttonlist,'responseType':'multi','returnFunction':"getFriendRequestResponse" }
     return display_Menu(attr,request)
 
-def sendMoneyRequest(request):
-    global u
-    l=u.friends.all()
-    attr={'list':l,'title':'Select a person to send money request','submitText':'Send request','responseType':'single','returnFunction':"getMoneyRequestResponse1" }
-    return display_Menu(attr,request)
+# TODO Not in use
+# def sendMoneyRequest(request):
+#     global u
+#     l=u.friends.all()
+#     attr={'list':l,'title':'Select a person to send money request','submitText':'Send request','responseType':'single','returnFunction':"getMoneyRequestResponse1" }
+#     return display_Menu(attr,request)
 
-def acceptFriendRequest(request):
-    global u
-    l=u.friend_requests.all()
-    attr={'list':l,'title':'Select a friend request to accept','submitText':'accept request','responseType':'single','returnFunction':"getFRAResponse" }
-    return display_Menu(attr,request)
+# TODO Not in use
+# def acceptFriendRequest(request):
+#     global u
+#     l=u.friend_requests.all()
+#     attr={'list':l,'title':'Select a friend request to accept','submitText':'accept request','responseType':'single','returnFunction':"getFRAResponse" }
+#     return display_Menu(attr,request)
 
-def declineFriendRequest(request):
-    global u
-    l=u.friend_requests.all()
-    attr={'list':l,'title':'Select a friend request to decline','submitText':'decline request','responseType':'single','returnFunction':"getFRDResponse" }
-    return display_Menu(attr,request)
+# TODO Not in use
+# def declineFriendRequest(request):
+#     global u
+#     l=u.friend_requests.all()
+#     attr={'list':l,'title':'Select a friend request to decline','submitText':'decline request','responseType':'single','returnFunction':"getFRDResponse" }
+#     return display_Menu(attr,request)
 
-def unfriend(request):
-    global u
-    l=u.friends.all()
-    attr={'list':l,'title':'Select a friend to unfriend','submitText':'unfriend','responseType':'single','returnFunction':"getUnfriendResponse" }
-    return display_Menu(attr,request)
+# TODO Not in use
+# def unfriend(request):
+#     global u
+#     l=u.friends.all()
+#     attr={'list':l,'title':'Select a friend to unfriend','submitText':'unfriend','responseType':'single','returnFunction':"getUnfriendResponse" }
+#     return display_Menu(attr,request)
 
 def acceptMoneyRequest(request):
     global u
@@ -134,6 +138,7 @@ def post_OnOwnTimeline(request) :
     attr = {'title':"Type content on your Post",'submitText':"Post",'returnFunction':"getPostOnOwnTimelineResponse"}
     return display_textbox(attr,request)
 
+# TODO in view friends
 def post_OnOthersTimeline(request):
     global u
     l=u.friends.all()
@@ -223,20 +228,23 @@ def getFLResponse(request):
     
 
 
-def getFRAResponse(request):
-    responseList=getResponseList(request)
-    u.accept_friend_request(responseList[0].pk)
-    return displayMainMenu(request)
+# TODO Not in use
+# def getFRAResponse(request):
+#     responseList=getResponseList(request)
+#     u.accept_friend_request(responseList[0].pk)
+#     return displayMainMenu(request)
 
-def getFRDResponse(request):
-    responseList=getResponseList(request)
-    u.reject_friend_request(responseList[0].pk)
-    return displayMainMenu(request)
+# TODO Not in use
+# def getFRDResponse(request):
+#     responseList=getResponseList(request)
+#     u.reject_friend_request(responseList[0].pk)
+#     return displayMainMenu(request)
 
-def getUnfriendResponse(request):
-    responseList=getResponseList(request)
-    u.unfriend(responseList[0].pk)
-    return displayMainMenu(request)
+# TODO Not in use
+# def getUnfriendResponse(request):
+#     responseList=getResponseList(request)
+#     u.unfriend(responseList[0].pk)
+#     return displayMainMenu(request)
 
 def getAccept_MoneyRequestResponse(request):
     responseList=getResponseList(request)
@@ -316,16 +324,22 @@ def getMenuResponse(request):
         return viewFriends(request)
     if(response.index==1):
         return sendFriendRequest(request)
-    if(response.index==2):
-        return acceptFriendRequest(request)
-    if(response.index==3):
-        return declineFriendRequest(request)
-    if(response.index==4):
-        return unfriend(request)
+
+# TODO Not in use    
+    # if(response.index==2):
+    #     return acceptFriendRequest(request)
+    # if(response.index==3):
+    #     return declineFriendRequest(request)
+    # if(response.index==4):
+    #     return unfriend(request)
+
     if(response.index==5):
         return depositMoney(request)
-    if(response.index==6):
-        return sendMoneyRequest(request)
+
+# TODO Not in use
+    # if(response.index==6):
+    #     return sendMoneyRequest(request)
+
     if(response.index==7):
         return acceptMoneyRequest(request)
     if(response.index==8):
