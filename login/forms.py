@@ -2,6 +2,6 @@ from django import forms
 
 
 class PlanForm(forms.Form):
-    choices = (('Silver(50/pm)', 'silver'), ('Gold(100/pm)',
-                                             'gold'), ('Platinum(150/pm)', 'platinum'),)
+    choices = (('silver', 'Silver(50/pm)'), (
+        'gold', 'Gold(100/pm)'), ('platinum', 'Platinum(150/pm)'),)
     plan = forms.ChoiceField(choices=choices)

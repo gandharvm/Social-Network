@@ -99,8 +99,8 @@ def otp_page(request):
 
     otp = request.POST['otp']
     print(otp)
-    # if otp_mail.verify_token(otp):
-    if True:
+    if otp_mail.verify_token(otp):
+        # if True:
             # create django user model instance
         newUser = models.User.objects.create_user(
             username, email_reg, password)
