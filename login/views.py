@@ -6,13 +6,16 @@ from django.contrib.auth import authenticate, login, logout, models, logout
 import json
 from django.template.loader import render_to_string
 from django.core.mail import EmailMessage
-from .utils import otp_mail
+from .utils import TOTPVerification
 from .forms import PlanForm
+
+otp_mail = TOTPVerification()
 
 username = None
 password = None
 email_reg = None
 category = None
+dob = None
 
 # show login Page
 
@@ -44,10 +47,10 @@ def logout_view(request):
 
 
 def signUpForm(request):
-    users = CasualUser.objects.all()
+    userslist = CasualUser.objects.all()
     Names_List = []
-    for user in users:
-        Names_List.append(user.username)
+    for u in userslist:
+        Names_List.append(str(u))
     context = {
         "len": len(Names_List),
         "names": json.dumps(Names_List),
@@ -63,7 +66,7 @@ def createUser(request):
     global email_reg
     global category
     global dob
-
+    
     username = request.POST['username']
     password = request.POST['password']
     email_reg = request.POST['email']
@@ -121,6 +124,7 @@ def otp_page(request):
         password = None
         email_reg = None
         category = None
+        dob = None
 
         return HttpResponseRedirect(reverse('loginPage'))
     else:
