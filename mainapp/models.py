@@ -46,11 +46,23 @@ class CasualUser(models.Model):
             return
         to_user = to_user[0]
         from_user = self
+        if(from_user in to_user.friend_requests.all()):
+            return
         to_user.friend_requests.add(from_user)
         # logger.info('user '+str(self) +
         #             ' sent friend request to '+str(to_user))
         self.save()
         to_user.save()
+    
+    def unfriend(self,UserId):
+        fr = self.friend_requests.filter(pk=UserId)
+        k=CasualUser.objects.get(pk=UserId)
+        if not fr.exists():
+            return
+        self.friends.remove(fr)
+        k.friends.remove(self)
+        self.save()
+        k.save()
 
     def accept_friend_request(self, UserId):
         fr = self.friend_requests.filter(pk=UserId)
@@ -190,6 +202,8 @@ class Friendship(models.Model):
     class Meta:
         unique_together = (("to_friend", "from_friend"),)
 
+class intHolder(models.Model):
+    num=models.IntegerField(default=0)
 
 class PremiumUser(CasualUser):
     plansMap = {'silver': 0, 'gold': 1, 'platinum': 1}

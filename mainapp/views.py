@@ -5,8 +5,8 @@ from mainapp.models import *
 from mainapp.utils import *
 
 modelList=[]
-u=CasualUser.objects.get(username="Harsimar")
-# u=CasualUser()
+# u=CasualUser.objects.get(username="Harsimar")
+u=CasualUser()
 
 
 # view models list
@@ -64,6 +64,13 @@ def friendRequests(request):
     attr={'list':l,'title':'Select requests to accept/decline','buttonlist':buttonlist,'responseType':'multi','returnFunction':"getFRADResponse"}
     return display_Menu(attr,request)
 
+def viewFriends(request):
+    l=u.friend_requests.all()
+    buttonlist=["View Profile","Unfriend","Send_Money_Request","Send_Private_Message","Post_on_timeline","Go_Back"]
+    attr={'list':l,'title':'Here are your friends','buttonlist':buttonlist,'responseType':'single','returnFunction':"getFLResponse"}    
+    return display_Menu(attr,request)
+    
+
 
 # parsing string list for multiple responsetype
 def getIndexList_Mutli(stringList):
@@ -76,14 +83,13 @@ def getIndexList_Mutli(stringList):
 def sendFriendRequest(request):
     global u
     l=CasualUser.objects.all()
-    m=u.pot_friends.all()
     m2=u.friends.all()
     l2=[]
     for element in l:
-        if element not in m and element not in m2 and element!=u:
+        if element not in m2 and element!=u:
             l2.append(element)
-    buttonlist=['Send request']
-    attr={'list':l2,'title':'Select a person to send friend request','buttonlist':buttonlist,'responseType':'single','returnFunction':"getFriendRequestResponse" }
+    buttonlist=['Send_request',"Go_back"]
+    attr={'list':l2,'title':'Select persons to send friend request','buttonlist':buttonlist,'responseType':'multi','returnFunction':"getFriendRequestResponse" }
     return display_Menu(attr,request)
 
 def sendMoneyRequest(request):
@@ -147,7 +153,7 @@ def getResponseList(request):
         if (responseType=='single') :        
             indexList = getIndexList(request.POST['indexList'])    
         elif(responseType=='multi') :
-            indexList = request.POST.getlist('indexList')
+            indexList = getIndexList_Mutli(request.POST.getlist('indexList')) 
 
         responseList=[]
         for index in indexList:
@@ -158,17 +164,22 @@ def getResponseList(request):
         return(indexList)
 
 def getFriendRequestResponse(request):
+    buttonlist=['Send_request',"Go_back"]
     responseList=getResponseList(request)
-    u.send_friend_request(responseList[0].pk)
-    return displayMainMenu(request)
+    button= request.POST['submit']
+    if(button=='Send_request'):
+        for fr in responseList:
+            u.send_friend_request(fr.pk)
+        return displayMainMenu(request)
+    elif(button=="Go_back"):
+        return displayMainMenu(request)
 
 
-def getMoneyRequestResponse1(request):
-    responseList=getResponseList(request)
+def getMoneyRequestResponse1(responseList):
     l=intHolder.objects.get(pk=1)
     l.num=responseList[0].pk
     l.save()
-    return enterMoneytoSend(request)
+    return enterMoneytoSend(HttpRequest())
 
 def getMoneyRequestResponse2(request):
     amount=request.POST['text']
@@ -188,7 +199,27 @@ def getFRADResponse(request):
             u.reject_friend_request(frequest.pk)
         return displayMainMenu(request)
     elif(button=="Go_Back"):
-        return displayMainMenu(request)        
+        return displayMainMenu(request)
+
+def getFLResponse(request):
+    responseList=getResponseList(request)
+    button= request.POST['submit']
+    buttonlist=["View Profile","Unfriend","Send_Money_Request","Send_Private_Message","Post_on_timeline","Go_Back"]
+    if(button=="View Profile"):
+        pass
+    elif(button=="Unfriend"):
+        u.unfriend(responseList[0].pk)
+        return HttpResponseRedirect(reverse("displayMainMenu"))
+    elif(button=="Send_Money_Request"):
+        return getMoneyRequestResponse1(responseList)
+    elif(button=="Send_Private_Message"):
+        pass
+    elif(button=="Post_on_timeline"):
+        pass
+    elif(button=="Go_Back"):
+        return HttpResponseRedirect(reverse("displayMainMenu"))
+    
+
 
 def getFRAResponse(request):
     responseList=getResponseList(request)
@@ -273,6 +304,8 @@ def getMenuResponse(request):
     response=responseList[0]
     if(response.index==-1):
         return friendRequests(request)
+    if(response.index==-2):
+        return viewFriends(request)
     if(response.index==1):
         return sendFriendRequest(request)
     if(response.index==2):

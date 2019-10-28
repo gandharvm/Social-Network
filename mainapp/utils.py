@@ -11,6 +11,7 @@ menuListCommercial=[]
 
 # menuListCasual.append(menuItem("View All Users",-1))
 menuListCasual.append(menuItem("View Friend Requests",-1))
+menuListCasual.append(menuItem("View Friends",-2))
 menuListCasual.append(menuItem("Send Friend request",1))
 # menuListCasual.append(menuItem("Accept a Friend request",2))
 # menuListCasual.append(menuItem("Decline a Friend request",3))
