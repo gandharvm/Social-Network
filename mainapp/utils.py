@@ -9,9 +9,11 @@ menuListCasual=[]
 menuListPremium=[]
 menuListCommercial=[]
 
+# menuListCasual.append(menuItem("View All Users",-1))
+menuListCasual.append(menuItem("View Friend Requests",-1))
 menuListCasual.append(menuItem("Send Friend request",1))
-menuListCasual.append(menuItem("Accept a Friend request",2))
-menuListCasual.append(menuItem("Decline a Friend request",3))
+# menuListCasual.append(menuItem("Accept a Friend request",2))
+# menuListCasual.append(menuItem("Decline a Friend request",3))
 menuListCasual.append(menuItem("Unfriend someone",4))
 menuListCasual.append(menuItem("Deposit money in wallet",5))
 menuListCasual.append(menuItem("Send money request",6))

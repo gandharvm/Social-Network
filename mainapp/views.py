@@ -17,7 +17,6 @@ def display_Menu(attr,request) :
     global modelList
     modelList=attr['list']
     title=attr['title']
-    submitText=attr['submitText']
     responseType=attr['responseType']
     returnFunction=attr['returnFunction']
     buttonlist=attr['buttonlist']
@@ -29,7 +28,6 @@ def display_Menu(attr,request) :
         "displayList" : displayList,
         "rangeList": range(len(displayList)),
         "title": title,
-        "submitText": submitText,
         "returnFunction":returnFunction,
         "responseType":responseType
     }
@@ -47,8 +45,8 @@ def displayMainMenu(request):
         l=menuListPremium
     if(isinstance(u,CommercialUser)):
         l=menuListCommercial
-    buttonlist = ['go_back','logout']
-    attr={'list':l,'title':'What to do next?','submitText':'Go!','responseType':'single','returnFunction':"getMenuResponse", 'buttonlist':buttonlist }
+    buttonlist = ['GO']
+    attr={'list':l,'title':'What to do next?','responseType':'single','returnFunction':"getMenuResponse", 'buttonlist':buttonlist }
     return display_Menu(attr,request)
 
 def getIndexList(string):
@@ -59,6 +57,14 @@ def getIndexList(string):
         k.append(int(string[i]))
     return(k)
 
+def friendRequests(request):
+    l=u.friend_requests.all()
+    buttonlist=["Accept","Decline","Go_Back"]
+    attr={'list':l,'title':'Select a request to accept/decline','buttonlist':buttonlist,'responseType':'single','returnFunction':"getFRADResponse"}
+    return display_Menu(attr,request)
+
+
+
 def sendFriendRequest(request):
     global u
     l=CasualUser.objects.all()
@@ -68,7 +74,8 @@ def sendFriendRequest(request):
     for element in l:
         if element not in m and element not in m2 and element!=u:
             l2.append(element)
-    attr={'list':l2,'title':'Select a person to send friend request','submitText':'Send request','responseType':'single','returnFunction':"getFriendRequestResponse" }
+    buttonlist=['Send request']
+    attr={'list':l2,'title':'Select a person to send friend request','buttonlist':buttonlist,'responseType':'single','returnFunction':"getFriendRequestResponse" }
     return display_Menu(attr,request)
 
 def sendMoneyRequest(request):
@@ -126,16 +133,21 @@ def send_private_message(request):
 
 def getResponseList(request):
     responseType = request.POST['responseType']
-    indexList = []
-    if (responseType=='single') :        
-        indexList = getIndexList(request.POST['indexList'])    
-    elif(responseType=='multi') :
-        indexList = request.POST.getlist('indexList')
 
-    responseList=[]
-    for index in indexList:
-        responseList.append(modelList[int(index)])
-    return(responseList)
+    indexList = []
+    if('indexList' in request.POST.keys()):
+        if (responseType=='single') :        
+            indexList = getIndexList(request.POST['indexList'])    
+        elif(responseType=='multi') :
+            indexList = request.POST.getlist('indexList')
+
+        responseList=[]
+        for index in indexList:
+            responseList.append(modelList[int(index)])
+        return(responseList)
+    
+    else:
+        return(indexList)
 
 def getFriendRequestResponse(request):
     responseList=getResponseList(request)
@@ -155,6 +167,18 @@ def getMoneyRequestResponse2(request):
     l=intHolder.objects.get(pk=1)
     u.send_money(float(amount),l.num)
     return displayMainMenu(request)
+
+def getFRADResponse(request):
+    responseList=getResponseList(request)
+    button= request.POST['submit']
+    if(button == "Accept"):
+        u.accept_friend_request(responseList[0].pk)
+        return displayMainMenu(request)
+    elif(button=="Decline"):
+        u.reject_friend_request(responseList[0].pk)
+        return displayMainMenu(request)
+    elif(button=="Go_Back"):
+        return displayMainMenu(request)        
 
 def getFRAResponse(request):
     responseList=getResponseList(request)
@@ -224,7 +248,6 @@ def getMenuResponse(request):
     
     responseType = request.POST['responseType']
     button= request.POST['submit']
-    print(button,"---------------------------------")
     indexList = []
     if (responseType=='single') :        
         indexList = getIndexList(request.POST['indexList'])    
@@ -237,6 +260,8 @@ def getMenuResponse(request):
     
     #TODO
     response=responseList[0]
+    if(response.index==-1):
+        return friendRequests(request)
     if(response.index==1):
         return sendFriendRequest(request)
     if(response.index==2):
