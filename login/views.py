@@ -7,7 +7,7 @@ import json
 from django.template.loader import render_to_string
 from django.core.mail import EmailMessage
 from .utils import TOTPVerification
-from .forms import PlanForm
+from .forms import *
 
 otp_mail = TOTPVerification()
 
@@ -46,39 +46,26 @@ def logout_view(request):
 #  show sign up form
 
 
+def forgotPass(request):
+    return render(request, 'login/forget.html', context={'from': forgotForm})
+
+
 def signUpForm(request):
-    # users = CasualUser.objects.all()
-    # Names_List = []
-    # for user in users:
-    #     Names_List.append(user.username)
-    # context = {
-    #     "len": len(Names_List),
-    #     "names": json.dumps(Names_List),
-    # }
     return render(request, "login/SignUpForm.html", context={'form': SignUpForm})
 
-# create user
 
-
-def createUser(request):
+def sendOTP(request):
     global username
-    global password
-    global email_reg
-    global category
-    global dob
-
-    form = SignUpForm(request.POST)
-    print(form.errors)
+    form = forgotForm(request.POST)
     if(form.is_valid()):
-
         username = form.cleaned_data['username']
-        password = form.cleaned_data['password1']
-        email_reg = form.cleaned_data['email']
-        category = form.cleaned_data['category']
-        dob = form.cleaned_data['date_of_birth']
+        user = CasualUser.objects.filter(username=username)
+        if not user.exists():
+            return render(request, 'login/forget.html', context={'from': forgotForm, 'errors': 'user does not exist'})
 
         generated_token = otp_mail.generate_token()
-        print(generated_token)
+        user = user[0]
+        email_reg = user.email_id
 
         mail_subject = 'InstaBook: Verify OTP'
         message = render_to_string('login/acc_active_email.html', {
@@ -91,7 +78,49 @@ def createUser(request):
         )
         email.send()
 
-        return render(request, "login/otp_page.html", context={"Msg": "Enter OTP below!"})
+        return render(request, "login/otp_page.html", context={"Msg": "Enter OTP below!", 'redirect_url': 'verify'})
+    else:
+        return render(request, 'login/forget.html', context={'from': forgotForm, 'errors': form.errors})
+
+
+def changePass(request):
+    otp = request.POST['otp']
+    if otp_mail.verify_token(otp):
+        user = CasualUser.objects.filter(username=username)
+        
+
+def createUser(request):
+    global username
+    global password
+    global email_reg
+    global category
+    global dob
+
+    form = SignUpForm(request.POST)
+    # print(form.errors)
+    if(form.is_valid()):
+
+        username = form.cleaned_data['username']
+        password = form.cleaned_data['password1']
+        email_reg = form.cleaned_data['email']
+        category = form.cleaned_data['category']
+        dob = form.cleaned_data['date_of_birth']
+
+        generated_token = otp_mail.generate_token()
+        # print(generated_token)
+
+        mail_subject = 'InstaBook: Verify OTP'
+        message = render_to_string('login/acc_active_email.html', {
+            'username': username,
+            'otp': generated_token,
+        })
+
+        email = EmailMessage(
+            mail_subject, message, to=[email_reg]
+        )
+        email.send()
+
+        return render(request, "login/otp_page.html", context={"Msg": "Enter OTP below!", 'redirect_url': 'otp'})
     else:
         return render(request, "login/SignUpForm.html", context={'form': SignUpForm, 'errors': form.errors})
 
@@ -108,8 +137,7 @@ def otp_page(request):
 
     otp = request.POST['otp']
     print(otp)
-    # if otp_mail.verify_token(otp):
-    if True:
+    if otp_mail.verify_token(otp):
             # create django user model instance
 
         # Create mainapp user model instance
@@ -135,7 +163,7 @@ def otp_page(request):
         return HttpResponseRedirect(reverse('loginPage'))
     else:
 
-        return render(request, "login/otp_page.html", context={"Msg": "Wrong OTP!"})
+        return render(request, "login/otp_page.html", context={"Msg": "Wrong OTP!", 'redirect_url': 'otp'})
 
 
 def choosePlan(request):

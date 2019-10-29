@@ -15,3 +15,7 @@
     {% csrf_token %}
     <input type="submit" value="Sign Up"><br>
 </form>
+<form action="{% url 'forgotPass' %}" method="POST">
+        {% csrf_token %}
+        <input type="submit" value="Sign Up"><br>
+</form>

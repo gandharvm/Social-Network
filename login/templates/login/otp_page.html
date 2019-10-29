@@ -1,5 +1,5 @@
 <p>{{Msg}}</p>
-<form action="{% url 'otp' %}" method="POST">
+<form action="{% url redirect_url %}" method="POST">
     {% csrf_token %}
     OTP:<br>
     <input type="password" name="otp" required><br>

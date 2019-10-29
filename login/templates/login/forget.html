@@ -1,0 +1,15 @@
+<h1>SignUp</h1>
+
+{% if errors %}
+<div style="color: red;">
+    Please correct the following error(s) and retry:
+    {{ errors }}
+</div>
+{% endif %}
+
+<form name=forgetPass action="{% url 'sendOTP' %}" method="POST">
+    {% csrf_token %}
+    {{form.as_p}}
+    <input type="submit" value="Send OTP">
+
+</form>
