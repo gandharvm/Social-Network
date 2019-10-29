@@ -393,13 +393,13 @@ class GroupAdmin(models.Model):
         PremiumUser, on_delete=models.CASCADE, related_name='admin')
     group_count = models.IntegerField(default=0)
 
-    def create_group(self, group_name, max_num, can_send):
+    def create_group(self, group_name, max_num, can_send, price=0):
         if(max_num < 3):
             max_num = 20
         if self.group_count <= self.user.plansMaxGroups[self.user.plansMap[self.user.plan]]:
             group = Group(admin=self, name=group_name,
                           max_num_of_members=max_num,
-                          can_send_join_requests=can_send)
+                          can_send_join_requests=can_send, price=price)
             self.group_count += 1
             self.save()
             group.save()
@@ -411,23 +411,23 @@ class GroupAdmin(models.Model):
         group = group[0]
         if group.admin == self:
             group.delete()
-            self.group_count -= 1
+            self.group_count += 1
             self.save()
         else:
             return
 
-    def add_member(self, UserId, GroupId):
-        user = CasualUser.objects.filter(pk=UserId)
-        if not user.exists():
-            return
-        user = user[0]
-        group = Group.objects.filter(pk=GroupId)
-        if not group.exists():
-            return
-        group = group[0]
-        if group.admin == self:
-            group.members.add(user)
-            group.save()
+    # def add_member(self, UserId, GroupId):
+    #     user = CasualUser.objects.filter(pk=UserId)
+    #     if not user.exists():
+    #         return
+    #     user = user[0]
+    #     group = Group.objects.filter(pk=GroupId)
+    #     if not group.exists():
+    #         return
+    #     group = group[0]
+    #     if group.admin == self:
+    #         group.members.add(user)
+    #         group.save()
 
     def remove_member(self, UserId, GroupId):
         group = Group.objects.filter(pk=GroupId)
@@ -445,7 +445,6 @@ class GroupAdmin(models.Model):
     def accept_join_request(self, GroupId, joinId):
         group = Group.objects.filter(pk=GroupId)
         if not group.exists():
-            print('group not exists')
             return
         group = group[0]
         user = group.join_requests.filter(pk=joinId)
@@ -455,6 +454,10 @@ class GroupAdmin(models.Model):
             if (user[0] not in CasualUser.objects.all()):
                 return
             user = user[0]
+            if(user.wallet_money < group.price):
+                return
+            user.wallet_money -= group.price
+            self.user.wallet_money += group.price
             group.members.add(user)
             group.join_requests.remove(user)
             group.save()
@@ -489,6 +492,22 @@ class GroupAdmin(models.Model):
         if(group.admin == self):
             group.can_send_join_requests = setting
 
+    def change_name(self, GroupId, new_name):
+        group = Group.objects.filter(pk=GroupId)
+        if not group.exists():
+            return
+        group = group[0]
+        if(group.admin == self):
+            group.name = new_name
+
+    def change_price(self, GroupId, new_price):
+        group = Group.objects.filter(pk=GroupId)
+        if not group.exists():
+            return
+        group = group[0]
+        if(group.admin == self):
+            group.price = new_price
+
 
 class GroupMessage(models.Model):
     from_user = models.ForeignKey(
@@ -508,3 +527,4 @@ class Group(models.Model):
     can_send_join_requests = models.BooleanField(default=False)
     messages = models.ManyToManyField(
         GroupMessage, related_name='message_on')
+    price = models.IntegerField(default=0)
