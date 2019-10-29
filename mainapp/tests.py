@@ -42,6 +42,8 @@ class User_Test(TestCase):
         u1 = CasualUser.create('E', datetime.today(), 'e@x.com')
         u1.others_can_post = True
         u2 = PremiumUser.create('F', datetime.today(), 'f@x.com', 'silver')
+        u2.deposit_money(10000)
+        u2.pay()
         u2.send_friend_request(u1.pk)
         u1.accept_friend_request(u2.pk)
         post1 = u1.post_on_own_timeline('Hello World. Post on own timeline')
@@ -86,22 +88,24 @@ class User_Test(TestCase):
 class Private_Messages_Test(TestCase):
     def test_message(self):
         u1 = PremiumUser.create("A", datetime.today(), 'a@x.com', 'gold')
+        u1.deposit_money(1000)
+        u1.pay()
         k1 = u1.pk
-        u2 = CommercialUser.create(
-            "B", datetime.today(), 'b@x.com')
+        u2 = CommercialUser.create("B", datetime.today(), 'b@x.com')
+        u2.deposit_money(10000)
+        u2.pay()
         k2 = u2.pk
         u1.send_friend_request(k2)
         u2.accept_friend_request(k1)
         msg = u1.send_message(k2, "Hello World!")
-        self.assertIn(
-            Private_Message(from_user=u1, to_user=u2, content="Hello World!"),
-            Private_Message.objects.all(),
-        )
+        self.assertIn(msg, Private_Message.objects.all(),)
 
 
 class Groups_Test(TestCase):
     def test_join_requests(self):
         u1 = PremiumUser.create('A', datetime.today(), 'a@x.com', 'silver')
+        u1.deposit_money(10000)
+        u1.pay()
         u1.create_group('New Group', 10, True)
         u2 = CasualUser.create('B', datetime.today(), 'b@x.com')
         group = Group.objects.all()[0]
@@ -113,6 +117,8 @@ class Groups_Test(TestCase):
 
     def test_decline_join_requests(self):
         u1 = PremiumUser.create('A', datetime.today(), 'a@x.com', 'silver')
+        u1.deposit_money(10000)
+        u1.pay()
         u1.create_group('New Group', 10, True)
         u2 = CasualUser.create('B', datetime.today(), 'b@x.com')
         group = Group.objects.all()[0]
@@ -121,3 +127,17 @@ class Groups_Test(TestCase):
         admin.reject_join_request(group.pk, u2.pk)
         self.assertNotIn(u2, group.members.all())
         self.assertNotIn(u2, group.join_requests.all())
+
+    def test_group_messages(self):
+        u1 = PremiumUser.create('A', datetime.today(), 'a@x.com', 'silver')
+        u1.deposit_money(10000)
+        u1.pay()
+        u1.create_group('New Group', 10, True)
+        u2 = CasualUser.create('B', datetime.today(), 'b@x.com')
+        group = Group.objects.all()[0]
+        u2.send_join_request(group.pk)
+        admin = u1.admin
+        admin.accept_join_request(group.pk, u2.pk)
+        u2.send_message_on_group(group.pk, 'Hello World')
+        message = GroupMessage.objects.all()[0]
+        self.assertIn(message, group.messages.all())
