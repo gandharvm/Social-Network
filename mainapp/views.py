@@ -5,7 +5,7 @@ from mainapp.models import *
 from mainapp.utils import *
 
 modelList=[]
-u=CommercialUser.objects.get(username="Udayaan")
+u=CasualUser.objects.get(username="wo")
 
 # u=CasualUser()
 

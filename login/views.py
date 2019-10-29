@@ -2,12 +2,12 @@ from django.shortcuts import render, render_to_response, HttpResponse, redirect
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse, resolve
 from mainapp.models import CasualUser, PremiumUser, CommercialUser
-from django.contrib.auth import authenticate, login, logout, models, logout
+from django.contrib.auth import authenticate, login, logout, models, logout, hashers
 import json
 from django.template.loader import render_to_string
 from django.core.mail import EmailMessage
 from .utils import otp_mail
-from .forms import PlanForm
+from .forms import PlanForm, SignUpForm
 
 username = None
 password = None
@@ -31,7 +31,7 @@ def authentication(request):
         login(request, user)
         return HttpResponseRedirect(reverse('displayMainMenu'))
     else:
-        return HttpResponseRedirect(reverse('loginPage'))
+        return render(request, 'login/loginPage.html', context={'Msg': 'Login Failed'})
 
 # logout
 
@@ -44,15 +44,15 @@ def logout_view(request):
 
 
 def signUpForm(request):
-    users = CasualUser.objects.all()
-    Names_List = []
-    for user in users:
-        Names_List.append(user.username)
-    context = {
-        "len": len(Names_List),
-        "names": json.dumps(Names_List),
-    }
-    return render(request, "login/SignUpForm.html", context)
+    # users = CasualUser.objects.all()
+    # Names_List = []
+    # for user in users:
+    #     Names_List.append(user.username)
+    # context = {
+    #     "len": len(Names_List),
+    #     "names": json.dumps(Names_List),
+    # }
+    return render(request, "login/SignUpForm.html", context={'form': SignUpForm})
 
 # create user
 
@@ -64,27 +64,33 @@ def createUser(request):
     global category
     global dob
 
-    username = request.POST['username']
-    password = request.POST['password']
-    email_reg = request.POST['email']
-    category = request.POST['category']
-    dob = request.POST['dob']
+    form = SignUpForm(request.POST)
+    print(form.errors)
+    if(form.is_valid()):
 
-    generated_token = otp_mail.generate_token()
-    print(generated_token)
+        username = form.cleaned_data['username']
+        password = form.cleaned_data['password1']
+        email_reg = form.cleaned_data['email']
+        category = form.cleaned_data['category']
+        dob = form.cleaned_data['date_of_birth']
 
-    mail_subject = 'InstaBook: Verify OTP'
-    message = render_to_string('login/acc_active_email.html', {
-        'username': username,
-        'otp': generated_token,
-    })
+        generated_token = otp_mail.generate_token()
+        print(generated_token)
 
-    email = EmailMessage(
-        mail_subject, message, to=[email_reg]
-    )
-    email.send()
+        mail_subject = 'InstaBook: Verify OTP'
+        message = render_to_string('login/acc_active_email.html', {
+            'username': username,
+            'otp': generated_token,
+        })
 
-    return render(request, "login/otp_page.html", context={"Msg": "Enter OTP below!"})
+        email = EmailMessage(
+            mail_subject, message, to=[email_reg]
+        )
+        email.send()
+
+        return render(request, "login/otp_page.html", context={"Msg": "Enter OTP below!"})
+    else:
+        return render(request, "login/SignUpForm.html", context={'form': SignUpForm, 'errors': form.errors})
 
 
 def otp_page(request):
@@ -99,24 +105,24 @@ def otp_page(request):
 
     otp = request.POST['otp']
     print(otp)
-    if otp_mail.verify_token(otp):
-        # if True:
+    # if otp_mail.verify_token(otp):
+    if True:
             # create django user model instance
-        newUser = models.User.objects.create_user(
-            username, email_reg, password)
 
         # Create mainapp user model instance
         user = None
         if (category == "casual"):
             user = CasualUser.create(
                 username=username, email_id=email_reg, dob=dob)
+            newUser = models.User.objects.create_user(
+                username, email_reg, password)
         elif(category == "premium"):
             return render(request, "login/selectPlan.html", context={"Msg": "Choose plan", 'form': PlanForm})
         elif(category == "commercial"):
             user = CommercialUser.create(
                 username=username, email_id=email_reg, dob=dob)
-        user.save()
-
+            newUser = models.User.objects.create_user(
+                username, email_reg, password)
         username = None
         password = None
         email_reg = None
@@ -134,4 +140,6 @@ def choosePlan(request):
         plan = form.cleaned_data['plan']
         user = PremiumUser.create(
             username=username, plan=plan, email_id=email_reg, dob=dob)
+        newUser = models.User.objects.create_user(
+            username, email_reg, password)
         return HttpResponseRedirect(reverse('loginPage'))
