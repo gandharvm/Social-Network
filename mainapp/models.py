@@ -28,7 +28,7 @@ class CasualUser(models.Model):
     # privacy settings
     others_can_post = models.BooleanField(default="False")
     others_can_see_friends = models.BooleanField(default='False')
-    others_can_see_email = models.BooleanField(default='True')
+    others_can_see_email = models.BooleanField(default='False')
     others_can_see_dob = models.BooleanField(default='False')
 
     @classmethod
@@ -55,7 +55,7 @@ class CasualUser(models.Model):
         to_user.save()
 
     def unfriend(self, UserId):
-        fr = self.friend_requests.filter(pk=UserId)
+        fr = self.friends.filter(pk=UserId)
         if not fr.exists():
             return
         fr = fr[0]

@@ -5,7 +5,7 @@ from mainapp.models import *
 from mainapp.utils import *
 
 modelList=[]
-u=CasualUser.objects.get(username="wo")
+u=CasualUser.objects.get(username="Harsimar")
 
 # u=CasualUser()
 
@@ -34,6 +34,38 @@ def display_Menu(attr,request) :
     }
     return render(request,"mainapp/models_List.html",context=context)
 
+def mainPage(request):
+    attr={'name':u.username}
+    return render(request,"mainapp/mainPage.html",attr)
+
+def getUpgradeResponse(request):
+    button=request.POST['submit']
+    if(button=="Go_Back"):
+        return HttpResponseRedirect(reverse("mainPage"))
+    elif(button=="Upgrade"):
+        rList=getResponseList(request)
+        resp=rList[0]
+        if(resp.index==1):
+            u=u.toPremium('silver')
+        if(resp.index==2):
+            u=u.toPremium('gold')
+        if(resp.index==3):
+            u=u.toPremium('platinum')
+        return HttpResponseRedirect(reverse("mainPage"))
+
+
+def upgradeAccount(request):
+    global u
+    if(isinstance(u,CommercialUser)):
+        pass #TODO alert
+    if(isinstance(u,PremiumUser)):
+        pass #TODO alert
+    if(isinstance(u,CasualUser)):
+        buttonlist=["Upgrade","Go_Back"]
+        l=[menuItem("Silver (INR 50 PM)",1),menuItem("Gold (INR 100 PM)",2),menuItem("Platinum (INR 100 PM)",3)]
+        attr={'list':l,'title':'Select your plan','buttonlist':buttonlist,'returnFunction':'getUpgradeResponse','responseType':'single'}
+        return display_Menu(attr,request)
+
 # display Main Menu
 def displayMainMenu(request):
     # check if user is authenticated 
@@ -45,6 +77,7 @@ def displayMainMenu(request):
     if(isinstance(u,PremiumUser)):
         l=menuListPremium
     if(isinstance(u,CommercialUser)):
+        print('ok')
         l=menuListCommercial
     buttonlist = ['GO']
     attr={'list':l,'title':'Welcome '+u.username,'responseType':'single','returnFunction':"getMenuResponse", 'buttonlist':buttonlist }
@@ -65,9 +98,15 @@ def friendRequests(request):
     attr={'list':l,'title':'Select requests to accept/decline','buttonlist':buttonlist,'responseType':'multi','returnFunction':"getFRADResponse"}
     return display_Menu(attr,request)
 
+def moneyRequests(request):
+    l=u.money_requests.all()
+    buttonlist=["Accept","Decline","Go_Back"]
+    attr={'list':l,'title':'Select requests to accept/decline','buttonlist':buttonlist,'responseType':'multi','returnFunction':"getMRADResponse"}
+    return display_Menu(attr,request)
+
 def viewFriends(request):
     l=u.friends.all()
-    buttonlist=["View Profile","Unfriend","Send_Money_Request","Post_on_timeline","Go_Back"]
+    buttonlist=["View_Profile/Timeline","Unfriend","Send_Money_Request","Post_on_timeline","Go_Back"]
     attr={'list':l,'title':'Here are your friends','buttonlist':buttonlist,'responseType':'single','returnFunction':"getFLResponse"}    
     return display_Menu(attr,request)
     
@@ -87,34 +126,10 @@ def sendFriendRequest(request):
     m2=u.friends.all()
     l2=[]
     for element in l:
-        if element not in m2 and element!=u:
+        if element not in m2 and element.pk!=u.pk:
             l2.append(element)
     buttonlist=['Send_request',"Go_back"]
     attr={'list':l2,'title':'Select persons to send friend request','buttonlist':buttonlist,'responseType':'multi','returnFunction':"getFriendRequestResponse" }
-    return display_Menu(attr,request)
-
-def sendMoneyRequest(request):
-    global u
-    l=u.friends.all()
-    attr={'list':l,'title':'Select a person to send money request','submitText':'Send request','responseType':'single','returnFunction':"getMoneyRequestResponse1" }
-    return display_Menu(attr,request)
-
-def acceptFriendRequest(request):
-    global u
-    l=u.friend_requests.all()
-    attr={'list':l,'title':'Select a friend request to accept','submitText':'accept request','responseType':'single','returnFunction':"getFRAResponse" }
-    return display_Menu(attr,request)
-
-def declineFriendRequest(request):
-    global u
-    l=u.friend_requests.all()
-    attr={'list':l,'title':'Select a friend request to decline','submitText':'decline request','responseType':'single','returnFunction':"getFRDResponse" }
-    return display_Menu(attr,request)
-
-def unfriend(request):
-    global u
-    l=u.friends.all()
-    attr={'list':l,'title':'Select a friend to unfriend','submitText':'unfriend','responseType':'single','returnFunction':"getUnfriendResponse" }
     return display_Menu(attr,request)
 
 def acceptMoneyRequest(request):
@@ -134,6 +149,7 @@ def post_OnOwnTimeline(request) :
     attr = {'title':"Type content on your Post",'submitText':"Post",'returnFunction':"getPostOnOwnTimelineResponse"}
     return display_textbox(attr,request)
 
+# TODO in view friends
 def post_OnOthersTimeline(request):
     global u
     l=u.friends.all()
@@ -192,6 +208,21 @@ def getMoneyRequestResponse2(request):
     u.send_money(float(amount),l.num)
     return displayMainMenu(request)
 
+def getMRADResponse(request):
+    responseList=getResponseList(request)
+    button=request.POST['submit']
+    if(button == "Accept"):
+        for mrequest in responseList:
+            u.accept_money(mrequest.pk)
+        return displayMainMenu(request)
+    elif(button=="Decline"):
+        for mrequest in responseList:
+            u.reject_money(mrequest.pk)
+        return displayMainMenu(request)
+    elif(button=="Go_Back"):
+        return displayMainMenu(request)
+
+
 def getFRADResponse(request):
     responseList=getResponseList(request)
     button= request.POST['submit']
@@ -221,22 +252,6 @@ def getFLResponse(request):
     elif(button=="Go_Back"):
         return HttpResponseRedirect(reverse("displayMainMenu"))
     
-
-
-def getFRAResponse(request):
-    responseList=getResponseList(request)
-    u.accept_friend_request(responseList[0].pk)
-    return displayMainMenu(request)
-
-def getFRDResponse(request):
-    responseList=getResponseList(request)
-    u.reject_friend_request(responseList[0].pk)
-    return displayMainMenu(request)
-
-def getUnfriendResponse(request):
-    responseList=getResponseList(request)
-    u.unfriend(responseList[0].pk)
-    return displayMainMenu(request)
 
 def getAccept_MoneyRequestResponse(request):
     responseList=getResponseList(request)
@@ -314,18 +329,26 @@ def getMenuResponse(request):
         return friendRequests(request)
     if(response.index==-2):
         return viewFriends(request)
+    if(response.index==-3):
+        return moneyRequests(request)
     if(response.index==1):
         return sendFriendRequest(request)
-    if(response.index==2):
-        return acceptFriendRequest(request)
-    if(response.index==3):
-        return declineFriendRequest(request)
-    if(response.index==4):
-        return unfriend(request)
+
+# TODO Not in use    
+    # if(response.index==2):
+    #     return acceptFriendRequest(request)
+    # if(response.index==3):
+    #     return declineFriendRequest(request)
+    # if(response.index==4):
+    #     return unfriend(request)
+
     if(response.index==5):
         return depositMoney(request)
-    if(response.index==6):
-        return sendMoneyRequest(request)
+
+# TODO Not in use
+    # if(response.index==6):
+    #     return sendMoneyRequest(request)
+
     if(response.index==7):
         return acceptMoneyRequest(request)
     if(response.index==8):
@@ -338,6 +361,8 @@ def getMenuResponse(request):
         return viewMyPosts(request)
     if(response.index==12):
         return viewFriendsPost(request)
+    if(response.index==14):
+        return privacySettings(request)
     if(response.index==17):
         return send_private_message(request)
 
@@ -384,6 +409,38 @@ def viewContentlist(attr,request):
         "title": title,
     }
     return render(request,"mainapp/contentList.html",context=context)
+
+def privacySettings(request):
+    buttonList=["Confirm_Settings","Go_Back"]
+    l=privacyList
+    attr={'title':"Change your privacy settings here",'buttonlist':buttonList,'list':l,'responseType':'multi','returnFunction':"getPrivacyResponse"}
+    return display_Menu(attr,request)
+
+def getPrivacyResponse(request):
+    button=request.POST['submit']
+    responseList=getResponseList(request)
+    if(button=="Go_Back"):
+        return HttpResponseRedirect(reverse("displayMainMenu"))
+    elif(button=="Confirm_Settings"):
+        u.others_can_post=False
+        u.others_can_see_friends=False
+        u.others_can_see_email=False
+        u.others_can_see_dob=False
+        for r in responseList:
+            print(str(r))
+            if(r.index==1):
+                u.others_can_post=True
+            elif(r.index==2):
+                u.others_can_see_friends=True
+            elif(r.index==3):
+                u.others_can_see_email=True
+            elif(r.index==4):
+                u.others_can_see_dob=True
+        print(u.others_can_post)
+        u.save()
+        return HttpResponseRedirect(reverse("displayMainMenu"))
+
+
 
 def viewMyPosts(request):
     global u

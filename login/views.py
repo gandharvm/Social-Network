@@ -2,17 +2,20 @@ from django.shortcuts import render, render_to_response, HttpResponse, redirect
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse, resolve
 from mainapp.models import CasualUser, PremiumUser, CommercialUser
-from django.contrib.auth import authenticate, login, logout, models, logout, hashers
+from django.contrib.auth import authenticate, login, logout, models, logout
 import json
 from django.template.loader import render_to_string
 from django.core.mail import EmailMessage
-from .utils import otp_mail
-from .forms import PlanForm, SignUpForm
+from .utils import TOTPVerification
+from .forms import PlanForm
+
+otp_mail = TOTPVerification()
 
 username = None
 password = None
 email_reg = None
 category = None
+dob = None
 
 # show login Page
 
@@ -127,6 +130,7 @@ def otp_page(request):
         password = None
         email_reg = None
         category = None
+        dob = None
 
         return HttpResponseRedirect(reverse('loginPage'))
     else:
