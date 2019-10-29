@@ -524,10 +524,8 @@ def viewFriendsPost(request):
 
 def viewPages(request):
     l=Page.objects.all()
-    print(l)
-    l2=["Page by "+str(page.admin) for page in l]
     buttonlist=["View","Go_back"]
-    attr={'title':"Select a page to view",'buttonlist':buttonlist,'list':l2,'responseType':'single','returnFunction':"getVPResponse"}
+    attr={'title':"Select a page to view",'buttonlist':buttonlist,'list':l,'responseType':'single','returnFunction':"getVPResponse"}
     return display_Menu(attr,request)
 
 def getVPResponse(request):
@@ -537,6 +535,7 @@ def getVPResponse(request):
     elif(button=="View"):
         rList=getResponseList(request)
         r=rList[0]
+        print(r)
         attr={'username':r.admin,'content':r.Content}
         return render(request,"mainapp/page.html",attr)
 
