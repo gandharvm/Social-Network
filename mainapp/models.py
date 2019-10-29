@@ -1,7 +1,7 @@
 from django.db import models
 from math import inf
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 
 logger = logging.getLogger('MAINAPP')
 
@@ -53,12 +53,12 @@ class CasualUser(models.Model):
         #             ' sent friend request to '+str(to_user))
         self.save()
         to_user.save()
-    
-    def unfriend(self,UserId):
+
+    def unfriend(self, UserId):
         fr = self.friends.filter(pk=UserId)
         if not fr.exists():
             return
-        fr=fr[0]        
+        fr = fr[0]
         self.friends.remove(fr)
         fr.friends.remove(self)
         self.save()
@@ -190,6 +190,18 @@ class CasualUser(models.Model):
         new_instance.save()
         return(new_instance)
 
+    def send_message_on_group(self, GroupId, content):
+        group = Group.objects.filter(pk=GroupId)
+        if not group.exists():
+            return
+        group = group[0]
+        if self not in group.members.all():
+            return
+        message = GroupMessage(from_user=self, content=content)
+        message.save()
+        group.messages.add(message)
+        group.save()
+
 
 class Friendship(models.Model):
     from_friend = models.ForeignKey(
@@ -202,8 +214,10 @@ class Friendship(models.Model):
     class Meta:
         unique_together = (("to_friend", "from_friend"),)
 
+
 class intHolder(models.Model):
-    num=models.IntegerField(default=0)
+    num = models.IntegerField(default=0)
+
 
 class PremiumUser(CasualUser):
     plansMap = {'silver': 0, 'gold': 1, 'platinum': 1}
@@ -211,7 +225,7 @@ class PremiumUser(CasualUser):
     plansMaxGroups = [2, 4, inf]
     plan = models.CharField(max_length=10, default="silver")
     max_transactions = 30
-    next_payment_premium = models.DateField(auto_now=True)
+    next_payment_premium = models.DateField(auto_now_add=True)
 
     @classmethod
     def create(cls, username, dob, email_id, plan):
@@ -223,8 +237,11 @@ class PremiumUser(CasualUser):
         timeline.save()
         return user
 
+    def check_pay(self):
+        return(datetime.date(datetime.now()) < self.next_payment_premium)
+
     def amountToPay(self):
-        return(planCosts[plansMap[self.plan.lower()]])
+        return(self.planCosts[self.plansMap[self.plan.lower()]])
 
     def paymentCycleInMonths(self):
         return 1
@@ -236,29 +253,38 @@ class PremiumUser(CasualUser):
         return(plansMaxGroups[plansMap[self.plan.lower()]])
 
     def create_group(self, group_name, max_num, can_send):
-        if(self in GroupAdmin.objects.all()):
-            admin = GroupAdmin.objects.get(user=self)
+        if(self.check_pay()):
+            if(self in GroupAdmin.objects.all()):
+                admin = GroupAdmin.objects.get(user=self)
+            else:
+                admin = GroupAdmin(user=self)
+                admin.save()
+            admin.create_group(group_name, max_num, can_send)
         else:
-            admin = GroupAdmin(user=self)
-            admin.save()
-        admin.create_group(group_name, max_num, can_send)
+            self.pay()
 
     def send_message(self, UserId, content):
-        to_user = self.friends.filter(pk=UserId)
-        if not to_user.exists():
-            return
-        to_user = to_user[0]
-        from_user = self
-        msg = Private_Message(from_user=from_user,
-                              to_user=to_user, content=content)
-        msg.save()
-        return msg
+        if(self.check_pay()):
+            to_user = self.friends.filter(pk=UserId)
+            if not to_user.exists():
+                print('not exists')
+                return
+            to_user = to_user[0]
+            from_user = self
+            msg = Private_Message(from_user=from_user,
+                                  to_user=to_user, content=content)
+            msg.save()
+            return msg
+        else:
+            self.pay()
 
     def pay(self):
-        if(wallet_money > self.amountToPay()):
-            wallet_money -= self.amountToPay
-            next_payment_premium = next_payment_premium + \
-                datetime.timedelta(days=30)
+        if(self.wallet_money > self.amountToPay()):
+            self.wallet_money -= self.amountToPay()
+            self.next_payment_premium = self.next_payment_premium + \
+                timedelta(days=30)
+        else:
+            print('add money to wallet premium')
 
 
 class CommercialUser(PremiumUser):
@@ -276,6 +302,9 @@ class CommercialUser(PremiumUser):
         timeline.save()
         return user
 
+    def check_pay(self):
+        return(datetime.date(datetime.now()) < self.next_payment)
+
     def amountToPay(self):
         return amountToPay
 
@@ -286,24 +315,33 @@ class CommercialUser(PremiumUser):
         return max_transactions
 
     def create_page(self, content):
-        page = Page(admin, content=content)
-        page.save()
+        if(self.check_pay()):
+            page = Page(admin, content=content)
+            page.save()
+        else:
+            self.pay()
 
     def send_message(self, UserId, content):
-        to_user = CasualUser.objects.filter(pk=UserId)
-        if not to_user.exists():
-            return
-        to_user = to_user[0]
-        from_user = self
-        msg = Private_Message(from_user=from_user,
-                              to_user=to_user, content=content)
-        msg.save()
-        return msg
+        if(self.check_pay()):
+            to_user = CasualUser.objects.filter(pk=UserId)
+            if not to_user.exists():
+                return
+            to_user = to_user[0]
+            from_user = self
+            msg = Private_Message(from_user=from_user,
+                                  to_user=to_user, content=content)
+            msg.save()
+            return msg
+        else:
+            self.pay()
 
     def pay(self):
-        if(wallet_money > amount_to_pay):
-            wallet_money -= amount_to_pay
-            next_payment = next_payment + datetime.timedelta(days=365)
+        if(self.wallet_money > self.amount_to_pay):
+            self.wallet_money -= self.amount_to_pay
+            self.next_payment = self.next_payment + \
+                timedelta(days=365)
+        else:
+            print('add money to wallet comm')
 
 
 class Private_Message(models.Model):
@@ -455,6 +493,14 @@ class GroupAdmin(models.Model):
             group.can_send_join_requests = setting
 
 
+class GroupMessage(models.Model):
+    from_user = models.ForeignKey(
+        CasualUser, related_name="from_message", on_delete=models.CASCADE
+    )
+    content = models.CharField(max_length=500)
+    time = models.DateTimeField(auto_now_add=True)
+
+
 class Group(models.Model):
     admin = models.ForeignKey(GroupAdmin, on_delete=models.CASCADE)
     members = models.ManyToManyField(CasualUser, related_name='member_of')
@@ -463,3 +509,5 @@ class Group(models.Model):
         CasualUser, related_name='sent_join_request_to')
     max_num_of_members = models.IntegerField(default=20)
     can_send_join_requests = models.BooleanField(default=False)
+    messages = models.ManyToManyField(
+        GroupMessage, related_name='message_on')
