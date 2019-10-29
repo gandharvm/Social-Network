@@ -57,9 +57,11 @@ def getUpgradeResponse(request):
 def upgradeAccount(request):
     global u
     if(isinstance(u,CommercialUser)):
-        pass #TODO alert
+        attr={'name':u.username,'msg':"You cannot upgrade!"}
+        return render(request,"mainapp/mainPage.html",attr)
     if(isinstance(u,PremiumUser)):
-        pass #TODO alert
+        attr={'name':u.username,'msg':"You cannot upgrade!"}
+        return render(request,"mainapp/mainPage.html",attr)
     if(isinstance(u,CasualUser)):
         buttonlist=["Upgrade","Go_Back"]
         l=[menuItem("Silver (INR 50 PM)",1),menuItem("Gold (INR 100 PM)",2),menuItem("Platinum (INR 100 PM)",3)]
