@@ -7,7 +7,7 @@ import json
 from django.template.loader import render_to_string
 from django.core.mail import EmailMessage
 from .utils import TOTPVerification
-from .forms import PlanForm
+from .forms import *
 
 otp_mail = TOTPVerification()
 
@@ -108,8 +108,8 @@ def otp_page(request):
 
     otp = request.POST['otp']
     print(otp)
-    # if otp_mail.verify_token(otp):
-    if True:
+    if otp_mail.verify_token(otp):
+    # if True:
             # create django user model instance
 
         # Create mainapp user model instance

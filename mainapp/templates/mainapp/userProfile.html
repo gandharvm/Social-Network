@@ -1,0 +1,24 @@
+<h1>{{name}}</h1>
+
+
+<h2>Timeline</h2>
+<div style="height: 200px; width: 200px; overflow: auto;">
+    {% for content in postList %}
+    <p>{{content}}</p>
+    {% endfor %}
+</div>
+
+{% if enablePost %}
+<form action="{% url "getPostOnOtherTimelineResponse2" %}" method="POST">
+        {% csrf_token %}
+        <input type="text" name="potText" required>
+        <input type="submit" value="Post">
+    </form>
+{% endif %}
+
+
+{% for content in infoList %}
+<p>{{content}}</p>
+{% endfor %}
+<br>
+<a href="{% url "mainPage" %}">Go Back</a>
