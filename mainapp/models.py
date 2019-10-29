@@ -172,9 +172,8 @@ class CasualUser(models.Model):
             timeline.posts.add(post)
             timeline.save()
         else:
-            # cannot post on this user's timeline
-            pass
-        return post
+            return "You cannot post on this user's timeline"
+        return 'Posted on timeline'
 
     def __str__(self):
         return self.username
@@ -295,10 +294,13 @@ class PremiumUser(CasualUser):
         if(self.check_pay()):
             group = Group.objects.filter(pk=GroupId)
             if not group.exists():
-                return
+                return 'Group does not exist'
             group = group[0]
             if(group.admin == self):
                 group.price = new_price
+                return 'Changed price for joining group'
+            else:
+                return 'You are not admin of this group'
         else:
             if(self.pay()):
                 x = self.change_price(self, GroupId, new_price)
@@ -310,10 +312,13 @@ class PremiumUser(CasualUser):
         if(self.check_pay()):
             group = Group.objects.filter(pk=GroupId)
             if not group.exists():
-                return
+                return 'Group does not exist'
             group = group[0]
             if(group.admin == self):
                 group.name = new_name
+                return 'Changed the name of the group'
+            else:
+                return 'You are not admin of the group'
         else:
             if(self.pay()):
                 x = self.change_name(self, GroupId, new_name)
@@ -325,10 +330,13 @@ class PremiumUser(CasualUser):
         if(self.check_pay()):
             group = Group.objects.filter(pk=GroupId)
             if not group.exists():
-                return
+                return 'Group does not exist'
             group = group[0]
             if(group.admin == self):
                 group.can_send_join_requests = setting
+                return 'Changed the setting for the group'
+            else:
+                return 'You are not admin of this group'
         else:
             if(self.pay()):
                 x = self.change_join_settings(self, GroupId, setting)
@@ -340,16 +348,18 @@ class PremiumUser(CasualUser):
         if(self.check_pay()):
             group = Group.objects.filter(pk=GroupId)
             if not group.exists():
-                return
+                return 'Group does not exist'
             group = group[0]
             user = group.join_requests.filter(pk=joinId)
             if group.admin == self:
                 if not user.exists():
-                    return
-
+                    return 'Join request does not exist'
                 user = user[0]
                 group.join_requests.remove(user)
                 group.save()
+                return 'rejected the join request'
+            else:
+                return 'You are not admin of this group'
         else:
             if(self.pay()):
                 x = self.reject_join_request(self, GroupId, joinId)
@@ -378,6 +388,9 @@ class PremiumUser(CasualUser):
                 group.join_requests.remove(user)
                 group.save()
                 self.save()
+                return 'Accepted the join request'
+            else:
+                return 'You are not admin of this group'
         else:
             if(self.pay()):
                 x = self.accept_join_request(self, GroupId, joinId)
@@ -389,15 +402,18 @@ class PremiumUser(CasualUser):
         if(self.check_pay()):
             group = Group.objects.filter(pk=GroupId)
             if not group.exists():
-                return
+                return 'Group does not exist'
             group = group[0]
             user = group.members.filter(pk=UserId)
             if not user.exists():
-                return
+                return 'Member does not exist'
             user = user[0]
             if group.admin == self:
                 group.members.remove(user)
                 group.save()
+                return 'member removed'
+            else:
+                return 'You are not admin of this group'
         else:
             if(self.pay()):
                 x = self.remove_member(self, UserId, GroupId)
@@ -409,14 +425,15 @@ class PremiumUser(CasualUser):
         if(self.check_pay()):
             group = Group.objects.filter(pk=GroupId)
             if not group.exists():
-                return
+                return 'Group does not exist'
             group = group[0]
             if group.admin == self:
                 group.delete()
                 self.group_count += 1
                 self.save()
+                return 'Deleted the group'
             else:
-                return
+                return 'You are not admin of this group'
         else:
             if(self.pay()):
                 x = self.delete_group(self, joinId)
@@ -428,17 +445,17 @@ class PremiumUser(CasualUser):
         if(self.check_pay()):
             to_user = self.friends.filter(pk=UserId)
             if not to_user.exists():
-                print('not exists')
-                return
+                return 'User does not exist'
             to_user = to_user[0]
             from_user = self
             msg = Private_Message(from_user=from_user,
                                   to_user=to_user, content=content)
             msg.save()
-            return msg
+            return 'Message sent'
         else:
             if(self.pay()):
-                return 'The Amount due for continued service deducted from your wallet'
+                x = self.send_message(UserId, content)
+                return 'The Amount due for continued service deducted from your wallet\n'+x
             else:
                 return 'Please add money to your wallet as your payment is due.\nYou will not be able to use premium facilities without it'
 
@@ -450,7 +467,6 @@ class PremiumUser(CasualUser):
             self.save()
             return True
         else:
-            # print('add money to wallet premium')
             return False
 
 
@@ -471,7 +487,6 @@ class CommercialUser(PremiumUser):
 
     def check_pay(self):
         return(datetime.date(datetime.now()) < self.next_payment)
-        # return True
 
     def amountToPay(self):
         return amountToPay
@@ -486,9 +501,11 @@ class CommercialUser(PremiumUser):
         if(self.check_pay()):
             page = Page(admin=self, Content=content)
             page.save()
+            return 'Page created'
         else:
             if(self.pay()):
-                return 'The Amount due for continued service deducted from your wallet'
+                x = self.create_page(content)
+                return 'The Amount due for continued service deducted from your wallet\n'+x
             else:
                 return 'Please add money to your wallet as your payment is due.\nYou will not be able to use commercial facilities without it'
 
@@ -496,16 +513,18 @@ class CommercialUser(PremiumUser):
         if(self.check_pay()):
             to_user = CasualUser.objects.filter(pk=UserId)
             if not to_user.exists():
-                return
+                return 'User does not exist'
             to_user = to_user[0]
             from_user = self
             msg = Private_Message(from_user=from_user,
                                   to_user=to_user, content=content)
             msg.save()
             return msg
+            return 'Message sent'
         else:
             if(self.pay()):
-                return 'The Amount due for continued service deducted from your wallet'
+                x = self.send_message(UserId, content)
+                return 'The Amount due for continued service deducted from your wallet\n' + x
             else:
                 return 'Please add money to your wallet as your payment is due.\nYou will not be able to use premium facilities without it'
 
@@ -564,6 +583,7 @@ class Page(models.Model):
     admin = models.OneToOneField(
         CommercialUser, on_delete=models.CASCADE, related_name='page')
     Content = models.CharField(max_length=500)
+
     def __str__(self):
         return "Page by "+str(self.admin)
 
