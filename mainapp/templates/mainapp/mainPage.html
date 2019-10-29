@@ -25,9 +25,17 @@
         </td>
         {% if aType == 'Commercial' %}
         <td >
-                <a href="{% url "createPage" %}">Create Page</a>
+            <a href="{% url "createPage" %}">Create Page</a>
         </td>
         {% endif %}
+        {% if aType != 'Casual' %}
+        <td >
+            <a href="{% url "createGroup" %}">Create Group</a>
+        </td>
+        {% endif %}
+        <td >
+            <a href="{% url "viewPages" %}">View Pages</a>
+        </td>
         <td >
             <a href="{% url "logout" %}">Logout</a>
         </td>

@@ -1,0 +1,16 @@
+<h1>{{title}}</h1>
+<br>
+<form action="{% url returnFunction %}" method="POST">
+    {% csrf_token %}
+    {% for key in keys %}
+        <p>{{key}}</p><br>
+        <input type="text" name={{key}}  required><br><br><br>
+    {% endfor %}
+    <br>
+    <br>
+    {% for submitText in buttonlist %}
+        <input type="submit" name="submit" value={{submitText}}>
+    {% endfor %}
+    
+</form>
+<a href="{% url "mainPage" %}">Go Back</a>

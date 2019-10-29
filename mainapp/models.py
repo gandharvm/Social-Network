@@ -283,13 +283,14 @@ class PremiumUser(CasualUser):
             self.wallet_money -= self.amountToPay()
             self.next_payment_premium = self.next_payment_premium + \
                 timedelta(days=30)
+            self.save()
         else:
             print('add money to wallet premium')
 
 
 class CommercialUser(PremiumUser):
     max_transactions = inf
-    next_payment = models.DateField(auto_now=True)
+    next_payment = models.DateField(auto_now_add=True)
     amount_to_pay = 5000
 
     @classmethod
@@ -316,9 +317,11 @@ class CommercialUser(PremiumUser):
 
     def create_page(self, content):
         if(self.check_pay()):
-            page = Page(admin, content=content)
+            print("()()()()()())))))))))))))))))))))))))))))))))")
+            page = Page(admin=self, Content=content)
             page.save()
         else:
+            print("+=============================================")
             self.pay()
 
     def send_message(self, UserId, content):
@@ -340,6 +343,7 @@ class CommercialUser(PremiumUser):
             self.wallet_money -= self.amount_to_pay
             self.next_payment = self.next_payment + \
                 timedelta(days=365)
+            self.save()
         else:
             print('add money to wallet comm')
 

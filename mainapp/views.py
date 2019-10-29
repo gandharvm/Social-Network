@@ -33,7 +33,7 @@ def display_Menu(attr,request) :
         "responseType":responseType
     }
     return render(request,"mainapp/models_List.html",context=context)
-
+    
 
 def mainPage(request):
     timeline = Timeline.objects.get(timeline_of=u)
@@ -225,7 +225,7 @@ def getFriendRequestResponse(request):
         return HttpResponseRedirect(reverse('mainPage'))
     elif(button=="Go_back"):
         return HttpResponseRedirect(reverse('mainPage'))
-
+    
 
 def getMoneyRequestResponse1(request,responseList):
     l=intHolder.objects.get(pk=1)
@@ -415,6 +415,23 @@ def getMenuResponse(request):
 
     return HttpResponse(responseList)
 
+def getPageResponse(request):
+    content=request.POST['text']
+    fk=Page.objects.filter(admin=u)
+    if(fk.exists()):
+        fk[0].content=content
+        fk[0].save()
+        print("+++++++++++++++++++++++++++++++++++")
+
+    else:
+        print("*************************************")
+        u.create_page(content)
+    return HttpResponseRedirect(reverse("mainPage"))
+
+def createPage(request):
+    attr={'title':"Enter content for the page",'submitText':"Create Page",'returnFunction':"getPageResponse"}
+    return display_textbox(attr,request)
+
 # display text box
 def display_textbox(attr,request) :
     # TODO user.is_authenticated = ?
@@ -505,6 +522,24 @@ def viewFriendsPost(request):
     attr = {'list':l,'title':'Select friend','submitText':'Select','responseType':'single','returnFunction':"getViewPostOfFriendResponse" }
     return display_Menu(attr,request)
 
+def viewPages(request):
+    l=Page.objects.all()
+    print(l)
+    l2=["Page by "+str(page.admin) for page in l]
+    buttonlist=["View","Go_back"]
+    attr={'title':"Select a page to view",'buttonlist':buttonlist,'list':l2,'responseType':'single','returnFunction':"getVPResponse"}
+    return display_Menu(attr,request)
+
+def getVPResponse(request):
+    button=request.POST['submit']
+    if(button=="Go_back"):
+        return HttpResponseRedirect(reverse("mainPage"))
+    elif(button=="View"):
+        rList=getResponseList(request)
+        r=rList[0]
+        attr={'username':r.admin,'content':r.Content}
+        return render(request,"mainapp/page.html",attr)
+
 def getViewPostOfFriendResponse(request):
     responseList=getResponseList(request)
     friend = responseList[0]
@@ -515,3 +550,24 @@ def getViewPostOfFriendResponse(request):
         "title":"Posts on "+ friend.username +" timline",
     }
     return viewContentlist(attr,request)
+
+def textForm_Multi(attr,request):
+    return render(request,"mainapp/textForm_multiple.html",attr)
+
+
+def createGroup(request):
+    keys = ['Enter Group Name','Enter Maximum Number of members']
+    buttonlist = ['create_group']
+    attr= {
+        'keys':keys,
+        'title':'Create Group',
+        'returnFunction':'getcreateGroupResponse',
+        'buttonlist':buttonlist,
+    }
+    return textForm_Multi(attr,request)
+
+def getcreateGroupResponse(request):
+    # grp_Admin = GroupAdmin.objects.filter(user=u)
+    # if (grp_Admin.exists()):
+    #     grp_Admin[0].create_group()
+    pass
