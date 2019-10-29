@@ -555,7 +555,7 @@ def textForm_Multi(attr,request):
 
 
 def createGroup(request):
-    keys = ['Enter Group Name','Enter Maximum Number of members']
+    keys = ['Enter Group Name','Enter price for each member']
     buttonlist = ['create_group']
     attr= {
         'keys':keys,
@@ -566,7 +566,27 @@ def createGroup(request):
     return textForm_Multi(attr,request)
 
 def getcreateGroupResponse(request):
-    # grp_Admin = GroupAdmin.objects.filter(user=u)
-    # if (grp_Admin.exists()):
-    #     grp_Admin[0].create_group()
-    pass
+    grpname = request.POST['Enter Group Name']
+    price = request.POST['Enter price for each member']
+    u.create_group(grpname,True,float(price))
+    return HttpResponseRedirect(reverse("mainPage"))
+
+def viewGroups(request):
+    grps = Group.objects.all()
+    buttonlist = ['View_Group','Go_Back']
+    attr={'title':"Select a group to view",'buttonlist':buttonlist,'list':grps,'responseType':'single','returnFunction':"getVGResponse"}
+    return display_Menu(attr,request)
+
+def getVGResponse(request):
+    button = request.POST['submit']
+    if (button=='Go_Back'):
+        return HttpResponseRedirect(reverse("mainPage"))
+    elif(button=='View_Group'):
+        responseList = getResponseList(request)
+        grp = responseList[0]
+        if (grp.admin==u):
+            pass
+        elif(u in grp.members.objects.all()):
+            pass
+        else:
+            pass

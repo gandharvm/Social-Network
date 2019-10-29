@@ -17,9 +17,11 @@
             <a href="{% url "upgradeAccount" %}">Upgrade Account</a>
         </td>
         {% endif %}
+        {% if aType != 'Casual' %}
         <td >
             <a href="{% url "send_private_message" %}">Send Private Message</a>
         </td>
+        {% endif %}
         <td >
                 <a href="{% url "viewFriends" %}">View Friends</a>
         </td>
@@ -39,7 +41,9 @@
         <td >
             <a href="{% url "logout" %}">Logout</a>
         </td>
-        
+        <td >
+            <a href="{% url "viewGroups" %}">View Groups</a>
+        </td>
 
     </tr>
     <tr width="100%">

@@ -632,3 +632,6 @@ class Group(models.Model):
     messages = models.ManyToManyField(
         GroupMessage, related_name='message_on')
     price = models.IntegerField(default=0)
+
+    def __str__(self):
+        return self.name
