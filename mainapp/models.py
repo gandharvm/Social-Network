@@ -35,6 +35,7 @@ class CasualUser(models.Model):
     def create(cls, username, dob, email_id):
         # logger.info("user " + username + " created")
         user = cls(username=username, date_of_birth=dob, email_id=email_id)
+        user.category="casual"
         user.save()
         timeline = Timeline(timeline_of=user)
         timeline.save()
@@ -299,6 +300,7 @@ class PremiumUser(CasualUser):
         # logger.info("user " + username + " created")
         user = cls(username=username, date_of_birth=dob,
                    email_id=email_id, plan=plan)
+        user.category = "premium"
         user.save()
         timeline = Timeline(timeline_of=user)
         timeline.save()
@@ -526,6 +528,7 @@ class CommercialUser(PremiumUser):
         # logger.info("user " + username + " created")
         user = cls(username=username, date_of_birth=dob,
                    email_id=email_id, plan='platinum', next_payment_premium=datetime.max)
+        user.category = "commercial"
         user.save()
         timeline = Timeline(timeline_of=user)
         timeline.save()

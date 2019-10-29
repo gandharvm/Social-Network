@@ -32,7 +32,7 @@ def authentication(request):
     user = authenticate(request, username=username, password=password)
     if user is not None:
         login(request, user)
-        return HttpResponseRedirect(reverse('displayMainMenu'))
+        return HttpResponseRedirect(reverse('mainPage'))
     else:
         return render(request, 'login/loginPage.html', context={'Msg': 'Login Failed'})
 

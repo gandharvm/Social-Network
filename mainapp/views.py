@@ -5,8 +5,8 @@ from mainapp.models import *
 from mainapp.utils import *
 
 modelList=[]
-u=CasualUser.objects.get(username="Harsimar")
-
+# u=CasualUser.objects.get(username="Harsimar")
+u = None
 # u=CasualUser()
 
 
@@ -36,6 +36,15 @@ def display_Menu(attr,request) :
     
 
 def mainPage(request):
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('loginPage'))
+    global u
+    u = CasualUser.objects.get(username=request.user.username)
+    if(u.category=='commercial'):
+        u=CommercialUser.objects.get(username=u.username)
+    elif(u.category=='premium'):
+        u=PremiumUser.objects.get(username=u.username)
+    
     timeline = Timeline.objects.get(timeline_of=u)
     postList=[str(post) for post in timeline.posts.all()]
     l=Private_Message.objects.filter(to_user=u)

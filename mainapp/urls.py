@@ -33,6 +33,7 @@ urlpatterns = [
     path("getPageResponse/",views.getPageResponse,name="getPageResponse"),
     path("viewPages/",views.viewPages,name="viewPages"),
     path("getVPResponse/",views.getVPResponse,name="getVPResponse"),    
-    path('createGroup',views.createGroup,name="createGroup"),
-    path("getcreateGroupResponse",views.getcreateGroupResponse,name="getcreateGroupResponse"),
+    path('createGroup/',views.createGroup,name="createGroup"),
+    path("getcreateGroupResponse/",views.getcreateGroupResponse,name="getcreateGroupResponse"),
+    path("viewGroups/",views.viewGroups,name="viewGroups"),
 ]
