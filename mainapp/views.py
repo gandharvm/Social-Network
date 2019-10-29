@@ -5,10 +5,11 @@ from mainapp.models import *
 from mainapp.utils import *
 
 modelList=[]
-u=CasualUser.objects.get(username="Harsimar")
+u=CasualUser.objects.get(username="Abhivandan")
 
 # u=CasualUser()
 
+error = ''
 
 # view models list
 def display_Menu(attr,request) :
@@ -36,6 +37,7 @@ def display_Menu(attr,request) :
     
 
 def mainPage(request):
+    global error
     timeline = Timeline.objects.get(timeline_of=u)
     postList=[str(post) for post in timeline.posts.all()]
     l=Private_Message.objects.filter(to_user=u)
@@ -48,7 +50,8 @@ def mainPage(request):
     elif(isinstance(u,CasualUser)):
         h="Casual"        
     attr={'name':u.username,'postList':postList,'messageList':messageList,'balance':u.wallet_money,
-        'maxt':u.max_transactions,'transactions':u.transactions,'DOB':u.date_of_birth,'email':u.email_id,'aType':h}
+        'maxt':u.max_transactions,'transactions':u.transactions,'DOB':u.date_of_birth,'email':u.email_id,'aType':h, 'Error': error}
+    error = ''
     return render(request,"mainapp/mainPage.html",attr)
 
 def getUpgradeResponse(request):
@@ -67,7 +70,7 @@ def getUpgradeResponse(request):
         if(resp.index==3):
             l=u.toPremium('platinum')
         u=l
-        print(u)
+        # print(u)
         return HttpResponseRedirect(reverse("mainPage"))
 
 
@@ -123,7 +126,7 @@ def getIndexList(string):
     return(k)
 
 def friendRequests(request):
-    l=u.friend_requests.all()
+    l=u.friend_requests.filter()
     buttonlist=["Accept","Decline","Go_Back"]
     attr={'list':l,'title':'Select requests to accept/decline','buttonlist':buttonlist,'responseType':'multi','returnFunction':"getFRADResponse"}
     return display_Menu(attr,request)
@@ -216,12 +219,13 @@ def getResponseList(request):
         return(indexList)
 
 def getFriendRequestResponse(request):
+    global error
     buttonlist=['Send_request',"Go_back"]
     responseList=getResponseList(request)
     button= request.POST['submit']
     if(button=='Send_request'):
         for fr in responseList:
-            u.send_friend_request(fr.pk)
+            error = u.send_friend_request(fr.pk)
         return HttpResponseRedirect(reverse('mainPage'))
     elif(button=="Go_back"):
         return HttpResponseRedirect(reverse('mainPage'))
@@ -234,36 +238,44 @@ def getMoneyRequestResponse1(request,responseList):
     return enterMoneytoSend(request)
 
 def getMoneyRequestResponse2(request):
+    global error
     amount=request.POST['text']
     l=intHolder.objects.get(pk=1)
-    u.send_money(float(amount),l.num)
-    return displayMainMenu(request)
+    try:
+        amount = float(amount)
+    except ValueError:
+        error = 'Amount not a float number'
+        return HttpResponseRedirect(reverse('mainPage'))
+    error = u.send_money(amount,l.num)
+    return HttpResponseRedirect(reverse('mainPage'))
 
 def getMRADResponse(request):
+    global error
     responseList=getResponseList(request)
     button=request.POST['submit']
     if(button == "Accept"):
         for mrequest in responseList:
-            u.accept_money(mrequest.pk)
+            error = u.accept_money(mrequest.pk)
         return displayMainMenu(request)
     elif(button=="Decline"):
         for mrequest in responseList:
-            u.reject_money(mrequest.pk)
+            error = u.reject_money(mrequest.pk)
         return displayMainMenu(request)
     elif(button=="Go_Back"):
         return displayMainMenu(request)
 
 
 def getFRADResponse(request):
+    global error
     responseList=getResponseList(request)
     button= request.POST['submit']
     if(button == "Accept"):
         for frequest in responseList:
-            u.accept_friend_request(frequest.pk)
+            error = u.accept_friend_request(frequest.pk)
         return HttpResponseRedirect(reverse('mainPage'))
     elif(button=="Decline"):
         for frequest in responseList:
-            u.reject_friend_request(frequest.pk)
+            error = u.reject_friend_request(frequest.pk)
         return HttpResponseRedirect(reverse('mainPage'))
     elif(button=="Go_Back"):
         return HttpResponseRedirect(reverse('mainPage'))
@@ -285,12 +297,13 @@ def viewFriendProfile(friend,request):
         
 
 def getFLResponse(request):
+    global error
     responseList=getResponseList(request)
     button= request.POST['submit']
     if(button=="View_Profile/Timeline"):
         return viewFriendProfile(responseList[0],request)
     elif(button=="Unfriend"):
-        u.unfriend(responseList[0].pk)
+        error = u.unfriend(responseList[0].pk)
         return HttpResponseRedirect(reverse("mainPage"))
     elif(button=="Send_Money_Request"):
         return getMoneyRequestResponse1(request,responseList)
@@ -301,19 +314,22 @@ def getFLResponse(request):
     
 
 def getAccept_MoneyRequestResponse(request):
+    global error
     responseList=getResponseList(request)
-    u.accept_money(responseList[0].pk)
+    error = u.accept_money(responseList[0].pk)
     return HttpResponseRedirect(reverse('displayMainMenu'))
 
 def getDecline_MoneyRequestResponse(request):
+    global error
     responseList=getResponseList(request)
-    u.reject_money(responseList[0].pk)
+    error = u.reject_money(responseList[0].pk)
     return HttpResponseRedirect(reverse('displayMainMenu'))
 
 def getPostOnOwnTimelineResponse(request):
+    global error
     text = request.POST['potText']
     text = text[:500]
-    u.post_on_own_timeline(text)
+    error = u.post_on_own_timeline(text)
     return HttpResponseRedirect(reverse('mainPage'))
 
 def getPostOnOtherTimelineResponse1(request):
@@ -365,7 +381,7 @@ def getMenuResponse(request):
     elif(responseType=='multi') :
         indexList = getIndexList_Mutli(request.POST.getlist('indexList')) 
 
-    print(indexList,"---------------------------")
+    # print(indexList,"---------------------------")
     responseList=[]
     for index in indexList:
         responseList.append(modelList[int(index)])
@@ -416,16 +432,15 @@ def getMenuResponse(request):
     return HttpResponse(responseList)
 
 def getPageResponse(request):
+    global error
     content=request.POST['text']
     fk=Page.objects.filter(admin=u)
     if(fk.exists()):
         fk[0].content=content
         fk[0].save()
-        print("+++++++++++++++++++++++++++++++++++")
 
     else:
-        print("*************************************")
-        u.create_page(content)
+        error = u.create_page(content)
     return HttpResponseRedirect(reverse("mainPage"))
 
 def createPage(request):
@@ -454,8 +469,14 @@ def enterMoneytoSend(request):
     return display_textbox(attr,request)
 
 def getDepositResponse(request):
+    global error
     amount=request.POST['text']
-    u.deposit_money(float(amount))
+    try:
+        amount = float(amount)
+    except ValueError:
+        error = 'Amount not a floating point number'
+        return HttpResponseRedirect(reverse('mainPage'))
+    error = u.deposit_money(amount)
     return HttpResponseRedirect(reverse('mainPage'))
 
 def viewContentlist(attr,request):
@@ -481,6 +502,7 @@ def privacySettings(request):
     return display_Menu(attr,request)
 
 def getPrivacyResponse(request):
+    global error
     button=request.POST['submit']
     responseList=getResponseList(request)
     if(button=="Go_Back"):
@@ -502,6 +524,7 @@ def getPrivacyResponse(request):
                 u.others_can_see_dob=True
         print(u.others_can_post)
         u.save()
+        error = 'Privacy settings changed'
         return HttpResponseRedirect(reverse("mainPage"))
 
 
@@ -566,27 +589,33 @@ def createGroup(request):
     return textForm_Multi(attr,request)
 
 def getcreateGroupResponse(request):
+    global error
     grpname = request.POST['Enter Group Name']
     price = request.POST['Enter price for each member']
-    u.create_group(grpname,True,float(price))
+    try:
+        price = float(price)
+    except ValueError:
+        error = 'Price is not float'
+        return HttpResponseRedirect(reverse('mainPage'))
+    error = u.create_group(grpname,True,price)
     return HttpResponseRedirect(reverse("mainPage"))
 
-def viewGroups(request):
-    grps = Group.objects.all()
-    buttonlist = ['View_Group','Go_Back']
-    attr={'title':"Select a group to view",'buttonlist':buttonlist,'list':grps,'responseType':'single','returnFunction':"getVGResponse"}
-    return display_Menu(attr,request)
+# def viewGroups(request):
+#     grps = Group.objects.all()
+#     buttonlist = ['View_Group','Go_Back']
+#     attr={'title':"Select a group to view",'buttonlist':buttonlist,'list':grps,'responseType':'single','returnFunction':"getVGResponse"}
+#     return display_Menu(attr,request)
 
-def getVGResponse(request):
-    button = request.POST['submit']
-    if (button=='Go_Back'):
-        return HttpResponseRedirect(reverse("mainPage"))
-    elif(button=='View_Group'):
-        responseList = getResponseList(request)
-        grp = responseList[0]
-        if (grp.admin==u):
-            pass
-        elif(u in grp.members.objects.all()):
-            pass
-        else:
-            pass
+# def getVGResponse(request):
+#     button = request.POST['submit']
+#     if (button=='Go_Back'):
+#         return HttpResponseRedirect(reverse("mainPage"))
+#     elif(button=='View_Group'):
+#         responseList = getResponseList(request)
+#         grp = responseList[0]
+#         if (grp.admin==u):
+#             pass
+#         elif(u in grp.members.objects.all()):
+#             pass
+#         else:
+#             pass
