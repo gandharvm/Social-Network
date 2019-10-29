@@ -53,12 +53,12 @@ class CasualUser(models.Model):
         #             ' sent friend request to '+str(to_user))
         self.save()
         to_user.save()
-    
-    def unfriend(self,UserId):
+
+    def unfriend(self, UserId):
         fr = self.friends.filter(pk=UserId)
         if not fr.exists():
             return
-        fr=fr[0]        
+        fr = fr[0]
         self.friends.remove(fr)
         fr.friends.remove(self)
         self.save()
@@ -202,8 +202,10 @@ class Friendship(models.Model):
     class Meta:
         unique_together = (("to_friend", "from_friend"),)
 
+
 class intHolder(models.Model):
-    num=models.IntegerField(default=0)
+    num = models.IntegerField(default=0)
+
 
 class PremiumUser(CasualUser):
     plansMap = {'silver': 0, 'gold': 1, 'platinum': 1}
@@ -223,6 +225,9 @@ class PremiumUser(CasualUser):
         timeline.save()
         return user
 
+    def check_pay(self):
+        return(datetime.today() < next_payment_premium)
+
     def amountToPay(self):
         return(planCosts[plansMap[self.plan.lower()]])
 
@@ -236,29 +241,37 @@ class PremiumUser(CasualUser):
         return(plansMaxGroups[plansMap[self.plan.lower()]])
 
     def create_group(self, group_name, max_num, can_send):
-        if(self in GroupAdmin.objects.all()):
-            admin = GroupAdmin.objects.get(user=self)
+        if(self.check_pay()):
+            if(self in GroupAdmin.objects.all()):
+                admin = GroupAdmin.objects.get(user=self)
+            else:
+                admin = GroupAdmin(user=self)
+                admin.save()
+            admin.create_group(group_name, max_num, can_send)
         else:
-            admin = GroupAdmin(user=self)
-            admin.save()
-        admin.create_group(group_name, max_num, can_send)
+            self.pay()
 
     def send_message(self, UserId, content):
-        to_user = self.friends.filter(pk=UserId)
-        if not to_user.exists():
-            return
-        to_user = to_user[0]
-        from_user = self
-        msg = Private_Message(from_user=from_user,
-                              to_user=to_user, content=content)
-        msg.save()
-        return msg
+        if(self.check_pay()):
+            to_user = self.friends.filter(pk=UserId)
+            if not to_user.exists():
+                return
+            to_user = to_user[0]
+            from_user = self
+            msg = Private_Message(from_user=from_user,
+                                  to_user=to_user, content=content)
+            msg.save()
+            return msg
+        else:
+            self.pay()
 
     def pay(self):
-        if(wallet_money > self.amountToPay()):
-            wallet_money -= self.amountToPay
-            next_payment_premium = next_payment_premium + \
+        if(self.wallet_money > self.amountToPay()):
+            self.wallet_money -= self.amountToPay
+            self.next_payment_premium = self.next_payment_premium + \
                 datetime.timedelta(days=30)
+        else:
+            print('add money to wallet premium')
 
 
 class CommercialUser(PremiumUser):
@@ -276,6 +289,9 @@ class CommercialUser(PremiumUser):
         timeline.save()
         return user
 
+    def check_pay(self):
+        return(datetime.date(datetime.now()) < self.next_payment)
+
     def amountToPay(self):
         return amountToPay
 
@@ -286,24 +302,33 @@ class CommercialUser(PremiumUser):
         return max_transactions
 
     def create_page(self, content):
-        page = Page(admin, content=content)
-        page.save()
+        if(self.check_pay()):
+            page = Page(admin, content=content)
+            page.save()
+        else:
+            self.pay()
 
     def send_message(self, UserId, content):
-        to_user = CasualUser.objects.filter(pk=UserId)
-        if not to_user.exists():
-            return
-        to_user = to_user[0]
-        from_user = self
-        msg = Private_Message(from_user=from_user,
-                              to_user=to_user, content=content)
-        msg.save()
-        return msg
+        if(self.check_pay()):
+            to_user = CasualUser.objects.filter(pk=UserId)
+            if not to_user.exists():
+                return
+            to_user = to_user[0]
+            from_user = self
+            msg = Private_Message(from_user=from_user,
+                                  to_user=to_user, content=content)
+            msg.save()
+            return msg
+        else:
+            self.pay()
 
     def pay(self):
-        if(wallet_money > amount_to_pay):
-            wallet_money -= amount_to_pay
-            next_payment = next_payment + datetime.timedelta(days=365)
+        if(self.wallet_money > self.amount_to_pay):
+            self.wallet_money -= self.amount_to_pay
+            self.next_payment = self.next_payment + \
+                datetime.timedelta(days=365)
+        else:
+            print('add money to wallet comm')
 
 
 class Private_Message(models.Model):

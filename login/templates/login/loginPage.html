@@ -1,9 +1,14 @@
+<h1>Login</h1>
+
+<p style="color: red;">
+    {{Msg}}
+</p>
 <form action="{% url 'auth' %}" method="POST">
     {% csrf_token %}
     UserName:<br>
     <input type="text" name="username" required><br>
     Password:<br>
-    <input type="password" name="password" required><br>
+    <input type="password" name="password" required><br><br>
     <input type="submit" value="Login"><br>
 </form>
 <form action="{% url 'signUpForm' %}" method="POST">
