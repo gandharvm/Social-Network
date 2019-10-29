@@ -29,5 +29,5 @@ urlpatterns = [
     path("viewFriendProfile/",views.viewFriendProfile,name="viewFriendProfile"),
     path("sendFriendRequest/",views.sendFriendRequest,name="sendFriendRequest"),
     path("friendRequests/",views.friendRequests,name="friendRequests"),
-    
+    path("createPage/",views.createPage,name="createPage"),    
 ]

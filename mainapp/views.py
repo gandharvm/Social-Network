@@ -5,7 +5,7 @@ from mainapp.models import *
 from mainapp.utils import *
 
 modelList=[]
-u=CommercialUser.objects.get(username="Harsimar")
+u=CommercialUser.objects.get(username="Gandharv")
 
 # u=CasualUser()
 
@@ -34,38 +34,61 @@ def display_Menu(attr,request) :
     }
     return render(request,"mainapp/models_List.html",context=context)
 
+
 def mainPage(request):
     timeline = Timeline.objects.get(timeline_of=u)
     postList=[str(post) for post in timeline.posts.all()]
     l=Private_Message.objects.filter(to_user=u)
     messageList=[str(e) for e in l]
+    h=""
+    if(isinstance(u,CommercialUser)):
+        h="Commercial"
+    elif(isinstance(u,PremiumUser)):
+        h="Premium ("+str(u.plan)+")"
+    elif(isinstance(u,CasualUser)):
+        h="Casual"        
     attr={'name':u.username,'postList':postList,'messageList':messageList,'balance':u.wallet_money,
-        'maxt':u.max_transactions,'transactions':u.transactions,'DOB':u.date_of_birth,'email':u.email_id}
+        'maxt':u.max_transactions,'transactions':u.transactions,'DOB':u.date_of_birth,'email':u.email_id,'aType':h}
     return render(request,"mainapp/mainPage.html",attr)
 
 def getUpgradeResponse(request):
     button=request.POST['submit']
+    global u
     if(button=="Go_Back"):
         return HttpResponseRedirect(reverse("mainPage"))
     elif(button=="Upgrade"):
         rList=getResponseList(request)
+        l=0
         resp=rList[0]
         if(resp.index==1):
-            u=u.toPremium('silver')
+            l=u.toPremium('silver')
         if(resp.index==2):
-            u=u.toPremium('gold')
+            l=u.toPremium('gold')
         if(resp.index==3):
-            u=u.toPremium('platinum')
+            l=u.toPremium('platinum')
+        u=l
+        print(u)
         return HttpResponseRedirect(reverse("mainPage"))
 
 
 def upgradeAccount(request):
     global u
+    timeline = Timeline.objects.get(timeline_of=u)
+    postList=[str(post) for post in timeline.posts.all()]
+    l=Private_Message.objects.filter(to_user=u)
+    messageList=[str(e) for e in l]
+    h=""
     if(isinstance(u,CommercialUser)):
-        attr={'name':u.username,'msg':"You cannot upgrade!"}
+        h="Commercial"
+    elif(isinstance(u,PremiumUser)):
+        h="Premium ("+str(u.plan)+")"
+    elif(isinstance(u,CasualUser)):
+        h="Casual"  
+    attr={'name':u.username,'postList':postList,'messageList':messageList,'balance':u.wallet_money,'aType':h,
+        'maxt':u.max_transactions,'transactions':u.transactions,'DOB':u.date_of_birth,'email':u.email_id,'msg':"You cannot upgrade!",}
+    if(isinstance(u,CommercialUser)):
         return render(request,"mainapp/mainPage.html",attr)
     if(isinstance(u,PremiumUser)):
-        attr={'name':u.username,'msg':"You cannot upgrade!"}
         return render(request,"mainapp/mainPage.html",attr)
     if(isinstance(u,CasualUser)):
         buttonlist=["Upgrade","Go_Back"]
