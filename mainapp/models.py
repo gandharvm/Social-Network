@@ -564,6 +564,8 @@ class Page(models.Model):
     admin = models.OneToOneField(
         CommercialUser, on_delete=models.CASCADE, related_name='page')
     Content = models.CharField(max_length=500)
+    def __str__(self):
+        return "Page by "+str(self.admin)
 
 
 class GroupMessage(models.Model):

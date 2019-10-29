@@ -29,5 +29,10 @@ urlpatterns = [
     path("viewFriendProfile/",views.viewFriendProfile,name="viewFriendProfile"),
     path("sendFriendRequest/",views.sendFriendRequest,name="sendFriendRequest"),
     path("friendRequests/",views.friendRequests,name="friendRequests"),
-    
+    path("createPage/",views.createPage,name="createPage"),
+    path("getPageResponse/",views.getPageResponse,name="getPageResponse"),
+    path("viewPages/",views.viewPages,name="viewPages"),
+    path("getVPResponse/",views.getVPResponse,name="getVPResponse"),    
+    path('createGroup',views.createGroup,name="createGroup"),
+    path("getcreateGroupResponse",views.getcreateGroupResponse,name="getcreateGroupResponse"),
 ]
