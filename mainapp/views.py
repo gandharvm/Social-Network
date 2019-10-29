@@ -5,9 +5,9 @@ from mainapp.models import *
 from mainapp.utils import *
 
 modelList=[]
-# u=CommercialUser.objects.get(username="Harsimar")
+u=CommercialUser.objects.get(username="Harsimar")
 
-u=CasualUser()
+# u=CasualUser()
 
 
 # view models list
@@ -65,9 +65,15 @@ def friendRequests(request):
     attr={'list':l,'title':'Select requests to accept/decline','buttonlist':buttonlist,'responseType':'multi','returnFunction':"getFRADResponse"}
     return display_Menu(attr,request)
 
+def moneyRequests(request):
+    l=u.money_requests.all()
+    buttonlist=["Accept","Decline","Go_Back"]
+    attr={'list':l,'title':'Select requests to accept/decline','buttonlist':buttonlist,'responseType':'multi','returnFunction':"getMRADResponse"}
+    return display_Menu(attr,request)
+
 def viewFriends(request):
     l=u.friends.all()
-    buttonlist=["View Profile","Unfriend","Send_Money_Request","Post_on_timeline","Go_Back"]
+    buttonlist=["View_Profile/Timeline","Unfriend","Send_Money_Request","Post_on_timeline","Go_Back"]
     attr={'list':l,'title':'Here are your friends','buttonlist':buttonlist,'responseType':'single','returnFunction':"getFLResponse"}    
     return display_Menu(attr,request)
     
@@ -168,6 +174,21 @@ def getMoneyRequestResponse2(request):
     l=intHolder.objects.get(pk=1)
     u.send_money(float(amount),l.num)
     return displayMainMenu(request)
+
+def getMRADResponse(request):
+    responseList=getResponseList(request)
+    button=request.POST['submit']
+    if(button == "Accept"):
+        for mrequest in responseList:
+            u.accept_money(mrequest.pk)
+        return displayMainMenu(request)
+    elif(button=="Decline"):
+        for mrequest in responseList:
+            u.reject_money(mrequest.pk)
+        return displayMainMenu(request)
+    elif(button=="Go_Back"):
+        return displayMainMenu(request)
+
 
 def getFRADResponse(request):
     responseList=getResponseList(request)
@@ -275,6 +296,8 @@ def getMenuResponse(request):
         return friendRequests(request)
     if(response.index==-2):
         return viewFriends(request)
+    if(response.index==-3):
+        return moneyRequests(request)
     if(response.index==1):
         return sendFriendRequest(request)
 
