@@ -43,4 +43,4 @@ menuListPremium.append(menuItem("Send private message",17))
 menuListPremium.append(menuItem("Create a group",18))
 
 menuListCommercial+=(menuListPremium)
-menuListPremium.append(menuItem("Create commercial page",19))
+menuListCommercial.append(menuItem("Create commercial page",19))

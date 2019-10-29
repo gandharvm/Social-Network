@@ -5,7 +5,7 @@ from mainapp.models import *
 from mainapp.utils import *
 
 modelList=[]
-u=CommercialUser.objects.get(username="Harsimar")
+u=CasualUser.objects.get(username="Harsimar")
 
 # u=CasualUser()
 
@@ -34,6 +34,38 @@ def display_Menu(attr,request) :
     }
     return render(request,"mainapp/models_List.html",context=context)
 
+def mainPage(request):
+    attr={'name':u.username}
+    return render(request,"mainapp/mainPage.html",attr)
+
+def getUpgradeResponse(request):
+    button=request.POST['submit']
+    if(button=="Go_Back"):
+        return HttpResponseRedirect(reverse("mainPage"))
+    elif(button=="Upgrade"):
+        rList=getResponseList(request)
+        resp=rList[0]
+        if(resp.index==1):
+            u=u.toPremium('silver')
+        if(resp.index==2):
+            u=u.toPremium('gold')
+        if(resp.index==3):
+            u=u.toPremium('platinum')
+        return HttpResponseRedirect(reverse("mainPage"))
+
+
+def upgradeAccount(request):
+    global u
+    if(isinstance(u,CommercialUser)):
+        pass #TODO alert
+    if(isinstance(u,PremiumUser)):
+        pass #TODO alert
+    if(isinstance(u,CasualUser)):
+        buttonlist=["Upgrade","Go_Back"]
+        l=[menuItem("Silver (INR 50 PM)",1),menuItem("Gold (INR 100 PM)",2),menuItem("Platinum (INR 100 PM)",3)]
+        attr={'list':l,'title':'Select your plan','buttonlist':buttonlist,'returnFunction':'getUpgradeResponse','responseType':'single'}
+        return display_Menu(attr,request)
+
 # display Main Menu
 def displayMainMenu(request):
     # check if user is authenticated 
@@ -45,6 +77,7 @@ def displayMainMenu(request):
     if(isinstance(u,PremiumUser)):
         l=menuListPremium
     if(isinstance(u,CommercialUser)):
+        print('ok')
         l=menuListCommercial
     buttonlist = ['GO']
     attr={'list':l,'title':'Welcome '+u.username,'responseType':'single','returnFunction':"getMenuResponse", 'buttonlist':buttonlist }
