@@ -5,9 +5,9 @@ from mainapp.models import *
 from mainapp.utils import *
 
 modelList=[]
-u=CommercialUser.objects.get(username="Harsimar")
+# u=CommercialUser.objects.get(username="Harsimar")
 
-# u=CasualUser()
+u=CasualUser()
 
 
 # view models list
@@ -92,34 +92,6 @@ def sendFriendRequest(request):
     buttonlist=['Send_request',"Go_back"]
     attr={'list':l2,'title':'Select persons to send friend request','buttonlist':buttonlist,'responseType':'multi','returnFunction':"getFriendRequestResponse" }
     return display_Menu(attr,request)
-
-# TODO Not in use
-# def sendMoneyRequest(request):
-#     global u
-#     l=u.friends.all()
-#     attr={'list':l,'title':'Select a person to send money request','submitText':'Send request','responseType':'single','returnFunction':"getMoneyRequestResponse1" }
-#     return display_Menu(attr,request)
-
-# TODO Not in use
-# def acceptFriendRequest(request):
-#     global u
-#     l=u.friend_requests.all()
-#     attr={'list':l,'title':'Select a friend request to accept','submitText':'accept request','responseType':'single','returnFunction':"getFRAResponse" }
-#     return display_Menu(attr,request)
-
-# TODO Not in use
-# def declineFriendRequest(request):
-#     global u
-#     l=u.friend_requests.all()
-#     attr={'list':l,'title':'Select a friend request to decline','submitText':'decline request','responseType':'single','returnFunction':"getFRDResponse" }
-#     return display_Menu(attr,request)
-
-# TODO Not in use
-# def unfriend(request):
-#     global u
-#     l=u.friends.all()
-#     attr={'list':l,'title':'Select a friend to unfriend','submitText':'unfriend','responseType':'single','returnFunction':"getUnfriendResponse" }
-#     return display_Menu(attr,request)
 
 def acceptMoneyRequest(request):
     global u
@@ -226,25 +198,6 @@ def getFLResponse(request):
     elif(button=="Go_Back"):
         return HttpResponseRedirect(reverse("displayMainMenu"))
     
-
-
-# TODO Not in use
-# def getFRAResponse(request):
-#     responseList=getResponseList(request)
-#     u.accept_friend_request(responseList[0].pk)
-#     return displayMainMenu(request)
-
-# TODO Not in use
-# def getFRDResponse(request):
-#     responseList=getResponseList(request)
-#     u.reject_friend_request(responseList[0].pk)
-#     return displayMainMenu(request)
-
-# TODO Not in use
-# def getUnfriendResponse(request):
-#     responseList=getResponseList(request)
-#     u.unfriend(responseList[0].pk)
-#     return displayMainMenu(request)
 
 def getAccept_MoneyRequestResponse(request):
     responseList=getResponseList(request)
