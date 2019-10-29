@@ -14,7 +14,7 @@ class MoneyRequest(models.Model):
 class CasualUser(models.Model):
     category = models.CharField(max_length=20)
     money_requests = models.ManyToManyField(MoneyRequest)
-    username = models.CharField(max_length=30, unique=True)
+    username = models.CharField(max_length=30)
     max_transactions = 15
 
     # private info
@@ -185,9 +185,55 @@ class CasualUser(models.Model):
         values = dict([(x, getattr(self, x)) for x in fields])
         new_instance = PremiumUser(**values)
         # new_instance.User_ptr = self.User_ptr #re-assign related parent
-        self.delete()
         new_instance.plan = plan
+        self.username="!!!" 
+        self.save()
         new_instance.save()
+        fk=MoneyRequest.objects.filter(from_user=self.pk)
+        if(fk.exists()):
+            for request in fk:
+                request.from_user=new_instance.pk
+                request.save()
+        
+        fk=Private_Message.objects.filter(from_user=self)
+        if(fk.exists()):
+            for request in fk:
+                request.from_user=new_instance
+                request.save()
+        
+        fk=Private_Message.objects.filter(to_user=self)
+        if(fk.exists()):
+            for request in fk:
+                request.to_user=new_instance
+                request.save()
+        
+        fk=Post.objects.filter(posted_by=self)
+        if(fk.exists()):
+            for request in fk:
+                request.posted_by=new_instance
+                request.save()
+        
+        fk=Timeline.objects.filter(timeline_of=self)
+        if(fk.exists()):
+            for request in fk:
+                request.timeline_of=new_instance
+                request.save()
+        
+        fk=GroupMessage.objects.filter(from_user=self)
+        if(fk.exists()):
+            for request in fk:
+                request.from_user=new_instance
+                request.save()
+        
+        fk=Group.objects.all()
+        for group in fk:
+            fk2=group.members.filter(pk=self.pk)
+            if(fk2.exists()):
+                for mem in fk2:
+                    mem=new_instance
+            group.save()
+
+        self.delete()
         return(new_instance)
 
     def send_message_on_group(self, GroupId, content):
