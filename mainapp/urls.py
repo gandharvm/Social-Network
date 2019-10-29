@@ -22,5 +22,12 @@ urlpatterns = [
     path("privacySettings/",views.privacySettings,name="privacySettings"),
     path("mainPage/",views.mainPage,name="mainPage"),
     path("upgradeAccount/",views.upgradeAccount,name="upgradeAccount"),
+    path("send_private_message/",views.send_private_message,name="send_private_message"),
     path("getUpgradeResponse/",views.getUpgradeResponse,name="getUpgradeResponse"),    
+    path("depositMoney/",views.depositMoney,name="depositMoney"),
+    path("viewFriends/",views.viewFriends,name="viewFriends"),
+    path("viewFriendProfile/",views.viewFriendProfile,name="viewFriendProfile"),
+    path("sendFriendRequest/",views.sendFriendRequest,name="sendFriendRequest"),
+    path("friendRequests/",views.friendRequests,name="friendRequests"),
+    
 ]
