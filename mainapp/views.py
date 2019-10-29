@@ -5,7 +5,7 @@ from mainapp.models import *
 from mainapp.utils import *
 
 modelList=[]
-u=CasualUser.objects.get(username="Harsimar")
+u=CommercialUser.objects.get(username="Harsimar")
 
 # u=CasualUser()
 
@@ -35,7 +35,12 @@ def display_Menu(attr,request) :
     return render(request,"mainapp/models_List.html",context=context)
 
 def mainPage(request):
-    attr={'name':u.username}
+    timeline = Timeline.objects.get(timeline_of=u)
+    postList=[str(post) for post in timeline.posts.all()]
+    l=Private_Message.objects.filter(to_user=u)
+    messageList=[str(e) for e in l]
+    attr={'name':u.username,'postList':postList,'messageList':messageList,'balance':u.wallet_money,
+        'maxt':u.max_transactions,'transactions':u.transactions,'DOB':u.date_of_birth,'email':u.email_id}
     return render(request,"mainapp/mainPage.html",attr)
 
 def getUpgradeResponse(request):
@@ -106,7 +111,7 @@ def moneyRequests(request):
 
 def viewFriends(request):
     l=u.friends.all()
-    buttonlist=["View_Profile/Timeline","Unfriend","Send_Money_Request","Post_on_timeline","Go_Back"]
+    buttonlist=["View_Profile/Timeline","Unfriend","Send_Money_Request","Go_Back"]
     attr={'list':l,'title':'Here are your friends','buttonlist':buttonlist,'responseType':'single','returnFunction':"getFLResponse"}    
     return display_Menu(attr,request)
     
@@ -158,6 +163,7 @@ def post_OnOthersTimeline(request):
 
 def send_private_message(request):
     global u
+    l=[]
     if(isinstance(u,CommercialUser)):
         l=CasualUser.objects.all()
     elif(isinstance(u,PremiumUser)):
@@ -191,9 +197,9 @@ def getFriendRequestResponse(request):
     if(button=='Send_request'):
         for fr in responseList:
             u.send_friend_request(fr.pk)
-        return displayMainMenu(request)
+        return HttpResponseRedirect(reverse('mainPage'))
     elif(button=="Go_back"):
-        return displayMainMenu(request)
+        return HttpResponseRedirect(reverse('mainPage'))
 
 
 def getMoneyRequestResponse1(request,responseList):
@@ -229,28 +235,44 @@ def getFRADResponse(request):
     if(button == "Accept"):
         for frequest in responseList:
             u.accept_friend_request(frequest.pk)
-        return displayMainMenu(request)
+        return HttpResponseRedirect(reverse('mainPage'))
     elif(button=="Decline"):
         for frequest in responseList:
             u.reject_friend_request(frequest.pk)
-        return displayMainMenu(request)
+        return HttpResponseRedirect(reverse('mainPage'))
     elif(button=="Go_Back"):
-        return displayMainMenu(request)
+        return HttpResponseRedirect(reverse('mainPage'))
+
+def viewFriendProfile(friend,request):
+    infoList=[]
+    k=intHolder.objects.get(pk=1)
+    k.num=friend.pk
+    k.save()
+    timeline = Timeline.objects.get(timeline_of=friend)
+    postList=[str(post) for post in timeline.posts.all()]
+    enablePost = friend.others_can_post
+    if(friend.others_can_see_dob==True):
+        infoList.append("DOB:- "+str(friend.date_of_birth))
+    if(friend.others_can_see_email==True):
+        infoList.append("E-mail:- "+str(friend.email_id))
+    attr={'name':friend.username,'enablePost':enablePost,'infoList':infoList,'postList':postList}
+    return(render(request,"mainapp/userProfile.html",attr))
+        
 
 def getFLResponse(request):
     responseList=getResponseList(request)
     button= request.POST['submit']
-    if(button=="View Profile"):
-        pass
+    if(button=="View_Profile/Timeline"):
+        return viewFriendProfile(responseList[0],request)
     elif(button=="Unfriend"):
         u.unfriend(responseList[0].pk)
-        return HttpResponseRedirect(reverse("displayMainMenu"))
+        return HttpResponseRedirect(reverse("mainPage"))
     elif(button=="Send_Money_Request"):
         return getMoneyRequestResponse1(request,responseList)
     elif(button=="Post_on_timeline"):
         pass
     elif(button=="Go_Back"):
-        return HttpResponseRedirect(reverse("displayMainMenu"))
+        return HttpResponseRedirect(reverse("mainPage"))
     
 
 def getAccept_MoneyRequestResponse(request):
@@ -264,10 +286,10 @@ def getDecline_MoneyRequestResponse(request):
     return HttpResponseRedirect(reverse('displayMainMenu'))
 
 def getPostOnOwnTimelineResponse(request):
-    text = request.POST['text']
+    text = request.POST['potText']
     text = text[:500]
     u.post_on_own_timeline(text)
-    return HttpResponseRedirect(reverse('displayMainMenu'))
+    return HttpResponseRedirect(reverse('mainPage'))
 
 def getPostOnOtherTimelineResponse1(request):
     responseList=getResponseList(request)
@@ -278,11 +300,11 @@ def getPostOnOtherTimelineResponse1(request):
     return display_textbox(attr,request)
 
 def getPostOnOtherTimelineResponse2(request):
-    text = request.POST['text']
+    text = request.POST['potText']
     text = text[:500]
     l=intHolder.objects.get(pk=1)
     u.post_on_other_timeline(l.num,text)
-    return HttpResponseRedirect(reverse('displayMainMenu'))    
+    return viewFriendProfile(CasualUser.objects.get(pk=l.num),request)    
 
 def getSendPrivateMessageRequest1(request):
     buttonlist=["Select","Go_Back"]
@@ -295,7 +317,7 @@ def getSendPrivateMessageRequest1(request):
         attr={'title':"Enter Messsage",'submitText':"Send",'returnFunction':'getSendPrivateMessageRequest2'}
         return display_textbox(attr,request)
     else:
-        return HttpResponseRedirect(reverse('displayMainMenu'))    
+        return HttpResponseRedirect(reverse('mainPage'))    
 
 
 def getSendPrivateMessageRequest2(request):
@@ -303,7 +325,7 @@ def getSendPrivateMessageRequest2(request):
     text = text[:500]
     l=intHolder.objects.get(pk=1)
     u.send_message(l.num,text)
-    return HttpResponseRedirect(reverse('displayMainMenu'))   
+    return HttpResponseRedirect(reverse('mainPage'))   
 
 def getMenuResponse(request):
     # check if user is authenticated 
@@ -392,7 +414,7 @@ def enterMoneytoSend(request):
 def getDepositResponse(request):
     amount=request.POST['text']
     u.deposit_money(float(amount))
-    return displayMainMenu(request)
+    return HttpResponseRedirect(reverse('mainPage'))
 
 def viewContentlist(attr,request):
     # check if user is authenticated 
@@ -420,7 +442,7 @@ def getPrivacyResponse(request):
     button=request.POST['submit']
     responseList=getResponseList(request)
     if(button=="Go_Back"):
-        return HttpResponseRedirect(reverse("displayMainMenu"))
+        return HttpResponseRedirect(reverse("mainPage"))
     elif(button=="Confirm_Settings"):
         u.others_can_post=False
         u.others_can_see_friends=False
@@ -438,7 +460,7 @@ def getPrivacyResponse(request):
                 u.others_can_see_dob=True
         print(u.others_can_post)
         u.save()
-        return HttpResponseRedirect(reverse("displayMainMenu"))
+        return HttpResponseRedirect(reverse("mainPage"))
 
 
 

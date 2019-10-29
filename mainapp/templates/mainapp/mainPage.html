@@ -1,16 +1,84 @@
 <table width="100%">
     <tr width="100%">
-        <td width="70%">
+        <td width="30%">
             <h1>{{name}}</h1>
         </td>
-        <td width="15%">
+        <td>
+                <a href="{% url "friendRequests" %}">View Friend Request</a>
+        </td>
+        <td >
+                <a href="{% url "sendFriendRequest" %}">Send Friend Request</a>
+        </td>
+        <td >
             <a href="{% url "privacySettings" %}">Privacy Settings</a>
         </td>
-        <td width="15%">
+        <td >
             <a href="{% url "upgradeAccount" %}">Upgrade Account</a>
         </td>
-        <td width="15%">
-                <a href="{% url "logout" %}">Logout</a>
+        <td >
+            <a href="{% url "send_private_message" %}">Send Private Message</a>
+        </td>
+        <td >
+                <a href="{% url "viewFriends" %}">View Friends</a>
+        </td>
+        <td >
+            <a href="{% url "logout" %}">Logout</a>
+        </td>
+
+    </tr>
+    <tr width="100%">
+        <td colspna="3">
+            <h2>Timeline</h2>
+            <div style="height: 200px; width: 200px; overflow: auto;">
+                {% for content in postList %}
+                <p>{{content}}</p>
+                {% endfor %}
+            </div>
+            <form action="{% url "getPostOnOwnTimelineResponse" %}" method="POST">
+                {% csrf_token %}
+                <input type="text" name="potText" required>
+                <input type="submit" value="Post">
+            </form>
+        </td>
+        <td  colspan="5">
+            <table>
+                <tr>
+                    <td>
+                        <p>Wallet Balance:- {{balance}}</p>
+                    </td>
+                    <td>
+                        <a href="{% url "depositMoney" %}">Top Up</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <p>Transactions:- {{transactions}}</p>
+                    </td>
+                    <td>
+                        <p>(Max {{maxt}})</p>
+                    </td>
+                </tr>
+                <tr>
+                        <td>
+                            <p>DOB:- {{DOB}}</p>
+                        </td>
+                </tr>
+                <tr>
+                        <td>
+                            <p>E-Mail:- {{email}}</p>
+                        </td>
+                </tr>
+            </table>
         </td>
     </tr>
-</table>     
+    <tr width="100%">
+        <td colspan="3">
+            <h2>Messages</h2>
+            <div style="height: 200px; width: 200px; overflow: auto;">
+                {% for content in messageList %}
+                <p>{{content}}</p>
+                {% endfor %}
+            </div>
+        </td>
+    </tr>
+</table>

@@ -315,15 +315,18 @@ class Private_Message(models.Model):
     content = models.CharField(max_length=500)
     time = models.DateTimeField(auto_now_add=True)
 
+    # def __str__(self):
+    #     return (
+    #         "From "
+    #         + str(self.from_user)
+    #         + " To "
+    #         + str(self.to_user)
+    #         + "\n"
+    #         + self.content
+    #     )
+    
     def __str__(self):
-        return (
-            "From "
-            + str(self.from_user)
-            + " To "
-            + str(self.to_user)
-            + "\n"
-            + self.content
-        )
+        return("At "+str(self.time)+" "+str(self.from_user)+" "+" wrote \n"+str(self.content))
 
     def __eq__(self, other):
         return str(self) == str(other)
@@ -336,7 +339,7 @@ class Post(models.Model):
     time = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return (self.content)
+        return ("At "+str(self.time)+" "+str(self.posted_by)+" wrote "+ self.content)
 
 
 class Timeline(models.Model):
