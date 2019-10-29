@@ -43,54 +43,66 @@ class CasualUser(models.Model):
     def send_friend_request(self, UserId):
         to_user = CasualUser.objects.filter(pk=UserId)
         if not to_user.exists():
-            return
+            return 'User does not exist'
         to_user = to_user[0]
         from_user = self
         if(from_user in to_user.friend_requests.all()):
-            return
+            return 'Friend request already sent'
+        if(from_user in to_user.friend_set.all()):
+            return 'User is already a friend'
         to_user.friend_requests.add(from_user)
         # logger.info('user '+str(self) +
         #             ' sent friend request to '+str(to_user))
         self.save()
         to_user.save()
+        return 'Friend request sent'
 
     def unfriend(self, UserId):
         fr = self.friends.filter(pk=UserId)
         if not fr.exists():
-            return
+            return 'User is not a friend'
         fr = fr[0]
         self.friends.remove(fr)
         fr.friends.remove(self)
         self.save()
         fr.save()
+        return 'User unfriended'
 
     def accept_friend_request(self, UserId):
         fr = self.friend_requests.filter(pk=UserId)
         if not fr.exists():
-            return
+            return 'No such friend request'
         self.friends.add(UserId)
         self.friend_requests.remove(UserId)
         self.save()
+        return 'friend request accepted'
 
     def reject_friend_request(self, UserId):
         fr = self.friend_requests.filter(pk=UserId)
         if not fr.exists():
-            return
+            return 'Friend request does not exist'
         self.friend_requests.remove(UserId)
         self.save()
+        return 'Friend request rejected'
 
     def deposit_money(self, amount):
-        self.wallet_money += amount
-        logger.info(str(self)+' deposited '+str(amount)+' to their wallet')
-        self.save()
+        if(amount > 0 and amount <= 10000000):
+            self.wallet_money += amount
+            logger.info(str(self)+' deposited '+str(amount)+' to their wallet')
+            self.save()
+            return "Amount added to wallet"
+        else:
+            return 'Amount invalid'
 
     def send_money(self, amount, UserId):
         if(self.transactions < self.max_transactions):
             to_user = self.friends.filter(pk=UserId)
             if not to_user.exists():
-                return
+                return 'User does not exist'
             to_user = to_user[0]
             from_user = self.pk
+            if(amount <= 0 or amount > 1000000):
+                return 'Amount invalid'
             r = MoneyRequest(amount=amount, from_user=from_user)
             r.save()
             to_user.money_requests.add(r)
@@ -98,34 +110,38 @@ class CasualUser(models.Model):
                         str(to_user)+' for '+str(amount)+' amount')
             self.save()
             to_user.save()
+            return 'Money Request sent'
 
     def accept_money(self, tid):
         r = self.money_requests.filter(pk=tid)
         if not r.exists():
-            return
+            return 'Money request does not exist'
         r = r[0]
         u = CasualUser.objects.filter(pk=r.from_user)
         if not u.exists():
             self.money_requests.remove(tid)
             r.delete()
             self.save()
+            return 'User does not exist'
+        u = u[0]
+        if u.transactions < u.max_transactions:
+            u.transactions += 1
+            u.wallet_money -= r.amount
+            self.wallet_money += r.amount
+            u.save()
+            self.money_requests.remove(tid)
+            r.delete()
+            logger.info(str(self)+' accepted money request from ' +
+                        str(u)+' for '+str(r.amount)+' amount')
+            self.save()
+            return 'Money request exceeded'
         else:
-            u = u[0]
-            if u.transactions < u.max_transactions:
-                u.transactions += 1
-                u.wallet_money -= r.amount
-                self.wallet_money += r.amount
-                u.save()
-                self.money_requests.remove(tid)
-                r.delete()
-                logger.info(str(self)+' accepted money request from ' +
-                            str(u)+' for '+str(r.amount)+' amount')
-                self.save()
+            return 'Sender has exceeded his max limit of transactions'
 
     def reject_money(self, tid):
         r = MoneyRequest.objects.filter(pk=tid)
         if not r.exists():
-            return
+            return 'Money request does not exist'
         r = r[0]
         self.money_requests.remove(tid)
         r.delete()
@@ -134,6 +150,7 @@ class CasualUser(models.Model):
             logger.info(str(self)+' rejected money request from ' +
                         str(u)+' for '+str(r.amount)+' amount')
         self.save()
+        return 'Money request deleted'
 
     def post_on_own_timeline(self, content):
         post = Post(posted_by=self, content=content)
@@ -141,12 +158,12 @@ class CasualUser(models.Model):
         timeline = Timeline.objects.get(timeline_of=self)
         timeline.posts.add(post)
         timeline.save()
-        return post
+        return 'Successfully posted on timeline'
 
     def post_on_other_timeline(self, UserId, content):
         user = self.friends.filter(pk=UserId)
         if not user.exists():
-            return
+            return 'User does not exist'
         user = user[0]
         post = Post(posted_by=self, content=content)
         if(user.others_can_post):
@@ -165,11 +182,14 @@ class CasualUser(models.Model):
     def send_join_request(self, GroupId):
         group = Group.objects.filter(pk=GroupId)
         if not group.exists():
-            return
+            return 'group does not exist'
         group = group[0]
         if(group.can_send_join_requests):
             group.join_requests.add(self)
             group.save()
+            return 'sent join request'
+        else:
+            return 'cannot send join request to this group'
 
     def paymentCycleInMonths(self):
         return 1
@@ -193,14 +213,15 @@ class CasualUser(models.Model):
     def send_message_on_group(self, GroupId, content):
         group = Group.objects.filter(pk=GroupId)
         if not group.exists():
-            return
+            return 'Group does not exist'
         group = group[0]
         if self not in group.members.all():
-            return
+            return 'You are not a member of the group'
         message = GroupMessage(from_user=self, content=content)
         message.save()
         group.messages.add(message)
         group.save()
+        return 'Message sent'
 
 
 class Friendship(models.Model):
@@ -226,6 +247,7 @@ class PremiumUser(CasualUser):
     plan = models.CharField(max_length=10, default="silver")
     max_transactions = 30
     next_payment_premium = models.DateField(auto_now_add=True)
+    group_count = models.IntegerField(default=0)
 
     @classmethod
     def create(cls, username, dob, email_id, plan):
@@ -252,16 +274,155 @@ class PremiumUser(CasualUser):
     def maxGroups(self):
         return(plansMaxGroups[plansMap[self.plan.lower()]])
 
-    def create_group(self, group_name, max_num, can_send):
+    def create_group(self, group_name, can_send, price):
         if(self.check_pay()):
-            if(self in GroupAdmin.objects.all()):
-                admin = GroupAdmin.objects.get(user=self)
-            else:
-                admin = GroupAdmin(user=self)
-                admin.save()
-            admin.create_group(group_name, max_num, can_send)
+            if self.group_count <= self.plansMaxGroups[self.plansMap[self.plan]]:
+                group = Group(admin=self, name=group_name,
+                              can_send_join_requests=can_send, price=price)
+                self.group_count += 1
+                self.save()
+                group.save()
+                return 'Group created'
+            return 'Cannot create more groups'
         else:
-            self.pay()
+            if(self.pay()):
+                x = self.create_group(self, group_name, can_send, price)
+                return 'The Amount due for continued service deducted from your wallet\n' + x
+            else:
+                return 'Please add money to your wallet as your payment is due.\nYou will not be able to use premium facilities without it'
+
+    def change_price(self, GroupId, new_price):
+        if(self.check_pay()):
+            group = Group.objects.filter(pk=GroupId)
+            if not group.exists():
+                return
+            group = group[0]
+            if(group.admin == self):
+                group.price = new_price
+        else:
+            if(self.pay()):
+                x = self.change_price(self, GroupId, new_price)
+                return 'The Amount due for continued service deducted from your wallet\n' + x
+            else:
+                return 'Please add money to your wallet as your payment is due.\nYou will not be able to use premium facilities without it'
+
+    def change_name(self, GroupId, new_name):
+        if(self.check_pay()):
+            group = Group.objects.filter(pk=GroupId)
+            if not group.exists():
+                return
+            group = group[0]
+            if(group.admin == self):
+                group.name = new_name
+        else:
+            if(self.pay()):
+                x = self.change_name(self, GroupId, new_name)
+                return 'The Amount due for continued service deducted from your wallet\n' + x
+            else:
+                return 'Please add money to your wallet as your payment is due.\nYou will not be able to use premium facilities without it'
+
+    def change_join_settings(self, GroupId, setting):
+        if(self.check_pay()):
+            group = Group.objects.filter(pk=GroupId)
+            if not group.exists():
+                return
+            group = group[0]
+            if(group.admin == self):
+                group.can_send_join_requests = setting
+        else:
+            if(self.pay()):
+                x = self.change_join_settings(self, GroupId, setting)
+                return 'The Amount due for continued service deducted from your wallet\n' + x
+            else:
+                return 'Please add money to your wallet as your payment is due.\nYou will not be able to use premium facilities without it'
+
+    def reject_join_request(self, GroupId, joinId):
+        if(self.check_pay()):
+            group = Group.objects.filter(pk=GroupId)
+            if not group.exists():
+                return
+            group = group[0]
+            user = group.join_requests.filter(pk=joinId)
+            if group.admin == self:
+                if not user.exists():
+                    return
+
+                user = user[0]
+                group.join_requests.remove(user)
+                group.save()
+        else:
+            if(self.pay()):
+                x = self.reject_join_request(self, GroupId, joinId)
+                return 'The Amount due for continued service deducted from your wallet\n' + x
+            else:
+                return 'Please add money to your wallet as your payment is due.\nYou will not be able to use premium facilities without it'
+
+    def accept_join_request(self, GroupId, joinId):
+        if(self.check_pay()):
+            group = Group.objects.filter(pk=GroupId)
+            if not group.exists():
+                return 'Group does not exist'
+            group = group[0]
+            user = group.join_requests.filter(pk=joinId)
+            if group.admin == self:
+                if (not user.exists()):
+                    return 'Join request does not exist'
+                if (user[0] not in CasualUser.objects.all()):
+                    return 'User does not exist'
+                user = user[0]
+                if(user.wallet_money < group.price):
+                    return 'User does not have enough money'
+                user.wallet_money -= group.price
+                self.wallet_money += group.price
+                group.members.add(user)
+                group.join_requests.remove(user)
+                group.save()
+                self.save()
+        else:
+            if(self.pay()):
+                x = self.accept_join_request(self, GroupId, joinId)
+                return 'The Amount due for continued service deducted from your wallet\n' + x
+            else:
+                return 'Please add money to your wallet as your payment is due.\nYou will not be able to use premium facilities without it'
+
+    def remove_member(self, UserId, GroupId):
+        if(self.check_pay()):
+            group = Group.objects.filter(pk=GroupId)
+            if not group.exists():
+                return
+            group = group[0]
+            user = group.members.filter(pk=UserId)
+            if not user.exists():
+                return
+            user = user[0]
+            if group.admin == self:
+                group.members.remove(user)
+                group.save()
+        else:
+            if(self.pay()):
+                x = self.remove_member(self, UserId, GroupId)
+                return 'The Amount due for continued service deducted from your wallet\n' + x
+            else:
+                return 'Please add money to your wallet as your payment is due.\nYou will not be able to use premium facilities without it'
+
+    def delete_group(self, GroupId):
+        if(self.check_pay()):
+            group = Group.objects.filter(pk=GroupId)
+            if not group.exists():
+                return
+            group = group[0]
+            if group.admin == self:
+                group.delete()
+                self.group_count += 1
+                self.save()
+            else:
+                return
+        else:
+            if(self.pay()):
+                x = self.delete_group(self, joinId)
+                return 'The Amount due for continued service deducted from your wallet\n' + x
+            else:
+                return 'Please add money to your wallet as your payment is due.\nYou will not be able to use premium facilities without it'
 
     def send_message(self, UserId, content):
         if(self.check_pay()):
@@ -276,20 +437,26 @@ class PremiumUser(CasualUser):
             msg.save()
             return msg
         else:
-            self.pay()
+            if(self.pay()):
+                return 'The Amount due for continued service deducted from your wallet'
+            else:
+                return 'Please add money to your wallet as your payment is due.\nYou will not be able to use premium facilities without it'
 
     def pay(self):
         if(self.wallet_money > self.amountToPay()):
             self.wallet_money -= self.amountToPay()
             self.next_payment_premium = self.next_payment_premium + \
                 timedelta(days=30)
+            self.save()
+            return True
         else:
-            print('add money to wallet premium')
+            # print('add money to wallet premium')
+            return False
 
 
 class CommercialUser(PremiumUser):
     max_transactions = inf
-    next_payment = models.DateField(auto_now=True)
+    next_payment = models.DateField(auto_now_add=True)
     amount_to_pay = 5000
 
     @classmethod
@@ -304,6 +471,7 @@ class CommercialUser(PremiumUser):
 
     def check_pay(self):
         return(datetime.date(datetime.now()) < self.next_payment)
+        # return True
 
     def amountToPay(self):
         return amountToPay
@@ -316,10 +484,13 @@ class CommercialUser(PremiumUser):
 
     def create_page(self, content):
         if(self.check_pay()):
-            page = Page(admin, content=content)
+            page = Page(admin=self, Content=content)
             page.save()
         else:
-            self.pay()
+            if(self.pay()):
+                return 'The Amount due for continued service deducted from your wallet'
+            else:
+                return 'Please add money to your wallet as your payment is due.\nYou will not be able to use commercial facilities without it'
 
     def send_message(self, UserId, content):
         if(self.check_pay()):
@@ -333,15 +504,21 @@ class CommercialUser(PremiumUser):
             msg.save()
             return msg
         else:
-            self.pay()
+            if(self.pay()):
+                return 'The Amount due for continued service deducted from your wallet'
+            else:
+                return 'Please add money to your wallet as your payment is due.\nYou will not be able to use premium facilities without it'
 
     def pay(self):
         if(self.wallet_money > self.amount_to_pay):
             self.wallet_money -= self.amount_to_pay
             self.next_payment = self.next_payment + \
                 timedelta(days=365)
+            self.save()
+            return True
         else:
-            print('add money to wallet comm')
+            # print('add money to wallet comm')
+            return False
 
 
 class Private_Message(models.Model):
@@ -384,129 +561,9 @@ class Timeline(models.Model):
 
 
 class Page(models.Model):
-    admin = models.ForeignKey(CommercialUser, on_delete=models.CASCADE)
+    admin = models.OneToOneField(
+        CommercialUser, on_delete=models.CASCADE, related_name='page')
     Content = models.CharField(max_length=500)
-
-
-class GroupAdmin(models.Model):
-    user = models.OneToOneField(
-        PremiumUser, on_delete=models.CASCADE, related_name='admin')
-    group_count = models.IntegerField(default=0)
-
-    def create_group(self, group_name, max_num, can_send, price=0):
-        if(max_num < 3):
-            max_num = 20
-        if self.group_count <= self.user.plansMaxGroups[self.user.plansMap[self.user.plan]]:
-            group = Group(admin=self, name=group_name,
-                          max_num_of_members=max_num,
-                          can_send_join_requests=can_send, price=price)
-            self.group_count += 1
-            self.save()
-            group.save()
-
-    def delete_group(self, GroupId):
-        group = Group.objects.filter(pk=GroupId)
-        if not group.exists():
-            return
-        group = group[0]
-        if group.admin == self:
-            group.delete()
-            self.group_count += 1
-            self.save()
-        else:
-            return
-
-    # def add_member(self, UserId, GroupId):
-    #     user = CasualUser.objects.filter(pk=UserId)
-    #     if not user.exists():
-    #         return
-    #     user = user[0]
-    #     group = Group.objects.filter(pk=GroupId)
-    #     if not group.exists():
-    #         return
-    #     group = group[0]
-    #     if group.admin == self:
-    #         group.members.add(user)
-    #         group.save()
-
-    def remove_member(self, UserId, GroupId):
-        group = Group.objects.filter(pk=GroupId)
-        if not group.exists():
-            return
-        group = group[0]
-        user = group.members.filter(pk=UserId)
-        if not user.exists():
-            return
-        user = user[0]
-        if group.admin == self:
-            group.members.remove(user)
-            group.save()
-
-    def accept_join_request(self, GroupId, joinId):
-        group = Group.objects.filter(pk=GroupId)
-        if not group.exists():
-            return
-        group = group[0]
-        user = group.join_requests.filter(pk=joinId)
-        if group.admin == self:
-            if (not user.exists()):
-                return
-            if (user[0] not in CasualUser.objects.all()):
-                return
-            user = user[0]
-            if(user.wallet_money < group.price):
-                return
-            user.wallet_money -= group.price
-            self.user.wallet_money += group.price
-            group.members.add(user)
-            group.join_requests.remove(user)
-            group.save()
-
-    def reject_join_request(self, GroupId, joinId):
-        group = Group.objects.filter(pk=GroupId)
-        if not group.exists():
-            return
-        group = group[0]
-        user = group.join_requests.filter(pk=joinId)
-        if group.admin == self:
-            if not user.exists():
-                return
-
-            user = user[0]
-            group.join_requests.remove(user)
-            group.save()
-
-    def inc_people(self, GroupId, num):
-        group = Group.objects.filter(pk=GroupId)
-        if not group.exists():
-            return
-        group = group[0]
-        if group.admin == self and num > group.max_num_of_members:
-            group.max_num_of_members = num
-
-    def change_join_settings(self, GroupId, setting):
-        group = Group.objects.filter(pk=GroupId)
-        if not group.exists():
-            return
-        group = group[0]
-        if(group.admin == self):
-            group.can_send_join_requests = setting
-
-    def change_name(self, GroupId, new_name):
-        group = Group.objects.filter(pk=GroupId)
-        if not group.exists():
-            return
-        group = group[0]
-        if(group.admin == self):
-            group.name = new_name
-
-    def change_price(self, GroupId, new_price):
-        group = Group.objects.filter(pk=GroupId)
-        if not group.exists():
-            return
-        group = group[0]
-        if(group.admin == self):
-            group.price = new_price
 
 
 class GroupMessage(models.Model):
@@ -518,12 +575,11 @@ class GroupMessage(models.Model):
 
 
 class Group(models.Model):
-    admin = models.ForeignKey(GroupAdmin, on_delete=models.CASCADE)
+    admin = models.ForeignKey(PremiumUser, on_delete=models.CASCADE)
     members = models.ManyToManyField(CasualUser, related_name='member_of')
     name = models.CharField(max_length=20, default='New Group')
     join_requests = models.ManyToManyField(
         CasualUser, related_name='sent_join_request_to')
-    max_num_of_members = models.IntegerField(default=20)
     can_send_join_requests = models.BooleanField(default=False)
     messages = models.ManyToManyField(
         GroupMessage, related_name='message_on')
