@@ -35,5 +35,7 @@ urlpatterns = [
     path("getVPResponse/",views.getVPResponse,name="getVPResponse"),    
     path('createGroup/',views.createGroup,name="createGroup"),
     path("getcreateGroupResponse/",views.getcreateGroupResponse,name="getcreateGroupResponse"),
-    # path("viewGroups/",views.viewGroups,name="viewGroups"),
+    path("viewGroups/",views.viewGroups,name="viewGroups"),
+    path("verify_otp_mainapp/",views.verify_otp_mainapp,name='verify_otp_mainapp'),
+
 ]

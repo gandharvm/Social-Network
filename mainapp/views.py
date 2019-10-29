@@ -4,10 +4,15 @@ from django.urls import reverse, resolve
 from mainapp.models import *
 from mainapp.utils import *
 
+from django.template.loader import render_to_string
+from django.core.mail import EmailMessage
+from login.utils import TOTPVerification
+
 modelList=[]
 # u=CasualUser.objects.get(username="Harsimar")
 u = None
 # u=CasualUser()
+otp_mail = TOTPVerification()
 
 error = ''
 
@@ -316,12 +321,40 @@ def getFLResponse(request):
         error = u.unfriend(responseList[0].pk)
         return HttpResponseRedirect(reverse("mainPage"))
     elif(button=="Send_Money_Request"):
-        return getMoneyRequestResponse1(request,responseList)
+        generated_token = otp_mail.generate_token()
+        # print(generated_token)
+
+        mail_subject = 'InstaBook: Verify OTP for Transaction'
+        message = render_to_string('login/acc_active_email.html', {
+            'username': u.username,
+            'otp': generated_token,
+        })
+
+        email = EmailMessage(
+            mail_subject, message, to=[u.email_id]
+        )
+        email.send()
+        return render(request,'mainapp/otp_page.html',context={"Msg": "Enter OTP below!","username":responseList[0].username,"userCat":responseList[0].category})
     elif(button=="Post_on_timeline"):
         pass
     elif(button=="Go_Back"):
         return HttpResponseRedirect(reverse("mainPage"))
     
+def verify_otp_mainapp(request):
+    otp = request.POST['otp']
+    username = request.POST['username']
+    userCat = request.POST['userCat']
+    if (otp_mail.verify_token(otp)==True):
+        user=None
+        if (userCat=='commercial'):
+            user=CommercialUser.objects.get(username=username)
+        elif(userCat=='premium'):
+            user=PremiumUser.objects.get(username=username)
+        elif(userCat=='casual'):
+            user=CasualUser.objects.get(username=username)
+        return getMoneyRequestResponse1(request,[user])
+    else :
+        return render(request,'mainapp/otp_page.html',context={"Msg": "Wrong OTP!","username":username,"userCat":userCat})
 
 def getAccept_MoneyRequestResponse(request):
     global error
@@ -610,22 +643,22 @@ def getcreateGroupResponse(request):
     error = u.create_group(grpname,True,price)
     return HttpResponseRedirect(reverse("mainPage"))
 
-# def viewGroups(request):
-#     grps = Group.objects.all()
-#     buttonlist = ['View_Group','Go_Back']
-#     attr={'title':"Select a group to view",'buttonlist':buttonlist,'list':grps,'responseType':'single','returnFunction':"getVGResponse"}
-#     return display_Menu(attr,request)
+def viewGroups(request):
+    grps = Group.objects.all()
+    buttonlist = ['View_Group','Go_Back']
+    attr={'title':"Select a group to view",'buttonlist':buttonlist,'list':grps,'responseType':'single','returnFunction':"getVGResponse"}
+    return display_Menu(attr,request)
 
-# def getVGResponse(request):
-#     button = request.POST['submit']
-#     if (button=='Go_Back'):
-#         return HttpResponseRedirect(reverse("mainPage"))
-#     elif(button=='View_Group'):
-#         responseList = getResponseList(request)
-#         grp = responseList[0]
-#         if (grp.admin==u):
-#             pass
-#         elif(u in grp.members.objects.all()):
-#             pass
-#         else:
-#             pass
+def getVGResponse(request):
+    button = request.POST['submit']
+    if (button=='Go_Back'):
+        return HttpResponseRedirect(reverse("mainPage"))
+    elif(button=='View_Group'):
+        responseList = getResponseList(request)
+        grp = responseList[0]
+        if (grp.admin==u):
+            pass
+        elif(u in grp.members.objects.all()):
+            pass
+        else:
+            pass

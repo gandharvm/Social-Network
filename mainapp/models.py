@@ -619,7 +619,7 @@ class Post(models.Model):
     time = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return (self.content)
+        return str(self.time)+" posted by: "+str(self.posted_by)+" | "+(self.content)
 
 
 class Timeline(models.Model):
