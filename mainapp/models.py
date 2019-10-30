@@ -364,7 +364,7 @@ class PremiumUser(CasualUser):
             if not group.exists():
                 return 'Group does not exist'
             group = group[0]
-            if(group.admin == self):
+            if(group.admin.pk == self.pk):
                 group.name = new_name
                 return 'Changed the name of the group'
             else:
@@ -382,7 +382,7 @@ class PremiumUser(CasualUser):
             if not group.exists():
                 return 'Group does not exist'
             group = group[0]
-            if(group.admin == self):
+            if(group.admin.pk == self.pk):
                 group.can_send_join_requests = setting
                 return 'Changed the setting for the group'
             else:
@@ -400,7 +400,7 @@ class PremiumUser(CasualUser):
             if not group.exists():
                 return 'Group does not exist'
             group = group[0]
-            if(group.admin == self):
+            if(group.admin.pk == self.pk):
                 group.can_join_directly = setting
                 return 'Changed the setting for the group'
             else:
@@ -418,7 +418,7 @@ class PremiumUser(CasualUser):
             if not group.exists():
                 return 'Group does not exist'
             group = group[0]
-            if(group.admin == self):
+            if(group.admin.pk == self.pk):
                 group.can_see_group_members = setting
                 return 'Changed the setting for the group'
             else:
@@ -495,7 +495,7 @@ class PremiumUser(CasualUser):
             if not user.exists():
                 return 'Member does not exist'
             user = user[0]
-            if group.admin == self:
+            if group.admin.pk == self.pk:
                 group.members.remove(user)
                 group.save()
                 return 'member removed'
@@ -514,7 +514,7 @@ class PremiumUser(CasualUser):
             if not group.exists():
                 return 'Group does not exist'
             group = group[0]
-            if group.admin == self:
+            if group.admin.pk == self.pk:
                 group.delete()
                 self.group_count += 1
                 self.save()

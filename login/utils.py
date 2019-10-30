@@ -8,7 +8,7 @@ class TOTPVerification:
     def __init__(self):
         self.key = random_hex(20)
         self.last_verified_counter = -1
-        self.token_validity_period = 60
+        self.token_validity_period = 300
         self.totp = None
 
     def totp_obj(self):
