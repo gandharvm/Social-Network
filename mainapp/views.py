@@ -761,8 +761,12 @@ def getVPResponse(request):
         return HttpResponseRedirect(reverse("mainPage"))
     elif(button=="View"):
         rList=getResponseList(request)
-        r=rList[0]
-        print(r)
+        try:
+            r=rList[0]
+        except IndexError:
+            error = 'Page not selected'
+            return HttpResponseRedirect(reverse("mainPage"))
+        # print(r)
         attr={'username':r.admin,'content':r.Content,'Error':error}
         try:
             error = ''
@@ -897,7 +901,11 @@ def getGSResponse(request):
         return(getVGResponse(request,Group.objects.get(pk=u.intHolder)))
     elif(button=="Change_Setting"):
         rList=getResponseList(request)
-        resp=rList[0]
+        try:
+            resp=rList[0]
+        except IndexError:
+            error = 'No option selected'
+            return HttpResponseRedirect(reverse("mainPage"))
         if(resp.index==1):
             attr={'title':"Enter new price",'submitText':"Change Price",'returnFunction':"getGCPResponse"}
             return display_textbox(attr,request)
