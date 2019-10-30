@@ -288,10 +288,6 @@ class Friendship(models.Model):
         unique_together = (("to_friend", "from_friend"),)
 
 
-class intHolder(models.Model):
-    num = models.IntegerField(default=0)
-
-
 class PremiumUser(CasualUser):
     plansMap = {'silver': 0, 'gold': 1, 'platinum': 1}
     planCosts = [50, 100, 150]
