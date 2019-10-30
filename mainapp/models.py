@@ -125,6 +125,8 @@ class CasualUser(models.Model):
             self.save()
             return 'User does not exist'
         u = u[0]
+        if u.wallet_money < r.amount:
+            return 'Sender does not have enough money in his wallet'
         if u.transactions < u.max_transactions:
             u.transactions += 1
             u.wallet_money -= r.amount
@@ -135,7 +137,7 @@ class CasualUser(models.Model):
             logger.info(str(self)+' accepted money request from ' +
                         str(u)+' for '+str(r.amount)+' amount')
             self.save()
-            return 'Money request exceeded'
+            return 'Money request accepted'
         else:
             return 'Sender has exceeded his max limit of transactions'
 
