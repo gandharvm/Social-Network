@@ -125,22 +125,7 @@ def upgradeAccount(request):
         attr={'list':l,'title':'Select your plan','buttonlist':buttonlist,'returnFunction':'getUpgradeResponse','responseType':'single'}
         return display_Menu(attr,request)
 
-# display Main Menu
-def displayMainMenu(request):
-    # check if user is authenticated 
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse('loginPage'))
-    l=[]
-    if(isinstance(u,CasualUser)):
-        l=menuListCasual
-    if(isinstance(u,PremiumUser)):
-        l=menuListPremium
-    if(isinstance(u,CommercialUser)):
-        print('ok')
-        l=menuListCommercial
-    buttonlist = ['GO']
-    attr={'list':l,'title':'Welcome '+u.username,'responseType':'single','returnFunction':"getMenuResponse", 'buttonlist':buttonlist }
-    return display_Menu(attr,request)
+
 
 # parsing string list for single responsetype
 def getIndexList(string):
@@ -520,69 +505,6 @@ def getSendPrivateMessageRequest2(request):
     text = text[:500]
     error = u.send_message(u.intHolder,text)
     return HttpResponseRedirect(reverse('mainPage'))   
-
-def getMenuResponse(request):
-    # check if user is authenticated 
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse('loginPage'))
-    
-    responseType = request.POST['responseType']
-    button= request.POST['submit']
-    indexList = []
-    if (responseType=='single') :        
-        indexList = getIndexList(request.POST['indexList'])    
-    elif(responseType=='multi') :
-        indexList = getIndexList_Mutli(request.POST.getlist('indexList')) 
-
-    # print(indexList,"---------------------------")
-    responseList=[]
-    for index in indexList:
-        responseList.append(modelList[int(index)])
-    
-    #TODO
-    response=responseList[0]
-    if(response.index==-1):
-        return friendRequests(request)
-    if(response.index==-2):
-        return viewFriends(request)
-    if(response.index==-3):
-        return moneyRequests(request)
-    if(response.index==1):
-        return sendFriendRequest(request)
-
-# TODO Not in use    
-    # if(response.index==2):
-    #     return acceptFriendRequest(request)
-    # if(response.index==3):
-    #     return declineFriendRequest(request)
-    # if(response.index==4):
-    #     return unfriend(request)
-
-    if(response.index==5):
-        return depositMoney(request)
-
-# TODO Not in use
-    # if(response.index==6):
-    #     return sendMoneyRequest(request)
-
-    if(response.index==7):
-        return acceptMoneyRequest(request)
-    if(response.index==8):
-        return declineMoneyRequest(request)
-    if(response.index==9):
-        return post_OnOwnTimeline(request)
-    if(response.index==10):
-        return post_OnOthersTimeline(request)
-    if(response.index==11):
-        return viewMyPosts(request)
-    if(response.index==12):
-        return viewFriendsPost(request)
-    if(response.index==14):
-        return privacySettings(request)
-    if(response.index==17):
-        return send_private_message(request)
-
-    return HttpResponse(responseList)
 
 def getPageResponse(request):
     # # check if user is authenticated 
