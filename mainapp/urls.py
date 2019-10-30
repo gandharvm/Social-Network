@@ -16,7 +16,6 @@ urlpatterns = [
     path("getPostOnOtherTimelineResponse2/",views.getPostOnOtherTimelineResponse2,name="getPostOnOtherTimelineResponse2"),
     path("getSendPrivateMessageRequest1/",views.getSendPrivateMessageRequest1,name="getSendPrivateMessageRequest1"),
     path("getSendPrivateMessageRequest2/",views.getSendPrivateMessageRequest2,name="getSendPrivateMessageRequest2"),
-    path("getViewPostOfFriendResponse",views.getViewPostOfFriendResponse,name="getViewPostOfFriendResponse"),
     path("privacySettings/",views.privacySettings,name="privacySettings"),
     path("mainPage/",views.mainPage,name="mainPage"),
     path("upgradeAccount/",views.upgradeAccount,name="upgradeAccount"),
