@@ -43,5 +43,7 @@ urlpatterns = [
     path("joinGroup/",views.joinGroup,name="joinGroup"),
     path("getVGResponse/",views.getVGResponse,name="getVGResponse"),
     path("getVJRResponse/",views.getVJRResponse,name="getVJRResponse"),
-
+    path("getGSResponse/",views.getGSResponse,name="getGSResponse"),
+    path("getGCNResponse/",views.getGCNResponse,name="getGCNResponse"),
+    path("getGCPResponse/",views.getGCPResponse,name="getGCPResponse"),
 ]

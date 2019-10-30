@@ -348,6 +348,7 @@ class PremiumUser(CasualUser):
             group = group[0]
             if(group.admin.pk == self.pk):
                 group.price = new_price
+                group.save()
                 return 'Changed price for joining group'
             else:
                 return 'You are not admin of this group'
@@ -366,6 +367,7 @@ class PremiumUser(CasualUser):
             group = group[0]
             if(group.admin.pk == self.pk):
                 group.name = new_name
+                group.save()
                 return 'Changed the name of the group'
             else:
                 return 'You are not admin of the group'
@@ -384,6 +386,7 @@ class PremiumUser(CasualUser):
             group = group[0]
             if(group.admin.pk == self.pk):
                 group.can_send_join_requests = setting
+                group.save()
                 return 'Changed the setting for the group'
             else:
                 return 'You are not admin of this group'

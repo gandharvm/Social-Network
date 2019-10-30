@@ -42,16 +42,16 @@ def display_Menu(attr,request) :
     
 
 def mainPage(request):
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse('loginPage'))
+    # if not request.user.is_authenticated:
+    #     return HttpResponseRedirect(reverse('loginPage'))
     global u
     global error
 
-    u = CasualUser.objects.get(username=request.user.username)
-    if(u.category=='commercial'):
-        u=CommercialUser.objects.get(username=u.username)
-    elif(u.category=='premium'):
-        u=PremiumUser.objects.get(username=u.username)
+    # u = CasualUser.objects.get(username=request.user.username)
+    # if(u.category=='commercial'):
+    #     u=CommercialUser.objects.get(username=u.username)
+    # elif(u.category=='premium'):
+    #     u=PremiumUser.objects.get(username=u.username)
     
     timeline = Timeline.objects.get(timeline_of=u)
     postList=[str(post) for post in timeline.posts.all()]
@@ -677,7 +677,60 @@ def getVJRResponse(request):
 
 
 def groupPS(request):
-    pass
+    s3=""
+    s1=""
+    s2=""
+    k=intHolder.objects.get(pk=1)
+    grp=Group.objects.get(pk=k.num)
+    b=grp.can_send_join_requests
+    s1="(Current:- "+str(grp.price)+" )"
+    s2="(Current:- "+grp.name+" )"
+    if(b):
+        s3="(Currently users can send join requests)"
+    else:
+        s3="(Currently users cannot send join requests)"
+
+    l=[menuItem("Change Price"+s1,1),menuItem("Change Name"+s2,2),menuItem("Toggle Join Setting "+s3,3)]
+    
+    buttonlist=["Change_Setting","Go_Back"]
+    attr={'title':"Select a setting to change",'list':l,'buttonlist':buttonlist,'responseType':'single','returnFunction':"getGSResponse"}
+    return display_Menu(attr,request)
+
+def getGSResponse(request):
+    k=intHolder.objects.get(pk=1)
+    grp=Group.objects.get(pk=k.num)
+    button=request.POST['submit']
+    if(button=="Go_Back"):
+        return(getVGResponse(request,Group.objects.get(pk=k.num)))
+    elif(button=="Change_Setting"):
+        rList=getResponseList(request)
+        resp=rList[0]
+        if(resp.index==1):
+            attr={'title':"Enter new price",'submitText':"Change Price",'returnFunction':"getGCPResponse"}
+            return display_textbox(attr,request)
+        elif(resp.index==2):
+            attr={'title':"Enter new name",'submitText':"Change Name",'returnFunction':"getGCNResponse"}
+            return display_textbox(attr,request)
+        elif(resp.index==3):
+            u.change_join_request_settings(grp.pk,not grp.can_send_join_requests)
+            return(getVGResponse(request,Group.objects.get(pk=k.num)))
+
+
+def getGCNResponse(request):
+    name=request.POST['text']
+    k=intHolder.objects.get(pk=1)
+    grp=Group.objects.get(pk=k.num)
+    print(u.change_name(grp.pk,name))
+    return(getVGResponse(request,Group.objects.get(pk=k.num)))
+
+def getGCPResponse(request):
+    price=request.POST['text']
+    k=intHolder.objects.get(pk=1)
+    grp=Group.objects.get(pk=k.num)
+    print(u.change_price(grp.pk,float(price)))
+    return(getVGResponse(request,Group.objects.get(pk=k.num)))
+
+
 
 def getPostOnGroupResponse(request):
     message=request.POST['pogText']
@@ -716,8 +769,11 @@ def getVGResponse(request,grp=1):
             return render(request,"mainapp/joinedGroup.html",attr)
         else:
             isRSent=False
+            canJoin=False
             if(u.pk in [l.pk for l in grp.join_requests.all()]):
                 isRSent=True
+            if(grp.can_send_join_requests):
+                canJoin=True
             print(isRSent)
-            attr={'groupTitle':grp.name,'groupAdmin':str(grp.admin),'groupAdmin':str(grp.admin),'sent':isRSent}
+            attr={'groupTitle':grp.name,'groupAdmin':str(grp.admin),'groupAdmin':str(grp.admin),'sent':isRSent,'canJoin':canJoin,'price':grp.price}
             return render(request,"mainapp/unjoinedGroup.html",attr)
