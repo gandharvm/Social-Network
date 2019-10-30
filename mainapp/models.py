@@ -546,7 +546,7 @@ class PremiumUser(CasualUser):
 
     def send_message(self, UserId, content):
         if(self.check_pay()):
-            to_user = self.friends.filter(pk=UserId)
+            to_user = CasualUser.objects.filter(pk=UserId)
             if not to_user.exists():
                 return 'User does not exist'
             to_user = to_user[0]
