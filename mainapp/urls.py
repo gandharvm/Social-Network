@@ -45,5 +45,5 @@ urlpatterns = [
     path("getVJRResponse/",views.getVJRResponse,name="getVJRResponse"),
     path("getGSResponse/",views.getGSResponse,name="getGSResponse"),
     path("getGCNResponse/",views.getGCNResponse,name="getGCNResponse"),
-
+    path("getGCPResponse/",views.getGCPResponse,name="getGCPResponse"),
 ]
