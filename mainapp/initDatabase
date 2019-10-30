@@ -2,12 +2,10 @@ from mainapp.models import *
 import datetime
 
 
-k=intHolder()
-k.save()
 
 
 
-u=CasualUser.create("Harsimar",datetime.datetime.now(),"k@g.com")
-u=CasualUser.create("Udayaan",datetime.datetime.now(),"k@g.com")
-u=CasualUser.create("Abhivandan",datetime.datetime.now(),"k@g.com")
-u=CasualUser.create("Gandharv",datetime.datetime.now(),"k@g.com")
+u=CasualUser.create("Harsimar2",datetime.datetime.now(),"k@g.com")
+u=CasualUser.create("Udayaan2",datetime.datetime.now(),"k@g.com")
+u=CommercialUser.create("Abhivandan2",datetime.datetime.now(),"k@g.com")
+u=CommercialUser.create("Gandharv2",datetime.datetime.now(),"k@g.com")
