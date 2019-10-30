@@ -534,6 +534,27 @@ def viewContentlist(attr,request):
 
 def privacySettings(request):
     buttonList=["Confirm_Settings","Go_Back"]
+    privacyList=[]
+    if(u.others_can_post):
+        privacyList.append(menuItem("Disallow others to post on your timeline",1))
+    else:
+        privacyList.append(menuItem("Allow others to post on your timeline",1))
+    
+    if(u.others_can_see_friends):
+        privacyList.append(menuItem("Disallow others to see your friends",2))
+    else:
+        privacyList.append(menuItem("Allow others to see your friends",2))
+    
+    if(u.others_can_see_email):
+        privacyList.append(menuItem("Disallow others to see your email",3))
+    else:
+        privacyList.append(menuItem("Allow others to see your email",3))
+    
+    if(u.others_can_see_dob):
+        privacyList.append(menuItem("Disallow others to see your DOB",4))
+    else:
+        privacyList.append(menuItem("Allow others to see your DOB",4))
+
     l=privacyList
     attr={'title':"Change your privacy settings here",'buttonlist':buttonList,'list':l,'responseType':'multi','returnFunction':"getPrivacyResponse"}
     return display_Menu(attr,request)
@@ -545,21 +566,16 @@ def getPrivacyResponse(request):
     if(button=="Go_Back"):
         return HttpResponseRedirect(reverse("mainPage"))
     elif(button=="Confirm_Settings"):
-        u.others_can_post=False
-        u.others_can_see_friends=False
-        u.others_can_see_email=False
-        u.others_can_see_dob=False
         for r in responseList:
             print(str(r))
             if(r.index==1):
-                u.others_can_post=True
+                u.others_can_post=not u.others_can_post
             elif(r.index==2):
-                u.others_can_see_friends=True
+                u.others_can_see_friends=not u.others_can_see_friends
             elif(r.index==3):
-                u.others_can_see_email=True
+                u.others_can_see_email=not u.others_can_see_email
             elif(r.index==4):
-                u.others_can_see_dob=True
-        print(u.others_can_post)
+                u.others_can_see_dob=not u.others_can_see_dob
         u.save()
         error = 'Privacy settings changed'
         return HttpResponseRedirect(reverse("mainPage"))
