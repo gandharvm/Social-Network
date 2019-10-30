@@ -21,7 +21,7 @@ class CasualUser(models.Model):
     date_of_birth = models.DateField()
     email_id = models.EmailField()
     friends = models.ManyToManyField("self")
-    friend_requests = models.ManyToManyField("self")
+    friend_requests = models.ManyToManyField("self", symmetrical=False)
     wallet_money = models.FloatField(default=0)
     transactions = models.IntegerField(default=0)
 
@@ -35,7 +35,7 @@ class CasualUser(models.Model):
     def create(cls, username, dob, email_id):
         # logger.info("user " + username + " created")
         user = cls(username=username, date_of_birth=dob, email_id=email_id)
-        user.category="casual"
+        user.category = "casual"
         user.save()
         timeline = Timeline(timeline_of=user)
         timeline.save()
@@ -206,51 +206,51 @@ class CasualUser(models.Model):
         new_instance = PremiumUser(**values)
         # new_instance.User_ptr = self.User_ptr #re-assign related parent
         new_instance.plan = plan
-        self.username="!!!" 
+        self.username = "!!!"
         self.save()
         new_instance.save()
-        fk=MoneyRequest.objects.filter(from_user=self.pk)
+        fk = MoneyRequest.objects.filter(from_user=self.pk)
         if(fk.exists()):
             for request in fk:
-                request.from_user=new_instance.pk
+                request.from_user = new_instance.pk
                 request.save()
-        
-        fk=Private_Message.objects.filter(from_user=self)
+
+        fk = Private_Message.objects.filter(from_user=self)
         if(fk.exists()):
             for request in fk:
-                request.from_user=new_instance
+                request.from_user = new_instance
                 request.save()
-        
-        fk=Private_Message.objects.filter(to_user=self)
+
+        fk = Private_Message.objects.filter(to_user=self)
         if(fk.exists()):
             for request in fk:
-                request.to_user=new_instance
+                request.to_user = new_instance
                 request.save()
-        
-        fk=Post.objects.filter(posted_by=self)
+
+        fk = Post.objects.filter(posted_by=self)
         if(fk.exists()):
             for request in fk:
-                request.posted_by=new_instance
+                request.posted_by = new_instance
                 request.save()
-        
-        fk=Timeline.objects.filter(timeline_of=self)
+
+        fk = Timeline.objects.filter(timeline_of=self)
         if(fk.exists()):
             for request in fk:
-                request.timeline_of=new_instance
+                request.timeline_of = new_instance
                 request.save()
-        
-        fk=GroupMessage.objects.filter(from_user=self)
+
+        fk = GroupMessage.objects.filter(from_user=self)
         if(fk.exists()):
             for request in fk:
-                request.from_user=new_instance
+                request.from_user = new_instance
                 request.save()
-        
-        fk=Group.objects.all()
+
+        fk = Group.objects.all()
         for group in fk:
-            fk2=group.members.filter(pk=self.pk)
+            fk2 = group.members.filter(pk=self.pk)
             if(fk2.exists()):
                 for mem in fk2:
-                    mem=new_instance
+                    mem = new_instance
             group.save()
 
         self.delete()
@@ -374,7 +374,7 @@ class PremiumUser(CasualUser):
             else:
                 return 'Please add money to your wallet as your payment is due.\nYou will not be able to use premium facilities without it'
 
-    def change_join_settings(self, GroupId, setting):
+    def change_join_request_settings(self, GroupId, setting):
         if(self.check_pay()):
             group = Group.objects.filter(pk=GroupId)
             if not group.exists():
@@ -382,6 +382,42 @@ class PremiumUser(CasualUser):
             group = group[0]
             if(group.admin == self):
                 group.can_send_join_requests = setting
+                return 'Changed the setting for the group'
+            else:
+                return 'You are not admin of this group'
+        else:
+            if(self.pay()):
+                x = self.change_join_settings(self, GroupId, setting)
+                return 'The Amount due for continued service deducted from your wallet\n' + x
+            else:
+                return 'Please add money to your wallet as your payment is due.\nYou will not be able to use premium facilities without it'
+
+    def change_direct_join_settings(self, GroupId, setting):
+        if(self.check_pay()):
+            group = Group.objects.filter(pk=GroupId)
+            if not group.exists():
+                return 'Group does not exist'
+            group = group[0]
+            if(group.admin == self):
+                group.can_join_directly = setting
+                return 'Changed the setting for the group'
+            else:
+                return 'You are not admin of this group'
+        else:
+            if(self.pay()):
+                x = self.change_join_settings(self, GroupId, setting)
+                return 'The Amount due for continued service deducted from your wallet\n' + x
+            else:
+                return 'Please add money to your wallet as your payment is due.\nYou will not be able to use premium facilities without it'
+
+    def change_can_see_group_members(self, GroupId, setting):
+        if(self.check_pay()):
+            group = Group.objects.filter(pk=GroupId)
+            if not group.exists():
+                return 'Group does not exist'
+            group = group[0]
+            if(group.admin == self):
+                group.can_see_group_members = setting
                 return 'Changed the setting for the group'
             else:
                 return 'You are not admin of this group'
@@ -651,7 +687,9 @@ class Group(models.Model):
     name = models.CharField(max_length=20, default='New Group')
     join_requests = models.ManyToManyField(
         CasualUser, related_name='sent_join_request_to')
-    can_send_join_requests = models.BooleanField(default=False)
+    can_send_join_requests = models.BooleanField(default=True)
+    can_join_directly = models.BooleanField(default=False)
+    can_see_group_members = models.BooleanField(default=True)
     messages = models.ManyToManyField(
         GroupMessage, related_name='message_on')
     price = models.IntegerField(default=0)
