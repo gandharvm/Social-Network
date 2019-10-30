@@ -9,8 +9,8 @@ from django.core.mail import EmailMessage
 from login.utils import TOTPVerification
 
 modelList=[]
-# u=CasualUser.objects.get(username="Harsimar")
-u = None
+u=CommercialUser.objects.get(username="Gandharv")
+# u = None
 # u=CasualUser()
 otp_mail = TOTPVerification()
 
@@ -42,16 +42,16 @@ def display_Menu(attr,request) :
     
 
 def mainPage(request):
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse('loginPage'))
+    # if not request.user.is_authenticated:
+    #     return HttpResponseRedirect(reverse('loginPage'))
     global u
     global error
 
-    u = CasualUser.objects.get(username=request.user.username)
-    if(u.category=='commercial'):
-        u=CommercialUser.objects.get(username=u.username)
-    elif(u.category=='premium'):
-        u=PremiumUser.objects.get(username=u.username)
+    # u = CasualUser.objects.get(username=request.user.username)
+    # if(u.category=='commercial'):
+    #     u=CommercialUser.objects.get(username=u.username)
+    # elif(u.category=='premium'):
+    #     u=PremiumUser.objects.get(username=u.username)
     
     timeline = Timeline.objects.get(timeline_of=u)
     postList=[str(post) for post in timeline.posts.all()]
@@ -622,7 +622,7 @@ def textForm_Multi(attr,request):
 
 
 def createGroup(request):
-    keys = ['Enter Group Name','Enter price for each member']
+    keys = ['Enter_Group_Name','Enter_price_for_each_member']
     buttonlist = ['create_group']
     attr= {
         'keys':keys,
@@ -634,8 +634,8 @@ def createGroup(request):
 
 def getcreateGroupResponse(request):
     global error
-    grpname = request.POST['Enter Group Name']
-    price = request.POST['Enter price for each member']
+    grpname = request.POST['Enter_Group_Name']
+    price = request.POST['Enter_price_for_each_member']
     try:
         price = float(price)
     except ValueError:
@@ -650,6 +650,21 @@ def viewGroups(request):
     attr={'title':"Select a group to view",'buttonlist':buttonlist,'list':grps,'responseType':'single','returnFunction':"getVGResponse"}
     return display_Menu(attr,request)
 
+def viewJR(request):
+    pass
+
+def groupPS(request):
+    pass
+
+def getPostOnGroupResponse(request):
+    pass
+
+def joinGroup(request):
+    h=intHolder.objects.get(pk=1)
+    grp=Group.objects.get(pk=h.num)
+    print(u.send_join_request(h.num))
+    return(HttpResponseRedirect(reverse("mainPage")))
+
 def getVGResponse(request):
     button = request.POST['submit']
     if (button=='Go_Back'):
@@ -657,9 +672,23 @@ def getVGResponse(request):
     elif(button=='View_Group'):
         responseList = getResponseList(request)
         grp = responseList[0]
+        h1=intHolder.objects.get(pk=1)
+        h1.num=grp.pk
+        h1.save()
         if (grp.admin==u):
-            pass
-        elif(u in grp.members.objects.all()):
-            pass
+            attr={'groupTitle':grp.name,'groupAdmin':str(grp.admin),
+            'messageList':[str(m) for m in grp.messages.all()],
+            'memberList':[str(mem) for mem in grp.members.all()]}
+            return render(request,"mainapp/joinedGroup.html",attr)
+        elif(u in grp.members.all()):
+            attr={'groupTitle':grp.name,'groupAdmin':str(grp.admin),
+            'messageList':[str(m) for m in grp.messages.all()],
+            'memberList':[str(mem) for mem in grp.members.all()]}
+            return render(request,"mainapp/joinedGroup.html",attr)
         else:
-            pass
+            isRSent=False
+            if(u in grp.join_requests.all()):
+                isRSent=True
+            print(isRSent)
+            attr={'groupTitle':grp.name,'groupAdmin':str(grp.admin),'groupAdmin':str(grp.admin),'sent':isRSent}
+            return render(request,"mainapp/unjoinedGroup.html",attr)

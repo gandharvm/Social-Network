@@ -683,6 +683,9 @@ class GroupMessage(models.Model):
     content = models.CharField(max_length=500)
     time = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return "At "+str(self.time)+" "+str(self.from_user)+" wrote :- "+str(self.content)
+
 
 class Group(models.Model):
     admin = models.ForeignKey(PremiumUser, on_delete=models.CASCADE)

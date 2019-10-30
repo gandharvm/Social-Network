@@ -1,0 +1,34 @@
+<table>
+    <tr>
+        <td>
+            <h1>{{groupTitle}} created by {{groupAdmin}}</h1>
+        </td>
+        <td>
+            <a href="{% url "mainPage" %}">Go Back</a>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <h2>Messages</h2>
+            <div style="height: 200px; width: 200px; overflow: auto;">
+                {% for message in messageList %}
+                <p>{{message}}</p>
+                {% endfor %}
+            </div>
+            <form action="{% url "getPostOnGroupResponse" %}" method="POST">
+                {% csrf_token %}
+                <input type="text" name="pogText" required>
+                <input type="submit" value="Post">
+            </form>
+        </td>
+
+        <td>
+            <h2>Group Members</h2>
+            <div style="height: 200px; width: 200px; overflow: auto;">
+                {% for member in memberList %}
+                <p>{{member}}</p>
+                {% endfor %}
+            </div>
+        </td>
+    </tr>
+</table>
