@@ -131,6 +131,8 @@ class CasualUser(models.Model):
             self.save()
             return 'User does not exist'
         u = u[0]
+        if u.wallet_money < r.amount:
+            return 'Sender does not have enough money in his wallet'
         if u.transactions < u.max_transactions:
             u.transactions += 1
             u.wallet_money -= r.amount
@@ -141,7 +143,7 @@ class CasualUser(models.Model):
             logger.info(str(self)+' accepted money request from ' +
                         str(u)+' for '+str(r.amount)+' amount')
             self.save()
-            return 'Money request exceeded'
+            return 'Money request accepted'
         else:
             return 'Sender has exceeded his max limit of transactions'
 
@@ -210,6 +212,8 @@ class CasualUser(models.Model):
         fields = [f.name for f in CasualUser._meta.fields if f.name != 'id']
         values = dict([(x, getattr(self, x)) for x in fields])
         new_instance = PremiumUser(**values)
+        new_instance.category='premium'
+        
         # new_instance.User_ptr = self.User_ptr #re-assign related parent
         new_instance.plan = plan
         self.username = "!!!"
