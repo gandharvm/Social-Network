@@ -329,6 +329,8 @@ class PremiumUser(CasualUser):
                 self.group_count += 1
                 self.save()
                 group.save()
+                group.members.add(self)
+                group.save()
                 return 'Group created'
             return 'Cannot create more groups'
         else:
@@ -351,7 +353,7 @@ class PremiumUser(CasualUser):
                 return 'You are not admin of this group'
         else:
             if(self.pay()):
-                x = self.change_price(self, GroupId, new_price)
+                x = self.change_price(GroupId, new_price)
                 return 'The Amount due for continued service deducted from your wallet\n' + x
             else:
                 return 'Please add money to your wallet as your payment is due.\nYou will not be able to use premium facilities without it'
@@ -369,7 +371,7 @@ class PremiumUser(CasualUser):
                 return 'You are not admin of the group'
         else:
             if(self.pay()):
-                x = self.change_name(self, GroupId, new_name)
+                x = self.change_name(GroupId, new_name)
                 return 'The Amount due for continued service deducted from your wallet\n' + x
             else:
                 return 'Please add money to your wallet as your payment is due.\nYou will not be able to use premium facilities without it'
@@ -387,7 +389,7 @@ class PremiumUser(CasualUser):
                 return 'You are not admin of this group'
         else:
             if(self.pay()):
-                x = self.change_join_settings(self, GroupId, setting)
+                x = self.change_join_request_settings(GroupId, setting)
                 return 'The Amount due for continued service deducted from your wallet\n' + x
             else:
                 return 'Please add money to your wallet as your payment is due.\nYou will not be able to use premium facilities without it'
@@ -405,7 +407,7 @@ class PremiumUser(CasualUser):
                 return 'You are not admin of this group'
         else:
             if(self.pay()):
-                x = self.change_join_settings(self, GroupId, setting)
+                x = self.change_direct_join_settings(GroupId, setting)
                 return 'The Amount due for continued service deducted from your wallet\n' + x
             else:
                 return 'Please add money to your wallet as your payment is due.\nYou will not be able to use premium facilities without it'
@@ -423,7 +425,7 @@ class PremiumUser(CasualUser):
                 return 'You are not admin of this group'
         else:
             if(self.pay()):
-                x = self.change_join_settings(self, GroupId, setting)
+                x = self.change_can_see_group_members(GroupId, setting)
                 return 'The Amount due for continued service deducted from your wallet\n' + x
             else:
                 return 'Please add money to your wallet as your payment is due.\nYou will not be able to use premium facilities without it'
@@ -446,7 +448,7 @@ class PremiumUser(CasualUser):
                 return 'You are not admin of this group'
         else:
             if(self.pay()):
-                x = self.reject_join_request(self, GroupId, joinId)
+                x = self.reject_join_request(GroupId, joinId)
                 return 'The Amount due for continued service deducted from your wallet\n' + x
             else:
                 return 'Please add money to your wallet as your payment is due.\nYou will not be able to use premium facilities without it'
@@ -477,7 +479,7 @@ class PremiumUser(CasualUser):
                 return 'You are not admin of this group'
         else:
             if(self.pay()):
-                x = self.accept_join_request(self, GroupId, joinId)
+                x = self.accept_join_request(GroupId, joinId)
                 return 'The Amount due for continued service deducted from your wallet\n' + x
             else:
                 return 'Please add money to your wallet as your payment is due.\nYou will not be able to use premium facilities without it'
@@ -500,7 +502,7 @@ class PremiumUser(CasualUser):
                 return 'You are not admin of this group'
         else:
             if(self.pay()):
-                x = self.remove_member(self, UserId, GroupId)
+                x = self.remove_member(UserId, GroupId)
                 return 'The Amount due for continued service deducted from your wallet\n' + x
             else:
                 return 'Please add money to your wallet as your payment is due.\nYou will not be able to use premium facilities without it'
@@ -520,7 +522,7 @@ class PremiumUser(CasualUser):
                 return 'You are not admin of this group'
         else:
             if(self.pay()):
-                x = self.delete_group(self, joinId)
+                x = self.delete_group(GroupId)
                 return 'The Amount due for continued service deducted from your wallet\n' + x
             else:
                 return 'Please add money to your wallet as your payment is due.\nYou will not be able to use premium facilities without it'

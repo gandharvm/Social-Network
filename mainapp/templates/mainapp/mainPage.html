@@ -7,44 +7,44 @@
             <h1>{{name}}</h1>
         </td>
         <td>
-                <a href="{% url "friendRequests" %}">View Friend Request</a>
+            <a href="{% url "friendRequests" %}">View Friend Request</a>
         </td>
-        <td >
-                <a href="{% url "sendFriendRequest" %}">Send Friend Request</a>
+        <td>
+            <a href="{% url "sendFriendRequest" %}">Send Friend Request</a>
         </td>
-        <td >
+        <td>
             <a href="{% url "privacySettings" %}">Privacy Settings</a>
         </td>
         {% if aType == 'Casual' %}
-        <td >
+        <td>
             <a href="{% url "upgradeAccount" %}">Upgrade Account</a>
         </td>
         {% endif %}
         {% if aType != 'Casual' %}
-        <td >
+        <td>
             <a href="{% url "send_private_message" %}">Send Private Message</a>
         </td>
         {% endif %}
-        <td >
-                <a href="{% url "viewFriends" %}">View Friends</a>
+        <td>
+            <a href="{% url "viewFriends" %}">View Friends</a>
         </td>
         {% if aType == 'Commercial' %}
-        <td >
+        <td>
             <a href="{% url "createPage" %}">Create Page</a>
         </td>
         {% endif %}
         {% if aType != 'Casual' %}
-        <td >
+        <td>
             <a href="{% url "createGroup" %}">Create Group</a>
         </td>
         {% endif %}
-        <td >
+        <td>
             <a href="{% url "viewPages" %}">View Pages</a>
         </td>
-        <td >
+        <td>
             <a href="{% url "logout" %}">Logout</a>
         </td>
-        <td >
+        <td>
             <a href="{% url "viewGroups" %}">View Groups</a>
         </td>
 
@@ -63,7 +63,7 @@
                 <input type="submit" value="Post">
             </form>
         </td>
-        <td  colspan="5">
+        <td colspan="5">
             <table>
                 <tr>
                     <td>
@@ -82,19 +82,19 @@
                     </td>
                 </tr>
                 <tr>
-                        <td>
-                            <p>DOB:- {{DOB}}</p>
-                        </td>
+                    <td>
+                        <p>DOB:- {{DOB}}</p>
+                    </td>
                 </tr>
                 <tr>
-                        <td>
-                            <p>E-Mail:- {{email}}</p>
-                        </td>
+                    <td>
+                        <p>E-Mail:- {{email}}</p>
+                    </td>
                 </tr>
                 <tr>
-                        <td>
-                            <p>Account Type:- {{aType}}</p>
-                        </td>
+                    <td>
+                        <p>Account Type:- {{aType}}</p>
+                    </td>
                 </tr>
             </table>
         </td>
@@ -109,10 +109,10 @@
             </div>
         </td>
     </tr>
-</table>     
+</table>
 <script>
     var msg = "{{msg}}";
-    if(msg!=""){
+    if (msg != "") {
         alert(msg);
     }
 </script>
