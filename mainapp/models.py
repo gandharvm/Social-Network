@@ -225,6 +225,18 @@ class CasualUser(models.Model):
             friend.friends.remove(self)
             friend.friends.add(new_instance)
         
+        for user in CasualUser.objects.all():
+            if(self.pk in [l.pk for l in user.friend_requests.all()]):
+                user.friend_requests.remove(self)
+                user.friend_requests.add(new_instance)
+        
+        for grp in Group.objects.all():
+            if(grp.admin.pk==self.pk):
+                grp.admin=new_instance
+            if(self.pk in [l.pk for l in grp.join_requests.all()]):
+                grp.join_requests.remove(self)
+                grp.join_requests.add(new_instance)
+
 
         fk = MoneyRequest.objects.filter(from_user=self.pk)
         if(fk.exists()):

@@ -9,9 +9,9 @@ from django.core.mail import EmailMessage
 from login.utils import TOTPVerification
 
 modelList=[]
-u=CasualUser.objects.get(username="abhi")
+u=CasualUser.objects.get(username="Harsimar2")
 # u = None
-# u=CasualUser()
+u=CasualUser()
 otp_mail = TOTPVerification()
 
 error = ''
