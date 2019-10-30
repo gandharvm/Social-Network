@@ -9,8 +9,8 @@ from django.core.mail import EmailMessage
 from login.utils import TOTPVerification
 
 modelList=[]
-# u=CommercialUser.objects.get(username="Gandharv")
-u = None
+u=CommercialUser.objects.get(username="Harsimar")
+# u = None
 # u=CasualUser()
 otp_mail = TOTPVerification()
 
@@ -651,13 +651,39 @@ def viewGroups(request):
     return display_Menu(attr,request)
 
 def viewJR(request):
-    pass
+    k=intHolder.objects.get(pk=1)
+    grp=Group.objects.get(pk=k.num)
+    buttonlist=['Accept','Reject','Go_Back']
+    l=grp.join_requests.all()
+    attr={'title':"Select join requests to reject/accept",'list':l,'buttonlist':buttonlist,
+    'responseType':'multi','returnFunction':"getVJRResponse"}
+    return display_Menu(attr,request)
+
+def getVJRResponse(request):
+    button=request.POST['submit']
+    k=intHolder.objects.get(pk=1)
+    grp=Group.objects.get(pk=k.num)
+    if(button=="Go_Back"):
+        return(getVGResponse(request,Group.objects.get(pk=k.num)))
+    else:
+        rList=getResponseList(request)
+        if(button=="Accept"):
+            for r in rList:
+                print(u.accept_join_request(grp.pk,r.pk))
+        if(button=="Reject"):
+            for r in rList:
+                print(u.reject_join_request(grp.pk,r.pk))
+        return(getVGResponse(request,Group.objects.get(pk=k.num)))
+
 
 def groupPS(request):
     pass
 
 def getPostOnGroupResponse(request):
-    pass
+    message=request.POST['pogText']
+    k=intHolder.objects.get(pk=1)
+    print(u.send_message_on_group(k.num,message))
+    return(getVGResponse(request,Group.objects.get(pk=k.num)))
 
 def joinGroup(request):
     h=intHolder.objects.get(pk=1)
@@ -665,29 +691,32 @@ def joinGroup(request):
     print(u.send_join_request(h.num))
     return(HttpResponseRedirect(reverse("mainPage")))
 
-def getVGResponse(request):
-    button = request.POST['submit']
-    if (button=='Go_Back'):
+def getVGResponse(request,grp=1):
+    button=1
+    if(grp==1):
+        button = request.POST['submit']
+    if (grp==1 and button=='Go_Back'):
         return HttpResponseRedirect(reverse("mainPage"))
-    elif(button=='View_Group'):
-        responseList = getResponseList(request)
-        grp = responseList[0]
+    elif(grp!=1 or button=='View_Group'):
+        if(grp==1):
+            responseList = getResponseList(request)
+            grp = responseList[0]
         h1=intHolder.objects.get(pk=1)
         h1.num=grp.pk
         h1.save()
-        if (grp.admin==u):
+        if (grp.admin.pk==u.pk):
             attr={'groupTitle':grp.name,'groupAdmin':str(grp.admin),
             'messageList':[str(m) for m in grp.messages.all()],
             'memberList':[str(mem) for mem in grp.members.all()]}
-            return render(request,"mainapp/joinedGroup.html",attr)
-        elif(u in grp.members.all()):
+            return render(request,"mainapp/adminGroup.html",attr)
+        elif(u.pk in [l.pk for l in grp.members.all()]):
             attr={'groupTitle':grp.name,'groupAdmin':str(grp.admin),
             'messageList':[str(m) for m in grp.messages.all()],
             'memberList':[str(mem) for mem in grp.members.all()]}
             return render(request,"mainapp/joinedGroup.html",attr)
         else:
             isRSent=False
-            if(u in grp.join_requests.all()):
+            if(u.pk in [l.pk for l in grp.join_requests.all()]):
                 isRSent=True
             print(isRSent)
             attr={'groupTitle':grp.name,'groupAdmin':str(grp.admin),'groupAdmin':str(grp.admin),'sent':isRSent}
