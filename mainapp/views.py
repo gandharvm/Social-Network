@@ -12,7 +12,7 @@ from login.utils import TOTPVerification
 # u=CommercialUser.objects.get(username="udayaan17119Commercial")
 # u = None`
 # u=CasualUser()
-otp_mail = TOTPVerification()
+# otp_mail = TOTPVerification()
 
 # error = ''
 
@@ -406,9 +406,10 @@ def getFLResponse(request):
             u.save()
         return HttpResponseRedirect(reverse("mainPage"))
     elif(button=="Send_Money_Request"):
+        otp_mail = TOTPVerification()
         generated_token = otp_mail.generate_token()
         # print(generated_token)
-
+        request.session['token']=generated_token
         mail_subject = 'InstaBook: Verify OTP for Transaction'
         message = render_to_string('login/acc_active_email.html', {
             'username': u.username,
@@ -434,11 +435,23 @@ def verify_otp_mainapp(request):
     # # check if user is authenticated 
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('loginPage'))
-    u = retrieveUser(request)    
+    u = retrieveUser(request)
+    token=None    
     otp = request.POST['otp']
     username = request.POST['username']
-    userCat = request.POST['userCat']
-    if (otp_mail.verify_token(otp)==True):
+    userCat= request.POST['userCat']
+    if('token' in request.session):
+        token=request.session['token']
+    else:
+        return HttpResponseRedirect(reverse("mainPage"))
+    try:
+        otp=int(otp)
+   
+    except ValueError:
+        del request.session['token']
+        return HttpResponseRedirect(reverse("mainPage"))
+    if (otp==int(token)):
+        del request.session['token']
         user=None
         if (userCat=='commercial'):
             user=CommercialUser.objects.get(username=username)
