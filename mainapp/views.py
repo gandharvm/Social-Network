@@ -717,31 +717,41 @@ def getGSResponse(request):
 
 
 def getGCNResponse(request):
+    global error
     name=request.POST['text']
     k=intHolder.objects.get(pk=1)
     grp=Group.objects.get(pk=k.num)
-    print(u.change_name(grp.pk,name))
+    error = u.change_name(grp.pk,name)
     return(getVGResponse(request,Group.objects.get(pk=k.num)))
 
 def getGCPResponse(request):
+    global error
     price=request.POST['text']
     k=intHolder.objects.get(pk=1)
     grp=Group.objects.get(pk=k.num)
-    print(u.change_price(grp.pk,float(price)))
+    try:
+        price = float(price)
+    except ValueError:
+        error = 'Amount not a float number'
+        return HttpResponseRedirect(reverse('mainPage'))
+    error = u.change_price(grp.pk,price)
+
     return(getVGResponse(request,Group.objects.get(pk=k.num)))
 
 
 
 def getPostOnGroupResponse(request):
+    global error
     message=request.POST['pogText']
     k=intHolder.objects.get(pk=1)
-    print(u.send_message_on_group(k.num,message))
+    error = u.send_message_on_group(k.num,message)
     return(getVGResponse(request,Group.objects.get(pk=k.num)))
 
 def joinGroup(request):
+    global error
     h=intHolder.objects.get(pk=1)
     grp=Group.objects.get(pk=h.num)
-    print(u.send_join_request(h.num))
+    error = u.send_join_request(h.num)
     return(HttpResponseRedirect(reverse("mainPage")))
 
 def getVGResponse(request,grp=1):
@@ -774,6 +784,6 @@ def getVGResponse(request,grp=1):
                 isRSent=True
             if(grp.can_send_join_requests):
                 canJoin=True
-            print(isRSent)
+            # print(isRSent)
             attr={'groupTitle':grp.name,'groupAdmin':str(grp.admin),'groupAdmin':str(grp.admin),'sent':isRSent,'canJoin':canJoin,'price':grp.price}
             return render(request,"mainapp/unjoinedGroup.html",attr)

@@ -342,9 +342,9 @@ class PremiumUser(CasualUser):
         else:
             if(self.pay()):
                 x = self.create_group(group_name, can_send, price)
-                return 'The Amount due for continued service deducted from your wallet\n' + x
+                return 'The Amount due for continued service deducted from your wallet<br>' + x
             else:
-                return 'Please add money to your wallet as your payment is due.\nYou will not be able to use premium facilities without it'
+                return 'Please add money to your wallet as your payment is due.<br>You will not be able to use premium facilities without it'
 
     def change_price(self, GroupId, new_price):
         if(self.check_pay()):
@@ -361,9 +361,9 @@ class PremiumUser(CasualUser):
         else:
             if(self.pay()):
                 x = self.change_price(GroupId, new_price)
-                return 'The Amount due for continued service deducted from your wallet\n' + x
+                return 'The Amount due for continued service deducted from your wallet<br>' + x
             else:
-                return 'Please add money to your wallet as your payment is due.\nYou will not be able to use premium facilities without it'
+                return 'Please add money to your wallet as your payment is due.<br>You will not be able to use premium facilities without it'
 
     def change_name(self, GroupId, new_name):
         if(self.check_pay()):
@@ -380,9 +380,9 @@ class PremiumUser(CasualUser):
         else:
             if(self.pay()):
                 x = self.change_name(GroupId, new_name)
-                return 'The Amount due for continued service deducted from your wallet\n' + x
+                return 'The Amount due for continued service deducted from your wallet<br>' + x
             else:
-                return 'Please add money to your wallet as your payment is due.\nYou will not be able to use premium facilities without it'
+                return 'Please add money to your wallet as your payment is due.<br>You will not be able to use premium facilities without it'
 
     def change_join_request_settings(self, GroupId, setting):
         if(self.check_pay()):
@@ -399,9 +399,9 @@ class PremiumUser(CasualUser):
         else:
             if(self.pay()):
                 x = self.change_join_request_settings(GroupId, setting)
-                return 'The Amount due for continued service deducted from your wallet\n' + x
+                return 'The Amount due for continued service deducted from your wallet<br>' + x
             else:
-                return 'Please add money to your wallet as your payment is due.\nYou will not be able to use premium facilities without it'
+                return 'Please add money to your wallet as your payment is due.<br>You will not be able to use premium facilities without it'
 
     def change_direct_join_settings(self, GroupId, setting):
         if(self.check_pay()):
@@ -417,9 +417,9 @@ class PremiumUser(CasualUser):
         else:
             if(self.pay()):
                 x = self.change_direct_join_settings(GroupId, setting)
-                return 'The Amount due for continued service deducted from your wallet\n' + x
+                return 'The Amount due for continued service deducted from your wallet<br>' + x
             else:
-                return 'Please add money to your wallet as your payment is due.\nYou will not be able to use premium facilities without it'
+                return 'Please add money to your wallet as your payment is due.<br>You will not be able to use premium facilities without it'
 
     def change_can_see_group_members(self, GroupId, setting):
         if(self.check_pay()):
@@ -435,9 +435,9 @@ class PremiumUser(CasualUser):
         else:
             if(self.pay()):
                 x = self.change_can_see_group_members(GroupId, setting)
-                return 'The Amount due for continued service deducted from your wallet\n' + x
+                return 'The Amount due for continued service deducted from your wallet<br>' + x
             else:
-                return 'Please add money to your wallet as your payment is due.\nYou will not be able to use premium facilities without it'
+                return 'Please add money to your wallet as your payment is due.<br>You will not be able to use premium facilities without it'
 
     def reject_join_request(self, GroupId, joinId):
         if(self.check_pay()):
@@ -458,9 +458,9 @@ class PremiumUser(CasualUser):
         else:
             if(self.pay()):
                 x = self.reject_join_request(GroupId, joinId)
-                return 'The Amount due for continued service deducted from your wallet\n' + x
+                return 'The Amount due for continued service deducted from your wallet<br>' + x
             else:
-                return 'Please add money to your wallet as your payment is due.\nYou will not be able to use premium facilities without it'
+                return 'Please add money to your wallet as your payment is due.<br>You will not be able to use premium facilities without it'
 
     def accept_join_request(self, GroupId, joinId):
         if(self.check_pay()):
@@ -490,9 +490,9 @@ class PremiumUser(CasualUser):
         else:
             if(self.pay()):
                 x = self.accept_join_request(GroupId, joinId)
-                return 'The Amount due for continued service deducted from your wallet\n' + x
+                return 'The Amount due for continued service deducted from your wallet<br>' + x
             else:
-                return 'Please add money to your wallet as your payment is due.\nYou will not be able to use premium facilities without it'
+                return 'Please add money to your wallet as your payment is due.<br>You will not be able to use premium facilities without it'
 
     def remove_member(self, UserId, GroupId):
         if(self.check_pay()):
@@ -513,9 +513,9 @@ class PremiumUser(CasualUser):
         else:
             if(self.pay()):
                 x = self.remove_member(UserId, GroupId)
-                return 'The Amount due for continued service deducted from your wallet\n' + x
+                return 'The Amount due for continued service deducted from your wallet<br>' + x
             else:
-                return 'Please add money to your wallet as your payment is due.\nYou will not be able to use premium facilities without it'
+                return 'Please add money to your wallet as your payment is due.<br>You will not be able to use premium facilities without it'
 
     def delete_group(self, GroupId):
         if(self.check_pay()):
@@ -533,9 +533,9 @@ class PremiumUser(CasualUser):
         else:
             if(self.pay()):
                 x = self.delete_group(GroupId)
-                return 'The Amount due for continued service deducted from your wallet\n' + x
+                return 'The Amount due for continued service deducted from your wallet<br>' + x
             else:
-                return 'Please add money to your wallet as your payment is due.\nYou will not be able to use premium facilities without it'
+                return 'Please add money to your wallet as your payment is due.<br>You will not be able to use premium facilities without it'
 
     def send_message(self, UserId, content):
         if(self.check_pay()):
@@ -551,9 +551,9 @@ class PremiumUser(CasualUser):
         else:
             if(self.pay()):
                 x = self.send_message(UserId, content)
-                return 'The Amount due for continued service deducted from your wallet\n'+x
+                return 'The Amount due for continued service deducted from your wallet<br>'+x
             else:
-                return 'Please add money to your wallet as your payment is due.\nYou will not be able to use premium facilities without it'
+                return 'Please add money to your wallet as your payment is due.<br>You will not be able to use premium facilities without it'
 
     def pay(self):
         if(self.wallet_money > self.amountToPay()):
@@ -602,9 +602,9 @@ class CommercialUser(PremiumUser):
         else:
             if(self.pay()):
                 x = self.create_page(content)
-                return 'The Amount due for continued service deducted from your wallet\n'+x
+                return 'The Amount due for continued service deducted from your wallet<br>'+x
             else:
-                return 'Please add money to your wallet as your payment is due.\nYou will not be able to use commercial facilities without it'
+                return 'Please add money to your wallet as your payment is due.<br>You will not be able to use commercial facilities without it'
 
     def send_message(self, UserId, content):
         if(self.check_pay()):
@@ -621,9 +621,9 @@ class CommercialUser(PremiumUser):
         else:
             if(self.pay()):
                 x = self.send_message(UserId, content)
-                return 'The Amount due for continued service deducted from your wallet\n' + x
+                return 'The Amount due for continued service deducted from your wallet<br>' + x
             else:
-                return 'Please add money to your wallet as your payment is due.\nYou will not be able to use premium facilities without it'
+                return 'Please add money to your wallet as your payment is due.<br>You will not be able to use premium facilities without it'
 
     def pay(self):
         if(self.wallet_money > self.amount_to_pay):
@@ -652,7 +652,7 @@ class Private_Message(models.Model):
             + str(self.from_user)
             + " To "
             + str(self.to_user)
-            + "\n"
+            + "<br>"
             + self.content
         )
 

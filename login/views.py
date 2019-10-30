@@ -68,7 +68,7 @@ def createUser(request):
     global dob
 
     form = SignUpForm(request.POST)
-    print(form.errors)
+    # print(form.errors)
     if(form.is_valid()):
 
         username = form.cleaned_data['username']
@@ -78,7 +78,7 @@ def createUser(request):
         dob = form.cleaned_data['date_of_birth']
 
         generated_token = otp_mail.generate_token()
-        print(generated_token)
+        # print(generated_token)
 
         mail_subject = 'InstaBook: Verify OTP'
         message = render_to_string('login/acc_active_email.html', {
@@ -107,7 +107,7 @@ def otp_page(request):
         return HttpResponseRedirect(reverse('loginPage'))
 
     otp = request.POST['otp']
-    print(otp)
+    # print(otp)
     if otp_mail.verify_token(otp):
     # if True:
             # create django user model instance
