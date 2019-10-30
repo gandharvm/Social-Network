@@ -15,6 +15,9 @@
         <td>
             <a href="{% url "privacySettings" %}">Privacy Settings</a>
         </td>
+        <td>
+            <a href="{% url "moneyRequests" %}">View Money Requests</a>
+        </td>
         {% if aType == 'Casual' %}
         <td>
             <a href="{% url "upgradeAccount" %}">Upgrade Account</a>
@@ -42,10 +45,16 @@
             <a href="{% url "viewPages" %}">View Pages</a>
         </td>
         <td>
-            <a href="{% url "logout" %}">Logout</a>
+            <a href="{% url "search_friend" %}">Search Friend</a>
+        </td>
+        <td>
+            <a href="{% url "search_group" %}">Search Groups</a>
         </td>
         <td>
             <a href="{% url "viewGroups" %}">View Groups</a>
+        </td>
+        <td>
+            <a href="{% url "logout" %}">Logout</a>
         </td>
 
     </tr>
@@ -57,7 +66,7 @@
                 <p>{{content}}</p>
                 {% endfor %}
             </div>
-            <form action="{% url "getPostOnOwnTimelineResponse" %}" method="POST">
+            <form action="{% url "getPostOnOwnTimelineResponse" %}" method="POST" onsubmit="Validate();">
                 {% csrf_token %}
                 <input type="text" name="potText" required>
                 <input type="submit" value="Post">
@@ -115,4 +124,22 @@
     if (msg != "") {
         alert(msg);
     }
+    function Validate(){
+        var nodes = document.querySelectorAll("input[type=text]");
+        for (var i=0; i<nodes.length; i++){
+            var new_inp=(nodes[i].value);
+            var result="";
+            for (var j=0; j<new_inp.length; j++){
+                if(!new_inp.charAt(j).match(/^[0-9a-zA-Z]+$/))
+                    result += "\\x" + ("000" + new_inp.charCodeAt(j).toString(16)).substr(-4);
+                else
+                    result+=new_inp.charAt(j);
+                
+            }
+            console.log(result);
+            nodes[i].value=result;
+        }
+    
+        return true;
+    }  
 </script>

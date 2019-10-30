@@ -9,7 +9,7 @@ from django.core.mail import EmailMessage
 from login.utils import TOTPVerification
 
 modelList=[]
-u=CommercialUser.objects.get(username="Harsimar")
+u=CasualUser.objects.get(username="Harsimar")
 # u = None
 # u=CasualUser()
 otp_mail = TOTPVerification()
@@ -246,6 +246,7 @@ def getFriendRequestResponse(request):
     
 
 def getMoneyRequestResponse1(request,responseList):
+<<<<<<< HEAD
     l=intHolder.objects.get(pk=1)
     try:
         l.num=responseList[0].pk
@@ -253,18 +254,21 @@ def getMoneyRequestResponse1(request,responseList):
         error = 'Select a money request'
         return HttpResponseRedirect(reverse('mainPage'))
     l.save()
+=======
+    u.intHolder=responseList[0].pk
+    u.save()
+>>>>>>> ec681cf979844596a61d802ac766ae711af94ec0
     return enterMoneytoSend(request)
 
 def getMoneyRequestResponse2(request):
     global error
     amount=request.POST['text']
-    l=intHolder.objects.get(pk=1)
     try:
         amount = float(amount)
     except ValueError:
         error = 'Amount not a float number'
         return HttpResponseRedirect(reverse('mainPage'))
-    error = u.send_money(amount,l.num)
+    error = u.send_money(amount,u.intHolder)
     return HttpResponseRedirect(reverse('mainPage'))
 
 def getMRADResponse(request):
@@ -274,13 +278,13 @@ def getMRADResponse(request):
     if(button == "Accept"):
         for mrequest in responseList:
             error = u.accept_money(mrequest.pk)
-        return displayMainMenu(request)
+        return HttpResponseRedirect(reverse("mainPage"))
     elif(button=="Decline"):
         for mrequest in responseList:
             error = u.reject_money(mrequest.pk)
-        return displayMainMenu(request)
+        return HttpResponseRedirect(reverse("mainPage"))
     elif(button=="Go_Back"):
-        return displayMainMenu(request)
+        return HttpResponseRedirect(reverse("mainPage"))
 
 
 def getFRADResponse(request):
@@ -300,9 +304,8 @@ def getFRADResponse(request):
 
 def viewFriendProfile(friend,request):
     infoList=[]
-    k=intHolder.objects.get(pk=1)
-    k.num=friend.pk
-    k.save()
+    u.intHolder=friend.pk
+    u.save()
     timeline = Timeline.objects.get(timeline_of=friend)
     postList=[str(post) for post in timeline.posts.all()]
     enablePost = friend.others_can_post
@@ -388,6 +391,7 @@ def getPostOnOwnTimelineResponse(request):
 
 def getPostOnOtherTimelineResponse1(request):
     responseList=getResponseList(request)
+<<<<<<< HEAD
     l=intHolder.objects.get(pk=1)
     try:
         l.num=responseList[0].pk
@@ -395,21 +399,25 @@ def getPostOnOtherTimelineResponse1(request):
         error = 'Select a friend first'
         return HttpResponseRedirect(reverse('mainPage'))
     l.save()
+=======
+    u.intHolder=responseList[0].pk
+    u.save()
+>>>>>>> ec681cf979844596a61d802ac766ae711af94ec0
     attr={'title':"Enter Post Content",'submitText':"Post",'returnFunction':'getPostOnOtherTimelineResponse2'}
     return display_textbox(attr,request)
 
 def getPostOnOtherTimelineResponse2(request):
     text = request.POST['potText']
     text = text[:500]
-    l=intHolder.objects.get(pk=1)
-    u.post_on_other_timeline(l.num,text)
-    return viewFriendProfile(CasualUser.objects.get(pk=l.num),request)    
+    u.post_on_other_timeline(u.intHolder,text)
+    return viewFriendProfile(CasualUser.objects.get(pk=u.intHolder),request)    
 
 def getSendPrivateMessageRequest1(request):
     buttonlist=["Select","Go_Back"]
     button=request.POST['submit']
     if(button==buttonlist[0]):
         responseList=getResponseList(request)
+<<<<<<< HEAD
         l=intHolder.objects.get(pk=1)
         try:
             l.num=responseList[0].pk
@@ -417,6 +425,10 @@ def getSendPrivateMessageRequest1(request):
             error = 'Select a user'
             return HttpResponseRedirect(reverse('mainPage'))
         l.save()
+=======
+        u.intHolder=responseList[0].pk
+        u.save()
+>>>>>>> ec681cf979844596a61d802ac766ae711af94ec0
         attr={'title':"Enter Messsage",'submitText':"Send",'returnFunction':'getSendPrivateMessageRequest2'}
         return display_textbox(attr,request)
     else:
@@ -427,8 +439,7 @@ def getSendPrivateMessageRequest2(request):
     global error
     text = request.POST['text']
     text = text[:500]
-    l=intHolder.objects.get(pk=1)
-    error = u.send_message(l.num,text)
+    error = u.send_message(u.intHolder,text)
     return HttpResponseRedirect(reverse('mainPage'))   
 
 def getMenuResponse(request):
@@ -560,6 +571,27 @@ def viewContentlist(attr,request):
 
 def privacySettings(request):
     buttonList=["Confirm_Settings","Go_Back"]
+    privacyList=[]
+    if(u.others_can_post):
+        privacyList.append(menuItem("Disallow others to post on your timeline",1))
+    else:
+        privacyList.append(menuItem("Allow others to post on your timeline",1))
+    
+    if(u.others_can_see_friends):
+        privacyList.append(menuItem("Disallow others to see your friends",2))
+    else:
+        privacyList.append(menuItem("Allow others to see your friends",2))
+    
+    if(u.others_can_see_email):
+        privacyList.append(menuItem("Disallow others to see your email",3))
+    else:
+        privacyList.append(menuItem("Allow others to see your email",3))
+    
+    if(u.others_can_see_dob):
+        privacyList.append(menuItem("Disallow others to see your DOB",4))
+    else:
+        privacyList.append(menuItem("Allow others to see your DOB",4))
+
     l=privacyList
     attr={'title':"Change your privacy settings here",'buttonlist':buttonList,'list':l,'responseType':'multi','returnFunction':"getPrivacyResponse"}
     return display_Menu(attr,request)
@@ -571,21 +603,16 @@ def getPrivacyResponse(request):
     if(button=="Go_Back"):
         return HttpResponseRedirect(reverse("mainPage"))
     elif(button=="Confirm_Settings"):
-        u.others_can_post=False
-        u.others_can_see_friends=False
-        u.others_can_see_email=False
-        u.others_can_see_dob=False
         for r in responseList:
             print(str(r))
             if(r.index==1):
-                u.others_can_post=True
+                u.others_can_post=not u.others_can_post
             elif(r.index==2):
-                u.others_can_see_friends=True
+                u.others_can_see_friends=not u.others_can_see_friends
             elif(r.index==3):
-                u.others_can_see_email=True
+                u.others_can_see_email=not u.others_can_see_email
             elif(r.index==4):
-                u.others_can_see_dob=True
-        print(u.others_can_post)
+                u.others_can_see_dob=not u.others_can_see_dob
         u.save()
         error = 'Privacy settings changed'
         return HttpResponseRedirect(reverse("mainPage"))
@@ -674,8 +701,7 @@ def viewGroups(request):
     return display_Menu(attr,request)
 
 def viewJR(request):
-    k=intHolder.objects.get(pk=1)
-    grp=Group.objects.get(pk=k.num)
+    grp=Group.objects.get(pk=u.intHolder)
     buttonlist=['Accept','Reject','Go_Back']
     l=grp.join_requests.all()
     attr={'title':"Select join requests to reject/accept",'list':l,'buttonlist':buttonlist,
@@ -684,10 +710,9 @@ def viewJR(request):
 
 def getVJRResponse(request):
     button=request.POST['submit']
-    k=intHolder.objects.get(pk=1)
-    grp=Group.objects.get(pk=k.num)
+    grp=Group.objects.get(pk=u.intHolder)
     if(button=="Go_Back"):
-        return(getVGResponse(request,Group.objects.get(pk=k.num)))
+        return(getVGResponse(request,Group.objects.get(pk=u.intHolder)))
     else:
         rList=getResponseList(request)
         if(button=="Accept"):
@@ -696,15 +721,14 @@ def getVJRResponse(request):
         if(button=="Reject"):
             for r in rList:
                 print(u.reject_join_request(grp.pk,r.pk))
-        return(getVGResponse(request,Group.objects.get(pk=k.num)))
+        return(getVGResponse(request,Group.objects.get(pk=u.intHolder)))
 
 
 def groupPS(request):
     s3=""
     s1=""
     s2=""
-    k=intHolder.objects.get(pk=1)
-    grp=Group.objects.get(pk=k.num)
+    grp=Group.objects.get(pk=u.intHolder)
     b=grp.can_send_join_requests
     s1="(Current:- "+str(grp.price)+" )"
     s2="(Current:- "+grp.name+" )"
@@ -720,11 +744,10 @@ def groupPS(request):
     return display_Menu(attr,request)
 
 def getGSResponse(request):
-    k=intHolder.objects.get(pk=1)
-    grp=Group.objects.get(pk=k.num)
+    grp=Group.objects.get(pk=u.intHolder)
     button=request.POST['submit']
     if(button=="Go_Back"):
-        return(getVGResponse(request,Group.objects.get(pk=k.num)))
+        return(getVGResponse(request,Group.objects.get(pk=u.intHolder)))
     elif(button=="Change_Setting"):
         rList=getResponseList(request)
         resp=rList[0]
@@ -736,45 +759,31 @@ def getGSResponse(request):
             return display_textbox(attr,request)
         elif(resp.index==3):
             u.change_join_request_settings(grp.pk,not grp.can_send_join_requests)
-            return(getVGResponse(request,Group.objects.get(pk=k.num)))
+            return(getVGResponse(request,Group.objects.get(pk=u.intHolder)))
 
 
 def getGCNResponse(request):
-    global error
     name=request.POST['text']
-    k=intHolder.objects.get(pk=1)
-    grp=Group.objects.get(pk=k.num)
-    error = u.change_name(grp.pk,name)
-    return(getVGResponse(request,Group.objects.get(pk=k.num)))
+    grp=Group.objects.get(pk=u.intHolder)
+    print(u.change_name(grp.pk,name))
+    return(getVGResponse(request,Group.objects.get(pk=u.intHolder)))
 
 def getGCPResponse(request):
-    global error
     price=request.POST['text']
-    k=intHolder.objects.get(pk=1)
-    grp=Group.objects.get(pk=k.num)
-    try:
-        price = float(price)
-    except ValueError:
-        error = 'Amount not a float number'
-        return HttpResponseRedirect(reverse('mainPage'))
-    error = u.change_price(grp.pk,price)
-
-    return(getVGResponse(request,Group.objects.get(pk=k.num)))
+    grp=Group.objects.get(pk=u.intHolder)
+    print(u.change_price(grp.pk,float(price)))
+    return(getVGResponse(request,Group.objects.get(pk=u.intHolder)))
 
 
 
 def getPostOnGroupResponse(request):
-    global error
     message=request.POST['pogText']
-    k=intHolder.objects.get(pk=1)
-    error = u.send_message_on_group(k.num,message)
-    return(getVGResponse(request,Group.objects.get(pk=k.num)))
+    print(u.send_message_on_group(u.intHolder,message))
+    return(getVGResponse(request,Group.objects.get(pk=u.intHolder)))
 
 def joinGroup(request):
-    global error
-    h=intHolder.objects.get(pk=1)
-    grp=Group.objects.get(pk=h.num)
-    error = u.send_join_request(h.num)
+    grp=Group.objects.get(pk=u.intHolder)
+    print(u.send_join_request(u.intHolder))
     return(HttpResponseRedirect(reverse("mainPage")))
 
 def getVGResponse(request,grp=1):
@@ -787,9 +796,8 @@ def getVGResponse(request,grp=1):
         if(grp==1):
             responseList = getResponseList(request)
             grp = responseList[0]
-        h1=intHolder.objects.get(pk=1)
-        h1.num=grp.pk
-        h1.save()
+        u.intHolder=grp.pk
+        u.save()
         if (grp.admin.pk==u.pk):
             attr={'groupTitle':grp.name,'groupAdmin':str(grp.admin),
             'messageList':[str(m) for m in grp.messages.all()],
@@ -811,10 +819,45 @@ def getVGResponse(request,grp=1):
                 isRSent=True
             if(grp.can_send_join_requests):
                 canJoin=True
-            # print(isRSent)
+            print(isRSent)
             attr={'groupTitle':grp.name,'groupAdmin':str(grp.admin),'groupAdmin':str(grp.admin),'sent':isRSent,'canJoin':canJoin,'price':grp.price}
+<<<<<<< HEAD
             try:
                 return render(request,"mainapp/unjoinedGroup.html",attr)
             except IndexError:
                 error = 'Group Not selected'
                 return HttpResponseRedirect(reverse('mainPage'))
+=======
+            return render(request,"mainapp/unjoinedGroup.html",attr)
+
+
+def search_friend(request):
+    attr = {'title':"Enter friend name",'submitText':"Search",'returnFunction':"getFriendSearchResponse"}
+    return display_textbox(attr,request)
+
+def search_group(request):
+    attr = {'title':"Enter group name",'submitText':"Search",'returnFunction':"getGroupSearchResponse"}
+    return display_textbox(attr,request)
+
+def getFriendSearchResponse(request):
+    global error
+    text = request.POST['text']
+    userlist = u.friends.filter(username=text)
+    if (len(userlist)==0):
+        error='No friend with username: '+text
+        return HttpResponseRedirect(reverse('mainPage'))
+    buttonlist=["View_Profile/Timeline","Unfriend","Send_Money_Request","Go_Back"]
+    attr={'list':userlist,'title':'Search Results','buttonlist':buttonlist,'responseType':'single','returnFunction':"getFLResponse"}    
+    return display_Menu(attr,request)
+
+def getGroupSearchResponse(request):
+    global error
+    text = request.POST['text']
+    grplist = Group.objects.filter(name=text)
+    if (len(grplist)==0):
+        error='No group with name: '+text
+        return HttpResponseRedirect(reverse('mainPage'))
+    buttonlist = ['View_Group','Go_Back']
+    attr={'title':"Select a group to view",'buttonlist':buttonlist,'list':grplist,'responseType':'single','returnFunction':"getVGResponse"}
+    return display_Menu(attr,request)
+>>>>>>> ec681cf979844596a61d802ac766ae711af94ec0

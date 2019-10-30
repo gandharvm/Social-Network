@@ -10,12 +10,17 @@ class MoneyRequest(models.Model):
     amount = models.FloatField(default=0)
     from_user = models.IntegerField(default=0)
 
+    def __str__(self):
+        u = CasualUser.objects.get(pk=self.from_user)
+        return "Amount:"+str(self.amount)+" sent by: "+str(u)
+
 
 class CasualUser(models.Model):
     category = models.CharField(max_length=20)
     money_requests = models.ManyToManyField(MoneyRequest)
     username = models.CharField(max_length=30)
     max_transactions = 15
+    intHolder=models.IntegerField(default=0)
 
     # private info
     date_of_birth = models.DateField()
@@ -38,6 +43,7 @@ class CasualUser(models.Model):
         user.category = "casual"
         user.save()
         timeline = Timeline(timeline_of=user)
+
         timeline.save()
         return user
 
@@ -211,6 +217,13 @@ class CasualUser(models.Model):
         self.username = "!!!"
         self.save()
         new_instance.save()
+
+        for friend in self.friends.all():
+            new_instance.friends.add(friend)
+            friend.friends.remove(self)
+            friend.friends.add(new_instance)
+        
+
         fk = MoneyRequest.objects.filter(from_user=self.pk)
         if(fk.exists()):
             for request in fk:
@@ -282,10 +295,6 @@ class Friendship(models.Model):
 
     class Meta:
         unique_together = (("to_friend", "from_friend"),)
-
-
-class intHolder(models.Model):
-    num = models.IntegerField(default=0)
 
 
 class PremiumUser(CasualUser):
