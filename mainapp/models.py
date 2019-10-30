@@ -619,7 +619,6 @@ class CommercialUser(PremiumUser):
             msg = Private_Message(from_user=from_user,
                                   to_user=to_user, content=content)
             msg.save()
-            return msg
             return 'Message sent'
         else:
             if(self.pay()):
