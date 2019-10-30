@@ -437,7 +437,7 @@ class PremiumUser(CasualUser):
                 return 'Group does not exist'
             group = group[0]
             user = group.join_requests.filter(pk=joinId)
-            if group.admin == self:
+            if group.admin.pk == self.pk:
                 if not user.exists():
                     return 'Join request does not exist'
                 user = user[0]
@@ -460,7 +460,7 @@ class PremiumUser(CasualUser):
                 return 'Group does not exist'
             group = group[0]
             user = group.join_requests.filter(pk=joinId)
-            if group.admin == self:
+            if group.admin.pk == self.pk:
                 if (not user.exists()):
                     return 'Join request does not exist'
                 user = user[0]
