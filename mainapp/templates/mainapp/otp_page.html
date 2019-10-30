@@ -1,9 +1,14 @@
+<p style="color: red;">
+    {{ Error }}
+</p>
+
 <p>{{Msg}}</p>
 <form action="{% url 'verify_otp_mainapp' %}" method="POST">
     {% csrf_token %}
     OTP:<br>
     <input type="password" name="otp" required><br>
-    <input type="hidden"  name='username' value="{{username}}"><br>
-    <input type="hidden"  name='userCat' value="{{userCat}}"><br>
+    <input type="hidden" name='username' value="{{username}}"><br>
+    <input type="hidden" name='userCat' value="{{userCat}}"><br>
     <input type="submit" value="Verify"><br>
 </form>
+<a href="{% url "mainPage" %}">Go Back</a>
