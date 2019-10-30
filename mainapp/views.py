@@ -291,7 +291,7 @@ def getFriendRequestResponse(request):
     
 
 def getMoneyRequestResponse1(request,responseList):
-     if not request.user.is_authenticated:
+    if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('loginPage'))
     try:
         u.intHolder=responseList[0].pk
