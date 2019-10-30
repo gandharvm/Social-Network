@@ -761,3 +761,34 @@ def getVGResponse(request,grp=1):
             print(isRSent)
             attr={'groupTitle':grp.name,'groupAdmin':str(grp.admin),'groupAdmin':str(grp.admin),'sent':isRSent,'canJoin':canJoin,'price':grp.price}
             return render(request,"mainapp/unjoinedGroup.html",attr)
+
+
+def search_friend(request):
+    attr = {'title':"Enter friend name",'submitText':"Search",'returnFunction':"getFriendSearchResponse"}
+    return display_textbox(attr,request)
+
+def search_group(request):
+    attr = {'title':"Enter group name",'submitText':"Search",'returnFunction':"getGroupSearchResponse"}
+    return display_textbox(attr,request)
+
+def getFriendSearchResponse(request):
+    global error
+    text = request.POST['text']
+    userlist = u.friends.filter(username=text)
+    if (len(userlist)==0):
+        error='No friend with username: '+text
+        return HttpResponseRedirect(reverse('mainPage'))
+    buttonlist=["View_Profile/Timeline","Unfriend","Send_Money_Request","Go_Back"]
+    attr={'list':userlist,'title':'Search Results','buttonlist':buttonlist,'responseType':'single','returnFunction':"getFLResponse"}    
+    return display_Menu(attr,request)
+
+def getGroupSearchResponse(request):
+    global error
+    text = request.POST['text']
+    grplist = Group.objects.filter(name=text)
+    if (len(grplist)==0):
+        error='No group with name: '+text
+        return HttpResponseRedirect(reverse('mainPage'))
+    buttonlist = ['View_Group','Go_Back']
+    attr={'title':"Select a group to view",'buttonlist':buttonlist,'list':grplist,'responseType':'single','returnFunction':"getVGResponse"}
+    return display_Menu(attr,request)
