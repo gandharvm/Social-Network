@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
+import datetime
 
 
 class PlanForm(forms.Form):
@@ -22,3 +23,9 @@ class SignUpForm(UserCreationForm):
         model = User
         fields = ('username', 'email', 'date_of_birth', 'category',
                   'password1', 'password2', )
+
+    def clean_date_of_birth(self):
+        date = self.cleaned_data['date_of_birth']
+        if date > datetime.date.today():
+            raise forms.ValidationError("The date cannot be in the future!")
+        return date

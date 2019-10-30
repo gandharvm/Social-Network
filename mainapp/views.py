@@ -405,10 +405,11 @@ def getSendPrivateMessageRequest1(request):
 
 
 def getSendPrivateMessageRequest2(request):
+    global error
     text = request.POST['text']
     text = text[:500]
     l=intHolder.objects.get(pk=1)
-    u.send_message(l.num,text)
+    error = u.send_message(l.num,text)
     return HttpResponseRedirect(reverse('mainPage'))   
 
 def getMenuResponse(request):
