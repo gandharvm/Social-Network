@@ -285,14 +285,11 @@ def getFriendRequestResponse(request):
     
 
 def getMoneyRequestResponse1(request,responseList):
-    l=intHolder.objects.get(pk=1)
     try:
-        l.num=responseList[0].pk
         u.intHolder=responseList[0].pk
     except:
         error = 'Select a money request'
         return HttpResponseRedirect(reverse('mainPage'))
-    l.save()
     u.save()
     return enterMoneytoSend(request)
 
@@ -466,14 +463,11 @@ def getPostOnOtherTimelineResponse1(request):
     # if not request.user.is_authenticated:
     #     return HttpResponseRedirect(reverse('loginPage'))
     responseList=getResponseList(request)
-    l=intHolder.objects.get(pk=1)
     try:
-        l.num=responseList[0].pk
         u.intHolder=responseList[0].pk
     except:
         error = 'Select a friend first'
         return HttpResponseRedirect(reverse('mainPage'))
-    l.save()
     u.save()
     attr={'title':"Enter Post Content",'submitText':"Post",'returnFunction':'getPostOnOtherTimelineResponse2'}
     return display_textbox(attr,request)
@@ -495,14 +489,11 @@ def getSendPrivateMessageRequest1(request):
     button=request.POST['submit']
     if(button==buttonlist[0]):
         responseList=getResponseList(request)
-        l=intHolder.objects.get(pk=1)
         try:
-            l.num=responseList[0].pk
             u.intHolder=responseList[0].pk
         except IndexError:
             error = 'Select a user'
             return HttpResponseRedirect(reverse('mainPage'))
-        l.save()
         u.save()
         attr={'title':"Enter Messsage",'submitText':"Send",'returnFunction':'getSendPrivateMessageRequest2'}
         return display_textbox(attr,request)
