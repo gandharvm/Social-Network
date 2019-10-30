@@ -42,4 +42,6 @@ urlpatterns = [
     path("getPostOnGroupResponse/",views.getPostOnGroupResponse,name="getPostOnGroupResponse"),
     path("joinGroup/",views.joinGroup,name="joinGroup"),
     path("getVGResponse/",views.getVGResponse,name="getVGResponse"),
+    path("getVJRResponse/",views.getVJRResponse,name="getVJRResponse"),
+
 ]

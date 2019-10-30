@@ -261,7 +261,7 @@ class CasualUser(models.Model):
         if not group.exists():
             return 'Group does not exist'
         group = group[0]
-        if self not in group.members.all():
+        if self.pk not in [l.pk for l in group.members.all()]:
             return 'You are not a member of the group'
         message = GroupMessage(from_user=self, content=content)
         message.save()
@@ -346,7 +346,7 @@ class PremiumUser(CasualUser):
             if not group.exists():
                 return 'Group does not exist'
             group = group[0]
-            if(group.admin == self):
+            if(group.admin.pk == self.pk):
                 group.price = new_price
                 return 'Changed price for joining group'
             else:
