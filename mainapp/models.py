@@ -212,6 +212,8 @@ class CasualUser(models.Model):
         fields = [f.name for f in CasualUser._meta.fields if f.name != 'id']
         values = dict([(x, getattr(self, x)) for x in fields])
         new_instance = PremiumUser(**values)
+        new_instance.category='premium'
+        
         # new_instance.User_ptr = self.User_ptr #re-assign related parent
         new_instance.plan = plan
         self.username = "!!!"
@@ -223,6 +225,18 @@ class CasualUser(models.Model):
             friend.friends.remove(self)
             friend.friends.add(new_instance)
         
+        for user in CasualUser.objects.all():
+            if(self.pk in [l.pk for l in user.friend_requests.all()]):
+                user.friend_requests.remove(self)
+                user.friend_requests.add(new_instance)
+        
+        for grp in Group.objects.all():
+            if(grp.admin.pk==self.pk):
+                grp.admin=new_instance
+            if(self.pk in [l.pk for l in grp.join_requests.all()]):
+                grp.join_requests.remove(self)
+                grp.join_requests.add(new_instance)
+
 
         fk = MoneyRequest.objects.filter(from_user=self.pk)
         if(fk.exists()):
@@ -621,7 +635,6 @@ class CommercialUser(PremiumUser):
             msg = Private_Message(from_user=from_user,
                                   to_user=to_user, content=content)
             msg.save()
-            return msg
             return 'Message sent'
         else:
             if(self.pay()):
