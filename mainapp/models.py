@@ -21,6 +21,7 @@ class CasualUser(models.Model):
     username = models.CharField(max_length=30)
     max_transactions = 15
     intHolder=models.IntegerField(default=0)
+    error=models.CharField(max_length=200)
 
     # private info
     date_of_birth = models.DateField()
