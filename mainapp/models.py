@@ -43,7 +43,6 @@ class CasualUser(models.Model):
         user.category = "casual"
         user.save()
         timeline = Timeline(timeline_of=user)
-
         timeline.save()
         return user
 
@@ -430,6 +429,7 @@ class PremiumUser(CasualUser):
             group = group[0]
             if(group.admin.pk == self.pk):
                 group.can_join_directly = setting
+                group.save()
                 return 'Changed the setting for the group'
             else:
                 return 'You are not admin of this group'
@@ -448,6 +448,7 @@ class PremiumUser(CasualUser):
             group = group[0]
             if(group.admin.pk == self.pk):
                 group.can_see_group_members = setting
+                group.save()
                 return 'Changed the setting for the group'
             else:
                 return 'You are not admin of this group'
