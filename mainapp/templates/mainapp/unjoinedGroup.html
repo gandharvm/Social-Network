@@ -1,0 +1,16 @@
+<table>
+    <tr>
+        <td>
+            <h1>{{groupTitle}} created by {{groupAdmin}}</h1>
+        </td>
+        <td>
+            <a href="{% url "mainPage" %}">Go Back</a>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <h2>You are not a member of this group</h2>
+            <a href="{% url "joinGroup" %}">Send join request</a>
+        </td>
+    </tr>
+</table>

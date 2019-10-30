@@ -37,5 +37,10 @@ urlpatterns = [
     path("getcreateGroupResponse/",views.getcreateGroupResponse,name="getcreateGroupResponse"),
     path("viewGroups/",views.viewGroups,name="viewGroups"),
     path("verify_otp_mainapp/",views.verify_otp_mainapp,name='verify_otp_mainapp'),
+    path("viewJR/",views.viewJR,name="viewJR"),
+    path("groupPS/",views.groupPS,name="groupPS"),
+    path("getPostOnGroupResponse/",views.getPostOnGroupResponse,name="getPostOnGroupResponse"),
+    path("joinGroup/",views.joinGroup,name="joinGroup"),
+
 
 ]

@@ -649,6 +649,18 @@ def viewGroups(request):
     attr={'title':"Select a group to view",'buttonlist':buttonlist,'list':grps,'responseType':'single','returnFunction':"getVGResponse"}
     return display_Menu(attr,request)
 
+def viewJR(request):
+    pass
+
+def groupPS(request):
+    pass
+
+def getPostOnGroupResponse(request):
+    pass
+
+def joinGroup(request):
+    pass
+
 def getVGResponse(request):
     button = request.POST['submit']
     if (button=='Go_Back'):
@@ -657,8 +669,15 @@ def getVGResponse(request):
         responseList = getResponseList(request)
         grp = responseList[0]
         if (grp.admin==u):
-            pass
+            attr={'groupTitle':grp.name,'groupAdmin':str(grp.admin),
+            'messageList':[str(m) for m in grp.messages.all()],
+            'memberList':[str(mem) for mem in grp.members.all()]}
+            return render(request,"mainapp/joinedGroup.html",attr)
         elif(u in grp.members.objects.all()):
-            pass
+            attr={'groupTitle':grp.name,'groupAdmin':str(grp.admin),
+            'messageList':[str(m) for m in grp.messages.all()],
+            'memberList':[str(mem) for mem in grp.members.all()]}
+            return render(request,"mainapp/joinedGroup.html",attr)
         else:
-            pass
+            attr={'groupTitle':grp.name,'groupAdmin':str(grp.admin)}
+            return render(request,"mainapp/unjoinedGroup.html")
