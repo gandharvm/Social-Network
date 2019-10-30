@@ -246,18 +246,15 @@ def getFriendRequestResponse(request):
     
 
 def getMoneyRequestResponse1(request,responseList):
-<<<<<<< HEAD
     l=intHolder.objects.get(pk=1)
     try:
         l.num=responseList[0].pk
+        u.intHolder=responseList[0].pk
     except:
         error = 'Select a money request'
         return HttpResponseRedirect(reverse('mainPage'))
     l.save()
-=======
-    u.intHolder=responseList[0].pk
     u.save()
->>>>>>> ec681cf979844596a61d802ac766ae711af94ec0
     return enterMoneytoSend(request)
 
 def getMoneyRequestResponse2(request):
@@ -328,7 +325,10 @@ def getFLResponse(request):
             error = 'Friend not selected'
             return HttpResponseRedirect(reverse('mainPage'))
     elif(button=="Unfriend"):
-        error = u.unfriend(responseList[0].pk)
+        try:
+            error = u.unfriend(responseList[0].pk)
+        except IndexError:
+            error = 'Friend not selected'  
         return HttpResponseRedirect(reverse("mainPage"))
     elif(button=="Send_Money_Request"):
         generated_token = otp_mail.generate_token()
@@ -373,14 +373,20 @@ def verify_otp_mainapp(request):
 def getAccept_MoneyRequestResponse(request):
     global error
     responseList=getResponseList(request)
-    error = u.accept_money(responseList[0].pk)
-    return HttpResponseRedirect(reverse('displayMainMenu'))
+    try:
+        error = u.accept_money(responseList[0].pk)
+    except:
+        error = 'Money request not selected'
+    return HttpResponseRedirect(reverse('mainPage'))
 
 def getDecline_MoneyRequestResponse(request):
     global error
     responseList=getResponseList(request)
-    error = u.reject_money(responseList[0].pk)
-    return HttpResponseRedirect(reverse('displayMainMenu'))
+    try:
+        error = u.reject_money(responseList[0].pk)
+    except IndexError:
+        error = 'Money request not selected'
+    return HttpResponseRedirect(reverse('mainPage'))
 
 def getPostOnOwnTimelineResponse(request):
     global error
@@ -391,18 +397,15 @@ def getPostOnOwnTimelineResponse(request):
 
 def getPostOnOtherTimelineResponse1(request):
     responseList=getResponseList(request)
-<<<<<<< HEAD
     l=intHolder.objects.get(pk=1)
     try:
         l.num=responseList[0].pk
+        u.intHolder=responseList[0].pk
     except:
         error = 'Select a friend first'
         return HttpResponseRedirect(reverse('mainPage'))
     l.save()
-=======
-    u.intHolder=responseList[0].pk
     u.save()
->>>>>>> ec681cf979844596a61d802ac766ae711af94ec0
     attr={'title':"Enter Post Content",'submitText':"Post",'returnFunction':'getPostOnOtherTimelineResponse2'}
     return display_textbox(attr,request)
 
@@ -417,18 +420,15 @@ def getSendPrivateMessageRequest1(request):
     button=request.POST['submit']
     if(button==buttonlist[0]):
         responseList=getResponseList(request)
-<<<<<<< HEAD
         l=intHolder.objects.get(pk=1)
         try:
             l.num=responseList[0].pk
+            u.intHolder=responseList[0].pk
         except IndexError:
             error = 'Select a user'
             return HttpResponseRedirect(reverse('mainPage'))
         l.save()
-=======
-        u.intHolder=responseList[0].pk
         u.save()
->>>>>>> ec681cf979844596a61d802ac766ae711af94ec0
         attr={'title':"Enter Messsage",'submitText':"Send",'returnFunction':'getSendPrivateMessageRequest2'}
         return display_textbox(attr,request)
     else:
@@ -658,7 +658,11 @@ def getVPResponse(request):
 
 def getViewPostOfFriendResponse(request):
     responseList=getResponseList(request)
-    friend = responseList[0]
+    try:
+        friend = responseList[0]
+    except:
+        error = 'friend not selected'
+        return HttpResponseRedirect(reverse("mainPage"))
     timeline = Timeline.objects.get(timeline_of=friend)
     posts=timeline.posts.all()
     attr = {
@@ -795,7 +799,11 @@ def getVGResponse(request,grp=1):
     elif(grp!=1 or button=='View_Group'):
         if(grp==1):
             responseList = getResponseList(request)
-            grp = responseList[0]
+            try:
+                grp = responseList[0]
+            except:
+                error = 'Group not selected'
+                return HttpResponseRedirect(reverse("mainPage"))
         u.intHolder=grp.pk
         u.save()
         if (grp.admin.pk==u.pk):
@@ -821,13 +829,11 @@ def getVGResponse(request,grp=1):
                 canJoin=True
             print(isRSent)
             attr={'groupTitle':grp.name,'groupAdmin':str(grp.admin),'groupAdmin':str(grp.admin),'sent':isRSent,'canJoin':canJoin,'price':grp.price}
-<<<<<<< HEAD
             try:
                 return render(request,"mainapp/unjoinedGroup.html",attr)
             except IndexError:
                 error = 'Group Not selected'
                 return HttpResponseRedirect(reverse('mainPage'))
-=======
             return render(request,"mainapp/unjoinedGroup.html",attr)
 
 
@@ -860,4 +866,3 @@ def getGroupSearchResponse(request):
     buttonlist = ['View_Group','Go_Back']
     attr={'title':"Select a group to view",'buttonlist':buttonlist,'list':grplist,'responseType':'single','returnFunction':"getVGResponse"}
     return display_Menu(attr,request)
->>>>>>> ec681cf979844596a61d802ac766ae711af94ec0
