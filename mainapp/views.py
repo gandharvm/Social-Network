@@ -399,7 +399,7 @@ def getFLResponse(request):
             return HttpResponseRedirect(reverse('mainPage'))
     elif(button=="Unfriend"):
         try:
-            u.error = u.unfriend(l[responseList][0].pk)
+            u.error = u.unfriend(l[responseList[0]].pk)
             u.save()
         except IndexError:
             u.error = 'Friend not selected'  
@@ -471,7 +471,7 @@ def getAccept_MoneyRequestResponse(request):
     responseList=getResponseList(request)
     l = u.money_requests.all()
     try:
-        u.error = u.accept_money(l[responseList][0].pk)
+        u.error = u.accept_money(l[responseList[0]].pk)
         u.save()
     except:
         u.error = 'Money request not selected'
