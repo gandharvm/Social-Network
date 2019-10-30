@@ -61,7 +61,7 @@
     <tr width="100%">
         <td colspan="3">
             <h2>Timeline</h2>
-            <div style="height: 200px; width: 200px; overflow: auto;">
+            <div style="height: 400px; width: 400px; overflow: auto; border: 1px solid;">
                 {% for content in postList %}
                 <p>{{content}}</p>
                 {% endfor %}
@@ -72,11 +72,12 @@
                 <input type="submit" value="Post">
             </form>
         </td>
-        <td colspan="5">
+        <td colspan="2" style="border:1px solid;">
             <table>
+                <tr ><td colspan="2" align="center"><b>Profile info</b></td> </tr>
                 <tr>
                     <td>
-                        <p>Wallet Balance:- {{balance}}</p>
+                        <p><b>Wallet Balance:-</b> {{balance}}</p>
                     </td>
                     <td>
                         <a href="{% url "depositMoney" %}">Top Up</a>
@@ -84,7 +85,7 @@
                 </tr>
                 <tr>
                     <td>
-                        <p>Transactions:- {{transactions}}</p>
+                        <p><b>Transactions:-</b> {{transactions}}</p>
                     </td>
                     <td>
                         <p>(Max {{maxt}})</p>
@@ -92,17 +93,17 @@
                 </tr>
                 <tr>
                     <td>
-                        <p>DOB:- {{DOB}}</p>
+                        <p><b>DOB:-</b> {{DOB}}</p>
                     </td>
                 </tr>
                 <tr>
                     <td>
-                        <p>E-Mail:- {{email}}</p>
+                        <p><b>E-Mail:-</b> {{email}}</p>
                     </td>
                 </tr>
                 <tr>
                     <td>
-                        <p>Account Type:- {{aType}}</p>
+                        <p><b>Account Type:-</b> {{aType}}</p>
                     </td>
                 </tr>
             </table>
@@ -111,7 +112,7 @@
     <tr width="100%">
         <td colspan="3">
             <h2>Messages</h2>
-            <div style="height: 200px; width: 200px; overflow: auto;">
+            <div style="height: 400px; width: 400px; overflow: auto; border: 1px solid;">
                 {% for content in messageList %}
                 <p>{{content}}</p>
                 {% endfor %}

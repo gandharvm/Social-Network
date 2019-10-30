@@ -9,7 +9,7 @@ from django.core.mail import EmailMessage
 from login.utils import TOTPVerification
 
 modelList=[]
-# u=CasualUser.objects.get(username="Gandharv2")
+# u=CommercialUser.objects.get(username="udayaan17119Commercial")
 u = None
 # u=CasualUser()
 otp_mail = TOTPVerification()
@@ -18,9 +18,9 @@ error = ''
 
 # view models list
 def display_Menu(attr,request) :
-    # # check if user is authenticated 
-    # if not request.user.is_authenticated:
-    #     return HttpResponseRedirect(reverse('loginPage'))
+    # check if user is authenticated 
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('loginPage'))
     global error
     global modelList
     modelList=attr['list']
@@ -45,16 +45,16 @@ def display_Menu(attr,request) :
     
 
 def mainPage(request):
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse('loginPage'))
+    # if not request.user.is_authenticated:
+    #     return HttpResponseRedirect(reverse('loginPage'))
     global u
     global error
 
-    u = CasualUser.objects.get(username=request.user.username)
-    if(u.category=='commercial'):
-        u=CommercialUser.objects.get(username=u.username)
-    elif(u.category=='premium'):
-        u=PremiumUser.objects.get(username=u.username)
+    # u = CasualUser.objects.get(username=request.user.username)
+    # if(u.category=='commercial'):
+    #     u=CommercialUser.objects.get(username=u.username)
+    # elif(u.category=='premium'):
+    #     u=PremiumUser.objects.get(username=u.username)
     
     timeline = Timeline.objects.get(timeline_of=u)
     postList=[str(post) for post in timeline.posts.all()]
@@ -849,6 +849,7 @@ def getVJRResponse(request):
     # # check if user is authenticated 
     # if not request.user.is_authenticated:
     #     return HttpResponseRedirect(reverse('loginPage'))
+    global error
     button=request.POST['submit']
     grp=Group.objects.get(pk=u.intHolder)
     if(button=="Go_Back"):
@@ -857,10 +858,10 @@ def getVJRResponse(request):
         rList=getResponseList(request)
         if(button=="Accept"):
             for r in rList:
-                print(u.accept_join_request(grp.pk,r.pk))
+                error=u.accept_join_request(grp.pk,r.pk)
         if(button=="Reject"):
             for r in rList:
-                print(u.reject_join_request(grp.pk,r.pk))
+                error=u.reject_join_request(grp.pk,r.pk)
         return(getVGResponse(request,Group.objects.get(pk=u.intHolder)))
 
 
