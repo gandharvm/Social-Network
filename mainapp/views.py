@@ -45,16 +45,16 @@ def display_Menu(attr,request) :
     
 
 def mainPage(request):
-    # if not request.user.is_authenticated:
-    #     return HttpResponseRedirect(reverse('loginPage'))
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('loginPage'))
     global u
     global error
 
-    # u = CasualUser.objects.get(username=request.user.username)
-    # if(u.category=='commercial'):
-    #     u=CommercialUser.objects.get(username=u.username)
-    # elif(u.category=='premium'):
-    #     u=PremiumUser.objects.get(username=u.username)
+    u = CasualUser.objects.get(username=request.user.username)
+    if(u.category=='commercial'):
+        u=CommercialUser.objects.get(username=u.username)
+    elif(u.category=='premium'):
+        u=PremiumUser.objects.get(username=u.username)
     
     timeline = Timeline.objects.get(timeline_of=u)
     postList=[str(post) for post in timeline.posts.all()]
@@ -74,8 +74,8 @@ def mainPage(request):
 
 def getUpgradeResponse(request):
     # # check if user is authenticated 
-    # if not request.user.is_authenticated:
-    #     return HttpResponseRedirect(reverse('loginPage'))
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('loginPage'))
     button=request.POST['submit']
     global u
     if(button=="Go_Back"):
@@ -97,8 +97,8 @@ def getUpgradeResponse(request):
 def upgradeAccount(request):
     
     # # check if user is authenticated 
-    # if not request.user.is_authenticated:
-    #     return HttpResponseRedirect(reverse('loginPage'))
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('loginPage'))
     global u,error
     timeline = Timeline.objects.get(timeline_of=u)
     postList=[str(post) for post in timeline.posts.all()]
@@ -128,8 +128,8 @@ def upgradeAccount(request):
 # display Main Menu
 def displayMainMenu(request):
     # check if user is authenticated 
-    # if not request.user.is_authenticated:
-    #     return HttpResponseRedirect(reverse('loginPage'))
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('loginPage'))
     l=[]
     if(isinstance(u,CasualUser)):
         l=menuListCasual
@@ -153,8 +153,8 @@ def getIndexList(string):
 
 def friendRequests(request):
     # # check if user is authenticated 
-    # if not request.user.is_authenticated:
-    #     return HttpResponseRedirect(reverse('loginPage'))
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('loginPage'))
     l=u.friend_requests.filter()
     buttonlist=["Accept","Decline","Go_Back"]
     attr={'list':l,'title':'Select requests to accept/decline','buttonlist':buttonlist,'responseType':'multi','returnFunction':"getFRADResponse"}
@@ -162,8 +162,8 @@ def friendRequests(request):
 
 def moneyRequests(request):
     # # check if user is authenticated 
-    # if not request.user.is_authenticated:
-    #     return HttpResponseRedirect(reverse('loginPage'))
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('loginPage'))
     l=u.money_requests.all()
     buttonlist=["Accept","Decline","Go_Back"]
     attr={'list':l,'title':'Select requests to accept/decline','buttonlist':buttonlist,'responseType':'multi','returnFunction':"getMRADResponse"}
@@ -171,8 +171,8 @@ def moneyRequests(request):
 
 def viewFriends(request):
     # # check if user is authenticated 
-    # if not request.user.is_authenticated:
-    #     return HttpResponseRedirect(reverse('loginPage'))
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('loginPage'))
     l=u.friends.all()
     buttonlist=["View_Profile/Timeline","Unfriend","Send_Money_Request","Go_Back"]
     attr={'list':l,'title':'Here are your friends','buttonlist':buttonlist,'responseType':'single','returnFunction':"getFLResponse"}    
@@ -190,8 +190,8 @@ def getIndexList_Mutli(stringList):
 
 def sendFriendRequest(request):
     # # check if user is authenticated 
-    # if not request.user.is_authenticated:
-    #     return HttpResponseRedirect(reverse('loginPage'))
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('loginPage'))
     global u
     l=CasualUser.objects.all()
     m2=u.friends.all()
@@ -205,8 +205,8 @@ def sendFriendRequest(request):
 
 def acceptMoneyRequest(request):
     # # check if user is authenticated 
-    # if not request.user.is_authenticated:
-    #     return HttpResponseRedirect(reverse('loginPage'))
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('loginPage'))
     global u
     l = u.money_requests.all()
     attr = {'list':l,'title':'Accept money from a friend','submitText':'accept','responseType':'single','returnFunction':"getAccept_MoneyRequestResponse" }
@@ -214,8 +214,8 @@ def acceptMoneyRequest(request):
 
 def declineMoneyRequest(request):
     # # check if user is authenticated 
-    # if not request.user.is_authenticated:
-    #     return HttpResponseRedirect(reverse('loginPage'))
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('loginPage'))
     global u
     l = u.money_requests.all()
     attr = {'list':l,'title':'Accept money from a friend','submitText':'accept','responseType':'single','returnFunction':"getDecline_MoneyRequestResponse" }
@@ -223,8 +223,8 @@ def declineMoneyRequest(request):
 
 def post_OnOwnTimeline(request) :
     # # check if user is authenticated 
-    # if not request.user.is_authenticated:
-    #     return HttpResponseRedirect(reverse('loginPage'))
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('loginPage'))
     global u
     attr = {'title':"Type content on your Post",'submitText':"Post",'returnFunction':"getPostOnOwnTimelineResponse"}
     return display_textbox(attr,request)
@@ -232,8 +232,8 @@ def post_OnOwnTimeline(request) :
 # TODO in view friends
 def post_OnOthersTimeline(request):
     # # check if user is authenticated 
-    # if not request.user.is_authenticated:
-    #     return HttpResponseRedirect(reverse('loginPage'))
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('loginPage'))
     global u
     l=u.friends.all()
     attr = {'list':l,'title':'Post on friends Timeline','submitText':'Select','responseType':'single','returnFunction':"getPostOnOtherTimelineResponse1" }
@@ -241,8 +241,8 @@ def post_OnOthersTimeline(request):
 
 def send_private_message(request):
     # # check if user is authenticated 
-    # if not request.user.is_authenticated:
-    #     return HttpResponseRedirect(reverse('loginPage'))
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('loginPage'))
     global u
     l=[]
     if(isinstance(u,CommercialUser)):
@@ -255,8 +255,8 @@ def send_private_message(request):
 
 def getResponseList(request):
     # # check if user is authenticated 
-    # if not request.user.is_authenticated:
-    #     return HttpResponseRedirect(reverse('loginPage'))
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('loginPage'))
     responseType = request.POST['responseType']
 
     indexList = []
@@ -276,8 +276,8 @@ def getResponseList(request):
 
 def getFriendRequestResponse(request):
     # # check if user is authenticated 
-    # if not request.user.is_authenticated:
-    #     return HttpResponseRedirect(reverse('loginPage'))
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('loginPage'))
     global error
     buttonlist=['Send_request',"Go_back"]
     responseList=getResponseList(request)
@@ -291,6 +291,8 @@ def getFriendRequestResponse(request):
     
 
 def getMoneyRequestResponse1(request,responseList):
+     if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('loginPage'))
     try:
         u.intHolder=responseList[0].pk
     except:
@@ -301,8 +303,8 @@ def getMoneyRequestResponse1(request,responseList):
 
 def getMoneyRequestResponse2(request):
     # # check if user is authenticated 
-    # if not request.user.is_authenticated:
-    #     return HttpResponseRedirect(reverse('loginPage'))
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('loginPage'))
     global error
     amount=request.POST['text']
     try:
@@ -315,8 +317,8 @@ def getMoneyRequestResponse2(request):
 
 def getMRADResponse(request):
     # # check if user is authenticated 
-    # if not request.user.is_authenticated:
-    #     return HttpResponseRedirect(reverse('loginPage'))
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('loginPage'))
     global error
     responseList=getResponseList(request)
     button=request.POST['submit']
@@ -334,8 +336,8 @@ def getMRADResponse(request):
 
 def getFRADResponse(request):
     # # check if user is authenticated 
-    # if not request.user.is_authenticated:
-    #     return HttpResponseRedirect(reverse('loginPage'))
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('loginPage'))
     global error
     responseList=getResponseList(request)
     button= request.POST['submit']
@@ -353,8 +355,8 @@ def getFRADResponse(request):
 def viewFriendProfile(friend,request):
     global error
     # # check if user is authenticated 
-    # if not request.user.is_authenticated:
-    #     return HttpResponseRedirect(reverse('loginPage'))
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('loginPage'))
     infoList=[]
     u.intHolder=friend.pk
     u.save()
@@ -372,8 +374,8 @@ def viewFriendProfile(friend,request):
 
 def getFLResponse(request):
     # # check if user is authenticated 
-    # if not request.user.is_authenticated:
-    #     return HttpResponseRedirect(reverse('loginPage'))
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('loginPage'))
     global error
     responseList=getResponseList(request)
     button= request.POST['submit']
@@ -415,8 +417,8 @@ def getFLResponse(request):
     
 def verify_otp_mainapp(request):
     # # check if user is authenticated 
-    # if not request.user.is_authenticated:
-    #     return HttpResponseRedirect(reverse('loginPage'))
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('loginPage'))
     otp = request.POST['otp']
     username = request.POST['username']
     userCat = request.POST['userCat']
@@ -434,8 +436,8 @@ def verify_otp_mainapp(request):
 
 def getAccept_MoneyRequestResponse(request):
     # # check if user is authenticated 
-    # if not request.user.is_authenticated:
-    #     return HttpResponseRedirect(reverse('loginPage'))
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('loginPage'))
     global error
     responseList=getResponseList(request)
     try:
@@ -446,8 +448,8 @@ def getAccept_MoneyRequestResponse(request):
 
 def getDecline_MoneyRequestResponse(request):
     # # check if user is authenticated 
-    # if not request.user.is_authenticated:
-    #     return HttpResponseRedirect(reverse('loginPage'))
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('loginPage'))
     global error
     responseList=getResponseList(request)
     try:
@@ -458,8 +460,8 @@ def getDecline_MoneyRequestResponse(request):
 
 def getPostOnOwnTimelineResponse(request):
     # # check if user is authenticated 
-    # if not request.user.is_authenticated:
-    #     return HttpResponseRedirect(reverse('loginPage'))
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('loginPage'))
     global error
     text = request.POST['potText']
     text = text[:500]
@@ -468,8 +470,8 @@ def getPostOnOwnTimelineResponse(request):
 
 def getPostOnOtherTimelineResponse1(request):
     # # check if user is authenticated 
-    # if not request.user.is_authenticated:
-    #     return HttpResponseRedirect(reverse('loginPage'))
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('loginPage'))
     responseList=getResponseList(request)
     try:
         u.intHolder=responseList[0].pk
@@ -482,8 +484,8 @@ def getPostOnOtherTimelineResponse1(request):
 
 def getPostOnOtherTimelineResponse2(request):
     # # check if user is authenticated 
-    # if not request.user.is_authenticated:
-    #     return HttpResponseRedirect(reverse('loginPage'))
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('loginPage'))
     text = request.POST['potText']
     text = text[:500]
     u.post_on_other_timeline(u.intHolder,text)
@@ -491,8 +493,8 @@ def getPostOnOtherTimelineResponse2(request):
 
 def getSendPrivateMessageRequest1(request):
     # # check if user is authenticated 
-    # if not request.user.is_authenticated:
-    #     return HttpResponseRedirect(reverse('loginPage'))
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('loginPage'))
     buttonlist=["Select","Go_Back"]
     button=request.POST['submit']
     if(button==buttonlist[0]):
@@ -511,8 +513,8 @@ def getSendPrivateMessageRequest1(request):
 
 def getSendPrivateMessageRequest2(request):
     # # check if user is authenticated 
-    # if not request.user.is_authenticated:
-    #     return HttpResponseRedirect(reverse('loginPage'))
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('loginPage'))
     global error
     text = request.POST['text']
     text = text[:500]
@@ -521,8 +523,8 @@ def getSendPrivateMessageRequest2(request):
 
 def getMenuResponse(request):
     # check if user is authenticated 
-    # if not request.user.is_authenticated:
-    #     return HttpResponseRedirect(reverse('loginPage'))
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('loginPage'))
     
     responseType = request.POST['responseType']
     button= request.POST['submit']
@@ -584,8 +586,8 @@ def getMenuResponse(request):
 
 def getPageResponse(request):
     # # check if user is authenticated 
-    # if not request.user.is_authenticated:
-    #     return HttpResponseRedirect(reverse('loginPage'))
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('loginPage'))
     global error
     content=request.POST['text']
     fk=Page.objects.filter(admin=u)
@@ -599,16 +601,16 @@ def getPageResponse(request):
 
 def createPage(request):
     # # check if user is authenticated 
-    # if not request.user.is_authenticated:
-    #     return HttpResponseRedirect(reverse('loginPage'))
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('loginPage'))
     attr={'title':"Enter content for the page",'submitText':"Create Page",'returnFunction':"getPageResponse"}
     return display_textbox(attr,request)
 
 # display text box
 def display_textbox(attr,request) :
     # # check if user is authenticated 
-    # if not request.user.is_authenticated:
-    #     return HttpResponseRedirect(reverse('loginPage'))
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('loginPage'))
 
     title=attr['title']
     submitText=attr['submitText']
@@ -622,22 +624,22 @@ def display_textbox(attr,request) :
 
 def depositMoney(request):
     # # check if user is authenticated 
-    # if not request.user.is_authenticated:
-    #     return HttpResponseRedirect(reverse('loginPage'))
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('loginPage'))
     attr={'title':"Enter amount to deposit",'submitText':"Deposit",'returnFunction':'getDepositResponse'}
     return display_textbox(attr,request)
 
 def enterMoneytoSend(request):
     # # check if user is authenticated 
-    # if not request.user.is_authenticated:
-    #     return HttpResponseRedirect(reverse('loginPage'))
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('loginPage'))
     attr={'title':"Enter amount to send",'submitText':"Send",'returnFunction':'getMoneyRequestResponse2'}
     return display_textbox(attr,request)
 
 def getDepositResponse(request):
     # # check if user is authenticated 
-    # if not request.user.is_authenticated:
-    #     return HttpResponseRedirect(reverse('loginPage'))
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('loginPage'))
     global error
     amount=request.POST['text']
     try:
@@ -650,8 +652,8 @@ def getDepositResponse(request):
 
 def viewContentlist(attr,request):
     # check if user is authenticated 
-    # if not request.user.is_authenticated:
-    #     return HttpResponseRedirect(reverse('loginPage'))
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('loginPage'))
     title=attr['title']
     modelList=attr['list']
     contentList=[]
@@ -666,8 +668,8 @@ def viewContentlist(attr,request):
 
 def privacySettings(request):
     # # check if user is authenticated 
-    # if not request.user.is_authenticated:
-    #     return HttpResponseRedirect(reverse('loginPage'))
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('loginPage'))
     buttonList=["Confirm_Settings","Go_Back"]
     privacyList=[]
     if(u.others_can_post):
@@ -696,8 +698,8 @@ def privacySettings(request):
 
 def getPrivacyResponse(request):
     # # check if user is authenticated 
-    # if not request.user.is_authenticated:
-    #     return HttpResponseRedirect(reverse('loginPage'))
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('loginPage'))
     global error
     button=request.POST['submit']
     responseList=getResponseList(request)
@@ -722,8 +724,8 @@ def getPrivacyResponse(request):
 
 def viewMyPosts(request):
     # # check if user is authenticated 
-    # if not request.user.is_authenticated:
-    #     return HttpResponseRedirect(reverse('loginPage'))
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('loginPage'))
     global u
     mytimeline=Timeline.objects.get(timeline_of=u)
     posts=mytimeline.posts.all()
@@ -735,8 +737,8 @@ def viewMyPosts(request):
 
 def viewFriendsPost(request):
     # # check if user is authenticated 
-    # if not request.user.is_authenticated:
-    #     return HttpResponseRedirect(reverse('loginPage'))
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('loginPage'))
     global u
     l=u.friends.all()
     attr = {'list':l,'title':'Select friend','submitText':'Select','responseType':'single','returnFunction':"getViewPostOfFriendResponse" }
@@ -744,8 +746,8 @@ def viewFriendsPost(request):
 
 def viewPages(request):
     # # check if user is authenticated 
-    # if not request.user.is_authenticated:
-    #     return HttpResponseRedirect(reverse('loginPage'))
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('loginPage'))
     l=Page.objects.all()
     buttonlist=["View","Go_back"]
     attr={'title':"Select a page to view",'buttonlist':buttonlist,'list':l,'responseType':'single','returnFunction':"getVPResponse"}
@@ -754,8 +756,8 @@ def viewPages(request):
 def getVPResponse(request):
     global error
     # # check if user is authenticated 
-    # if not request.user.is_authenticated:
-    #     return HttpResponseRedirect(reverse('loginPage'))
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('loginPage'))
     button=request.POST['submit']
     if(button=="Go_back"):
         return HttpResponseRedirect(reverse("mainPage"))
@@ -777,8 +779,8 @@ def getVPResponse(request):
 
 def getViewPostOfFriendResponse(request):
     # # check if user is authenticated 
-    # if not request.user.is_authenticated:
-    #     return HttpResponseRedirect(reverse('loginPage'))
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('loginPage'))
     responseList=getResponseList(request)
     try:
         friend = responseList[0]
@@ -795,15 +797,15 @@ def getViewPostOfFriendResponse(request):
 
 def textForm_Multi(attr,request):
     # # check if user is authenticated 
-    # if not request.user.is_authenticated:
-    #     return HttpResponseRedirect(reverse('loginPage'))
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('loginPage'))
     return render(request,"mainapp/textForm_multiple.html",attr)
 
 
 def createGroup(request):
     # # check if user is authenticated 
-    # if not request.user.is_authenticated:
-    #     return HttpResponseRedirect(reverse('loginPage'))
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('loginPage'))
     keys = ['Enter_Group_Name','Enter_price_for_each_member']
     buttonlist = ['create_group']
     attr= {
@@ -816,8 +818,8 @@ def createGroup(request):
 
 def getcreateGroupResponse(request):
     # # check if user is authenticated 
-    # if not request.user.is_authenticated:
-    #     return HttpResponseRedirect(reverse('loginPage'))
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('loginPage'))
     global error
     grpname = request.POST['Enter_Group_Name']
     price = request.POST['Enter_price_for_each_member']
@@ -831,8 +833,8 @@ def getcreateGroupResponse(request):
 
 def viewGroups(request):
     # # check if user is authenticated 
-    # if not request.user.is_authenticated:
-    #     return HttpResponseRedirect(reverse('loginPage'))
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('loginPage'))
     grps = Group.objects.all()
     buttonlist = ['View_Group','Go_Back']
     attr={'title':"Select a group to view",'buttonlist':buttonlist,'list':grps,'responseType':'single','returnFunction':"getVGResponse"}
@@ -840,8 +842,8 @@ def viewGroups(request):
 
 def viewJR(request):
     # # check if user is authenticated 
-    # if not request.user.is_authenticated:
-    #     return HttpResponseRedirect(reverse('loginPage'))
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('loginPage'))
     grp=Group.objects.get(pk=u.intHolder)
     buttonlist=['Accept','Reject','Go_Back']
     l=grp.join_requests.all()
@@ -851,8 +853,8 @@ def viewJR(request):
 
 def getVJRResponse(request):
     # # check if user is authenticated 
-    # if not request.user.is_authenticated:
-    #     return HttpResponseRedirect(reverse('loginPage'))
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('loginPage'))
     global error
     button=request.POST['submit']
     grp=Group.objects.get(pk=u.intHolder)
@@ -871,8 +873,8 @@ def getVJRResponse(request):
 
 def groupPS(request):
     # # check if user is authenticated 
-    # if not request.user.is_authenticated:
-    #     return HttpResponseRedirect(reverse('loginPage'))
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('loginPage'))
     s3=""
     s1=""
     s2=""
@@ -893,8 +895,8 @@ def groupPS(request):
 
 def getGSResponse(request):
     # # check if user is authenticated 
-    # if not request.user.is_authenticated:
-    #     return HttpResponseRedirect(reverse('loginPage'))
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('loginPage'))
     grp=Group.objects.get(pk=u.intHolder)
     button=request.POST['submit']
     if(button=="Go_Back"):
@@ -919,8 +921,8 @@ def getGSResponse(request):
 
 def getGCNResponse(request):
     # # check if user is authenticated 
-    # if not request.user.is_authenticated:
-    #     return HttpResponseRedirect(reverse('loginPage'))
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('loginPage'))
     name=request.POST['text']
     grp=Group.objects.get(pk=u.intHolder)
     print(u.change_name(grp.pk,name))
@@ -928,8 +930,8 @@ def getGCNResponse(request):
 
 def getGCPResponse(request):
     # # check if user is authenticated 
-    # if not request.user.is_authenticated:
-    #     return HttpResponseRedirect(reverse('loginPage'))
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('loginPage'))
     price=request.POST['text']
     grp=Group.objects.get(pk=u.intHolder)
     print(u.change_price(grp.pk,float(price)))
@@ -939,16 +941,16 @@ def getGCPResponse(request):
 
 def getPostOnGroupResponse(request):
     # # check if user is authenticated 
-    # if not request.user.is_authenticated:
-    #     return HttpResponseRedirect(reverse('loginPage'))
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('loginPage'))
     message=request.POST['pogText']
     print(u.send_message_on_group(u.intHolder,message))
     return(getVGResponse(request,Group.objects.get(pk=u.intHolder)))
 
 def joinGroup(request):
     # # check if user is authenticated 
-    # if not request.user.is_authenticated:
-    #     return HttpResponseRedirect(reverse('loginPage'))
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('loginPage'))
     grp=Group.objects.get(pk=u.intHolder)
     print(u.send_join_request(u.intHolder))
     return(HttpResponseRedirect(reverse("mainPage")))
@@ -956,8 +958,8 @@ def joinGroup(request):
 def getVGResponse(request,grp=1):
     global error
     # # check if user is authenticated 
-    # if not request.user.is_authenticated:
-    #     return HttpResponseRedirect(reverse('loginPage'))
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('loginPage'))
     button=1
     if(grp==1):
         button = request.POST['submit']
@@ -1013,22 +1015,22 @@ def getVGResponse(request,grp=1):
 
 def search_friend(request):
     # # check if user is authenticated 
-    # if not request.user.is_authenticated:
-    #     return HttpResponseRedirect(reverse('loginPage'))
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('loginPage'))
     attr = {'title':"Enter friend name",'submitText':"Search",'returnFunction':"getFriendSearchResponse"}
     return display_textbox(attr,request)
 
 def search_group(request):
     # # check if user is authenticated 
-    # if not request.user.is_authenticated:
-    #     return HttpResponseRedirect(reverse('loginPage'))
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('loginPage'))
     attr = {'title':"Enter group name",'submitText':"Search",'returnFunction':"getGroupSearchResponse"}
     return display_textbox(attr,request)
 
 def getFriendSearchResponse(request):
     # # check if user is authenticated 
-    # if not request.user.is_authenticated:
-    #     return HttpResponseRedirect(reverse('loginPage'))
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('loginPage'))
     global error
     text = request.POST['text']
     userlist = u.friends.filter(username=text)
@@ -1041,8 +1043,8 @@ def getFriendSearchResponse(request):
 
 def getGroupSearchResponse(request):
     # # check if user is authenticated 
-    # if not request.user.is_authenticated:
-    #     return HttpResponseRedirect(reverse('loginPage'))
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('loginPage'))
     global error
     text = request.POST['text']
     grplist = Group.objects.filter(name=text)
