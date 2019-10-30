@@ -9,9 +9,9 @@ from django.core.mail import EmailMessage
 from login.utils import TOTPVerification
 
 modelList=[]
-u=CasualUser.objects.get(username="Harsimar2")
-# u = None
-u=CasualUser()
+# u=CasualUser.objects.get(username="Harsimar2")
+u = None
+# u=CasualUser()
 otp_mail = TOTPVerification()
 
 error = ''
@@ -50,11 +50,11 @@ def mainPage(request):
     global u
     global error
 
-    # u = CasualUser.objects.get(username=request.user.username)
-    # if(u.category=='commercial'):
-    #     u=CommercialUser.objects.get(username=u.username)
-    # elif(u.category=='premium'):
-    #     u=PremiumUser.objects.get(username=u.username)
+    u = CasualUser.objects.get(username=request.user.username)
+    if(u.category=='commercial'):
+        u=CommercialUser.objects.get(username=u.username)
+    elif(u.category=='premium'):
+        u=PremiumUser.objects.get(username=u.username)
     
     timeline = Timeline.objects.get(timeline_of=u)
     postList=[str(post) for post in timeline.posts.all()]
