@@ -215,6 +215,13 @@ class CasualUser(models.Model):
         self.username = "!!!"
         self.save()
         new_instance.save()
+
+        for friend in self.friends.all():
+            new_instance.friends.add(friend)
+            friend.friends.remove(self)
+            friend.friends.add(new_instance)
+        
+
         fk = MoneyRequest.objects.filter(from_user=self.pk)
         if(fk.exists()):
             for request in fk:
