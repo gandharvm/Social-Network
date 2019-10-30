@@ -88,7 +88,6 @@ def getUpgradeResponse(request):
         if(resp.index==3):
             l=u.toPremium('platinum')
         u=l
-        # print(u)
         return HttpResponseRedirect(reverse("mainPage"))
 
 
@@ -286,10 +285,14 @@ def getFriendRequestResponse(request):
     
 
 def getMoneyRequestResponse1(request,responseList):
-    # # check if user is authenticated 
-    # if not request.user.is_authenticated:
-    #     return HttpResponseRedirect(reverse('loginPage'))
-    u.intHolder=responseList[0].pk
+    l=intHolder.objects.get(pk=1)
+    try:
+        l.num=responseList[0].pk
+        u.intHolder=responseList[0].pk
+    except:
+        error = 'Select a money request'
+        return HttpResponseRedirect(reverse('mainPage'))
+    l.save()
     u.save()
     return enterMoneytoSend(request)
 
@@ -370,9 +373,16 @@ def getFLResponse(request):
     responseList=getResponseList(request)
     button= request.POST['submit']
     if(button=="View_Profile/Timeline"):
-        return viewFriendProfile(responseList[0],request)
+        try:
+            return viewFriendProfile(responseList[0],request)
+        except IndexError:
+            error = 'Friend not selected'
+            return HttpResponseRedirect(reverse('mainPage'))
     elif(button=="Unfriend"):
-        error = u.unfriend(responseList[0].pk)
+        try:
+            error = u.unfriend(responseList[0].pk)
+        except IndexError:
+            error = 'Friend not selected'  
         return HttpResponseRedirect(reverse("mainPage"))
     elif(button=="Send_Money_Request"):
         generated_token = otp_mail.generate_token()
@@ -388,7 +398,11 @@ def getFLResponse(request):
             mail_subject, message, to=[u.email_id]
         )
         email.send()
-        return render(request,'mainapp/otp_page.html',context={"Msg": "Enter OTP below!","username":responseList[0].username,"userCat":responseList[0].category})
+        try:
+            return render(request,'mainapp/otp_page.html',context={"Msg": "Enter OTP below!","username":responseList[0].username,"userCat":responseList[0].category})
+        except IndexError:
+            error = 'Friend not selected'
+            return HttpResponseRedirect(reverse('mainPage'))
     elif(button=="Post_on_timeline"):
         pass
     elif(button=="Go_Back"):
@@ -419,8 +433,11 @@ def getAccept_MoneyRequestResponse(request):
     #     return HttpResponseRedirect(reverse('loginPage'))
     global error
     responseList=getResponseList(request)
-    error = u.accept_money(responseList[0].pk)
-    return HttpResponseRedirect(reverse('displayMainMenu'))
+    try:
+        error = u.accept_money(responseList[0].pk)
+    except:
+        error = 'Money request not selected'
+    return HttpResponseRedirect(reverse('mainPage'))
 
 def getDecline_MoneyRequestResponse(request):
     # # check if user is authenticated 
@@ -428,8 +445,11 @@ def getDecline_MoneyRequestResponse(request):
     #     return HttpResponseRedirect(reverse('loginPage'))
     global error
     responseList=getResponseList(request)
-    error = u.reject_money(responseList[0].pk)
-    return HttpResponseRedirect(reverse('displayMainMenu'))
+    try:
+        error = u.reject_money(responseList[0].pk)
+    except IndexError:
+        error = 'Money request not selected'
+    return HttpResponseRedirect(reverse('mainPage'))
 
 def getPostOnOwnTimelineResponse(request):
     # # check if user is authenticated 
@@ -446,7 +466,14 @@ def getPostOnOtherTimelineResponse1(request):
     # if not request.user.is_authenticated:
     #     return HttpResponseRedirect(reverse('loginPage'))
     responseList=getResponseList(request)
-    u.intHolder=responseList[0].pk
+    l=intHolder.objects.get(pk=1)
+    try:
+        l.num=responseList[0].pk
+        u.intHolder=responseList[0].pk
+    except:
+        error = 'Select a friend first'
+        return HttpResponseRedirect(reverse('mainPage'))
+    l.save()
     u.save()
     attr={'title':"Enter Post Content",'submitText':"Post",'returnFunction':'getPostOnOtherTimelineResponse2'}
     return display_textbox(attr,request)
@@ -468,7 +495,14 @@ def getSendPrivateMessageRequest1(request):
     button=request.POST['submit']
     if(button==buttonlist[0]):
         responseList=getResponseList(request)
-        u.intHolder=responseList[0].pk
+        l=intHolder.objects.get(pk=1)
+        try:
+            l.num=responseList[0].pk
+            u.intHolder=responseList[0].pk
+        except IndexError:
+            error = 'Select a user'
+            return HttpResponseRedirect(reverse('mainPage'))
+        l.save()
         u.save()
         attr={'title':"Enter Messsage",'submitText':"Send",'returnFunction':'getSendPrivateMessageRequest2'}
         return display_textbox(attr,request)
@@ -636,6 +670,27 @@ def privacySettings(request):
     # if not request.user.is_authenticated:
     #     return HttpResponseRedirect(reverse('loginPage'))
     buttonList=["Confirm_Settings","Go_Back"]
+    privacyList=[]
+    if(u.others_can_post):
+        privacyList.append(menuItem("Disallow others to post on your timeline",1))
+    else:
+        privacyList.append(menuItem("Allow others to post on your timeline",1))
+    
+    if(u.others_can_see_friends):
+        privacyList.append(menuItem("Disallow others to see your friends",2))
+    else:
+        privacyList.append(menuItem("Allow others to see your friends",2))
+    
+    if(u.others_can_see_email):
+        privacyList.append(menuItem("Disallow others to see your email",3))
+    else:
+        privacyList.append(menuItem("Allow others to see your email",3))
+    
+    if(u.others_can_see_dob):
+        privacyList.append(menuItem("Disallow others to see your DOB",4))
+    else:
+        privacyList.append(menuItem("Allow others to see your DOB",4))
+
     l=privacyList
     attr={'title':"Change your privacy settings here",'buttonlist':buttonList,'list':l,'responseType':'multi','returnFunction':"getPrivacyResponse"}
     return display_Menu(attr,request)
@@ -650,21 +705,16 @@ def getPrivacyResponse(request):
     if(button=="Go_Back"):
         return HttpResponseRedirect(reverse("mainPage"))
     elif(button=="Confirm_Settings"):
-        u.others_can_post=False
-        u.others_can_see_friends=False
-        u.others_can_see_email=False
-        u.others_can_see_dob=False
         for r in responseList:
             print(str(r))
             if(r.index==1):
-                u.others_can_post=True
+                u.others_can_post=not u.others_can_post
             elif(r.index==2):
-                u.others_can_see_friends=True
+                u.others_can_see_friends=not u.others_can_see_friends
             elif(r.index==3):
-                u.others_can_see_email=True
+                u.others_can_see_email=not u.others_can_see_email
             elif(r.index==4):
-                u.others_can_see_dob=True
-        print(u.others_can_post)
+                u.others_can_see_dob=not u.others_can_see_dob
         u.save()
         error = 'Privacy settings changed'
         return HttpResponseRedirect(reverse("mainPage"))
@@ -714,14 +764,22 @@ def getVPResponse(request):
         r=rList[0]
         print(r)
         attr={'username':r.admin,'content':r.Content}
-        return render(request,"mainapp/page.html",attr)
+        try:
+            return render(request,"mainapp/page.html",attr)
+        except IndexError:
+            error = 'Page not selected'
+            return HttpResponseRedirect(reverse('mainPage'))
 
 def getViewPostOfFriendResponse(request):
     # # check if user is authenticated 
     # if not request.user.is_authenticated:
     #     return HttpResponseRedirect(reverse('loginPage'))
     responseList=getResponseList(request)
-    friend = responseList[0]
+    try:
+        friend = responseList[0]
+    except:
+        error = 'friend not selected'
+        return HttpResponseRedirect(reverse("mainPage"))
     timeline = Timeline.objects.get(timeline_of=friend)
     posts=timeline.posts.all()
     attr = {
@@ -897,7 +955,11 @@ def getVGResponse(request,grp=1):
     elif(grp!=1 or button=='View_Group'):
         if(grp==1):
             responseList = getResponseList(request)
-            grp = responseList[0]
+            try:
+                grp = responseList[0]
+            except:
+                error = 'Group not selected'
+                return HttpResponseRedirect(reverse("mainPage"))
         u.intHolder=grp.pk
         u.save()
         if (grp.admin.pk==u.pk):
@@ -909,7 +971,11 @@ def getVGResponse(request,grp=1):
             attr={'groupTitle':grp.name,'groupAdmin':str(grp.admin),
             'messageList':[str(m) for m in grp.messages.all()],
             'memberList':[str(mem) for mem in grp.members.all()]}
-            return render(request,"mainapp/joinedGroup.html",attr)
+            try:
+                return render(request,"mainapp/joinedGroup.html",attr)
+            except:
+                error = 'Group not selected'
+                return HttpResponseRedirect(reverse('mainPage'))
         else:
             isRSent=False
             canJoin=False
@@ -919,6 +985,11 @@ def getVGResponse(request,grp=1):
                 canJoin=True
             print(isRSent)
             attr={'groupTitle':grp.name,'groupAdmin':str(grp.admin),'groupAdmin':str(grp.admin),'sent':isRSent,'canJoin':canJoin,'price':grp.price}
+            try:
+                return render(request,"mainapp/unjoinedGroup.html",attr)
+            except IndexError:
+                error = 'Group Not selected'
+                return HttpResponseRedirect(reverse('mainPage'))
             return render(request,"mainapp/unjoinedGroup.html",attr)
 
 
