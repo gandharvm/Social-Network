@@ -9,8 +9,8 @@ from django.core.mail import EmailMessage
 from login.utils import TOTPVerification
 
 modelList=[]
-u=CommercialUser.objects.get(username="Gandharv2")
-# u = None
+# u=CommercialUser.objects.get(username="udayaan17119Commercial")
+u = None
 # u=CasualUser()
 otp_mail = TOTPVerification()
 
@@ -18,9 +18,9 @@ error = ''
 
 # view models list
 def display_Menu(attr,request) :
-    # # check if user is authenticated 
-    # if not request.user.is_authenticated:
-    #     return HttpResponseRedirect(reverse('loginPage'))
+    # check if user is authenticated 
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('loginPage'))
     global error
     global modelList
     modelList=attr['list']
@@ -761,8 +761,12 @@ def getVPResponse(request):
         return HttpResponseRedirect(reverse("mainPage"))
     elif(button=="View"):
         rList=getResponseList(request)
-        r=rList[0]
-        print(r)
+        try:
+            r=rList[0]
+        except IndexError:
+            error = 'Page not selected'
+            return HttpResponseRedirect(reverse("mainPage"))
+        # print(r)
         attr={'username':r.admin,'content':r.Content,'Error':error}
         try:
             error = ''
@@ -849,6 +853,7 @@ def getVJRResponse(request):
     # # check if user is authenticated 
     # if not request.user.is_authenticated:
     #     return HttpResponseRedirect(reverse('loginPage'))
+    global error
     button=request.POST['submit']
     grp=Group.objects.get(pk=u.intHolder)
     if(button=="Go_Back"):
@@ -857,10 +862,10 @@ def getVJRResponse(request):
         rList=getResponseList(request)
         if(button=="Accept"):
             for r in rList:
-                print(u.accept_join_request(grp.pk,r.pk))
+                error=u.accept_join_request(grp.pk,r.pk)
         if(button=="Reject"):
             for r in rList:
-                print(u.reject_join_request(grp.pk,r.pk))
+                error=u.reject_join_request(grp.pk,r.pk)
         return(getVGResponse(request,Group.objects.get(pk=u.intHolder)))
 
 
@@ -896,7 +901,11 @@ def getGSResponse(request):
         return(getVGResponse(request,Group.objects.get(pk=u.intHolder)))
     elif(button=="Change_Setting"):
         rList=getResponseList(request)
-        resp=rList[0]
+        try:
+            resp=rList[0]
+        except IndexError:
+            error = 'No option selected'
+            return HttpResponseRedirect(reverse("mainPage"))
         if(resp.index==1):
             attr={'title':"Enter new price",'submitText':"Change Price",'returnFunction':"getGCPResponse"}
             return display_textbox(attr,request)
