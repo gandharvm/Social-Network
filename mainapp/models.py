@@ -210,6 +210,8 @@ class CasualUser(models.Model):
         fields = [f.name for f in CasualUser._meta.fields if f.name != 'id']
         values = dict([(x, getattr(self, x)) for x in fields])
         new_instance = PremiumUser(**values)
+        new_instance.category='premium'
+        
         # new_instance.User_ptr = self.User_ptr #re-assign related parent
         new_instance.plan = plan
         self.username = "!!!"
