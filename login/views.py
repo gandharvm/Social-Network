@@ -172,7 +172,7 @@ def choosePlan(request):
 
         plan = form.cleaned_data['plan']
         user = PremiumUser.create(
-            username=user1.username, plan=user1.plan, email_id=user1.email_reg, dob=user1.dob)
+            username=user1.username, plan=plan, email_id=user1.email_reg, dob=user1.dob)
         newUser = models.User.objects.create_user(
             user1.username, user1.email_reg, user1.password)
         user1.delete()
