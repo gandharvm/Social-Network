@@ -333,7 +333,7 @@ class PremiumUser(CasualUser):
             return 'Cannot create more groups'
         else:
             if(self.pay()):
-                x = self.create_group(self, group_name, can_send, price)
+                x = self.create_group(group_name, can_send, price)
                 return 'The Amount due for continued service deducted from your wallet\n' + x
             else:
                 return 'Please add money to your wallet as your payment is due.\nYou will not be able to use premium facilities without it'

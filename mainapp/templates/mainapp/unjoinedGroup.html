@@ -10,7 +10,11 @@
     <tr>
         <td>
             <h2>You are not a member of this group</h2>
-            <a href="{% url "joinGroup" %}">Send join request</a>
+            {% if not sent %}
+                <a href="{% url "joinGroup" %}">Send join request</a>
+            {% else %}
+                <p>Your join request is awaiting approval by group admin</p>
+            {% endif %}
         </td>
     </tr>
 </table>

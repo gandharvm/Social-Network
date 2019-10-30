@@ -41,6 +41,5 @@ urlpatterns = [
     path("groupPS/",views.groupPS,name="groupPS"),
     path("getPostOnGroupResponse/",views.getPostOnGroupResponse,name="getPostOnGroupResponse"),
     path("joinGroup/",views.joinGroup,name="joinGroup"),
-
-
+    path("getVGResponse/",views.getVGResponse,name="getVGResponse"),
 ]
