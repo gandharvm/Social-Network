@@ -9,7 +9,7 @@ from django.core.mail import EmailMessage
 from login.utils import TOTPVerification
 
 modelList=[]
-u=CasualUser.objects.get(username="Gandharv2")
+u=CommercialUser.objects.get(username="Gandharv2")
 # u = None
 # u=CasualUser()
 otp_mail = TOTPVerification()
@@ -590,9 +590,9 @@ def getPageResponse(request):
     content=request.POST['text']
     fk=Page.objects.filter(admin=u)
     if(fk.exists()):
-        fk[0].content=content
-        fk[0].save()
-
+        # fk[0].content=content
+        # fk[0].save()
+        error='You have already created a page'
     else:
         error = u.create_page(content)
     return HttpResponseRedirect(reverse("mainPage"))
