@@ -47,9 +47,9 @@ class CasualUser(models.Model):
             return 'User does not exist'
         to_user = to_user[0]
         from_user = self
-        if(from_user in to_user.friend_requests.all()):
+        if(from_user.pk in [l.pk for l in to_user.friend_requests.all()]):
             return 'Friend request already sent'
-        if(from_user in to_user.friend_set.all()):
+        if(from_user.pk in [l.pk for l in to_user.friend_set.all()]):
             return 'User is already a friend'
         to_user.friend_requests.add(from_user)
         # logger.info('user '+str(self) +
@@ -146,7 +146,7 @@ class CasualUser(models.Model):
         r = r[0]
         self.money_requests.remove(tid)
         r.delete()
-        if r.from_user in CasualUser.objects.all():
+        if r.from_user.pk in [l.pk for l in CasualUser.objects.all()]:
             u = u[0]
             logger.info(str(self)+' rejected money request from ' +
                         str(u)+' for '+str(r.amount)+' amount')
@@ -463,9 +463,10 @@ class PremiumUser(CasualUser):
             if group.admin == self:
                 if (not user.exists()):
                     return 'Join request does not exist'
-                if (user[0] not in CasualUser.objects.all()):
-                    return 'User does not exist'
                 user = user[0]
+                if (user.pk not in [l.pk for l in CasualUser.objects.all()]):
+                    return 'User does not exist'
+
                 if(user.wallet_money < group.price):
                     return 'User does not have enough money'
                 user.wallet_money -= group.price
