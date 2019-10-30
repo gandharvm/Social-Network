@@ -9,9 +9,9 @@ from django.core.mail import EmailMessage
 from login.utils import TOTPVerification
 
 modelList=[]
-u=CasualUser.objects.get(username="Harsimar2")
-# u = None
-u=CasualUser()
+# u=CasualUser.objects.get(username="Gandharv2")
+u = None
+# u=CasualUser()
 otp_mail = TOTPVerification()
 
 error = ''
@@ -21,6 +21,7 @@ def display_Menu(attr,request) :
     # # check if user is authenticated 
     # if not request.user.is_authenticated:
     #     return HttpResponseRedirect(reverse('loginPage'))
+    global error
     global modelList
     modelList=attr['list']
     title=attr['title']
@@ -36,22 +37,24 @@ def display_Menu(attr,request) :
         "rangeList": range(len(displayList)),
         "title": title,
         "returnFunction":returnFunction,
-        "responseType":responseType
+        "responseType":responseType,
+        "Error":error
     }
+    error = ''
     return render(request,"mainapp/models_List.html",context=context)
     
 
 def mainPage(request):
-    # if not request.user.is_authenticated:
-    #     return HttpResponseRedirect(reverse('loginPage'))
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('loginPage'))
     global u
     global error
 
-    # u = CasualUser.objects.get(username=request.user.username)
-    # if(u.category=='commercial'):
-    #     u=CommercialUser.objects.get(username=u.username)
-    # elif(u.category=='premium'):
-    #     u=PremiumUser.objects.get(username=u.username)
+    u = CasualUser.objects.get(username=request.user.username)
+    if(u.category=='commercial'):
+        u=CommercialUser.objects.get(username=u.username)
+    elif(u.category=='premium'):
+        u=PremiumUser.objects.get(username=u.username)
     
     timeline = Timeline.objects.get(timeline_of=u)
     postList=[str(post) for post in timeline.posts.all()]
@@ -92,10 +95,11 @@ def getUpgradeResponse(request):
 
 
 def upgradeAccount(request):
+    
     # # check if user is authenticated 
     # if not request.user.is_authenticated:
     #     return HttpResponseRedirect(reverse('loginPage'))
-    global u
+    global u,error
     timeline = Timeline.objects.get(timeline_of=u)
     postList=[str(post) for post in timeline.posts.all()]
     l=Private_Message.objects.filter(to_user=u)
@@ -108,10 +112,12 @@ def upgradeAccount(request):
     elif(isinstance(u,CasualUser)):
         h="Casual"  
     attr={'name':u.username,'postList':postList,'messageList':messageList,'balance':u.wallet_money,'aType':h,
-        'maxt':u.max_transactions,'transactions':u.transactions,'DOB':u.date_of_birth,'email':u.email_id,'msg':"You cannot upgrade!",}
+        'maxt':u.max_transactions,'transactions':u.transactions,'DOB':u.date_of_birth,'email':u.email_id,'msg':"You cannot upgrade!",'Error':error}
     if(isinstance(u,CommercialUser)):
+        error = ''
         return render(request,"mainapp/mainPage.html",attr)
     if(isinstance(u,PremiumUser)):
+        error = ''
         return render(request,"mainapp/mainPage.html",attr)
     if(isinstance(u,CasualUser)):
         buttonlist=["Upgrade","Go_Back"]
@@ -345,6 +351,7 @@ def getFRADResponse(request):
         return HttpResponseRedirect(reverse('mainPage'))
 
 def viewFriendProfile(friend,request):
+    global error
     # # check if user is authenticated 
     # if not request.user.is_authenticated:
     #     return HttpResponseRedirect(reverse('loginPage'))
@@ -358,7 +365,8 @@ def viewFriendProfile(friend,request):
         infoList.append("DOB:- "+str(friend.date_of_birth))
     if(friend.others_can_see_email==True):
         infoList.append("E-mail:- "+str(friend.email_id))
-    attr={'name':friend.username,'enablePost':enablePost,'infoList':infoList,'postList':postList}
+    attr={'name':friend.username,'enablePost':enablePost,'infoList':infoList,'postList':postList,'Error':error}
+    error = ''
     return(render(request,"mainapp/userProfile.html",attr))
         
 
@@ -744,6 +752,7 @@ def viewPages(request):
     return display_Menu(attr,request)
 
 def getVPResponse(request):
+    global error
     # # check if user is authenticated 
     # if not request.user.is_authenticated:
     #     return HttpResponseRedirect(reverse('loginPage'))
@@ -754,8 +763,9 @@ def getVPResponse(request):
         rList=getResponseList(request)
         r=rList[0]
         print(r)
-        attr={'username':r.admin,'content':r.Content}
+        attr={'username':r.admin,'content':r.Content,'Error':error}
         try:
+            error = ''
             return render(request,"mainapp/page.html",attr)
         except IndexError:
             error = 'Page not selected'
@@ -935,6 +945,7 @@ def joinGroup(request):
     return(HttpResponseRedirect(reverse("mainPage")))
 
 def getVGResponse(request,grp=1):
+    global error
     # # check if user is authenticated 
     # if not request.user.is_authenticated:
     #     return HttpResponseRedirect(reverse('loginPage'))
@@ -956,13 +967,19 @@ def getVGResponse(request,grp=1):
         if (grp.admin.pk==u.pk):
             attr={'groupTitle':grp.name,'groupAdmin':str(grp.admin),
             'messageList':[str(m) for m in grp.messages.all()],
-            'memberList':[str(mem) for mem in grp.members.all()]}
-            return render(request,"mainapp/adminGroup.html",attr)
+            'memberList':[str(mem) for mem in grp.members.all()], 'Error':error}
+            try:
+                error = ''
+                return render(request,"mainapp/adminGroup.html",attr)
+            except IndexError:
+                error = 'Group not selected'
+                return HttpResponseRedirect(reverse('mainPage'))
         elif(u.pk in [l.pk for l in grp.members.all()]):
             attr={'groupTitle':grp.name,'groupAdmin':str(grp.admin),
             'messageList':[str(m) for m in grp.messages.all()],
-            'memberList':[str(mem) for mem in grp.members.all()]}
+            'memberList':[str(mem) for mem in grp.members.all()], 'Error':error}
             try:
+                error = ''
                 return render(request,"mainapp/joinedGroup.html",attr)
             except:
                 error = 'Group not selected'
@@ -975,8 +992,9 @@ def getVGResponse(request,grp=1):
             if(grp.can_send_join_requests):
                 canJoin=True
             print(isRSent)
-            attr={'groupTitle':grp.name,'groupAdmin':str(grp.admin),'groupAdmin':str(grp.admin),'sent':isRSent,'canJoin':canJoin,'price':grp.price}
+            attr={'groupTitle':grp.name,'groupAdmin':str(grp.admin),'groupAdmin':str(grp.admin),'sent':isRSent,'canJoin':canJoin,'price':grp.price, 'Error':error}
             try:
+                error = ''
                 return render(request,"mainapp/unjoinedGroup.html",attr)
             except IndexError:
                 error = 'Group Not selected'

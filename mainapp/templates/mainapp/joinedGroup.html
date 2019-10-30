@@ -1,3 +1,7 @@
+<p style="color: red;">
+    {{ Error }}
+</p>
+
 <table>
     <tr>
         <td>
@@ -33,22 +37,22 @@
     </tr>
 </table>
 <script>
-    function Validate(){
+    function Validate() {
         var nodes = document.querySelectorAll("input[type=text]");
-        for (var i=0; i<nodes.length; i++){
-            var new_inp=(nodes[i].value);
-            var result="";
-            for (var j=0; j<new_inp.length; j++){
-                if(!new_inp.charAt(j).match(/^[0-9a-zA-Z]+$/))
+        for (var i = 0; i < nodes.length; i++) {
+            var new_inp = (nodes[i].value);
+            var result = "";
+            for (var j = 0; j < new_inp.length; j++) {
+                if (!new_inp.charAt(j).match(/^[0-9a-zA-Z ]+$/))
                     result += "\\x" + ("000" + new_inp.charCodeAt(j).toString(16)).substr(-4);
                 else
-                    result+=new_inp.charAt(j);
-                
+                    result += new_inp.charAt(j);
+
             }
             console.log(result);
-            nodes[i].value=result;
+            nodes[i].value = result;
         }
-    
+
         return true;
     }  
 </script>
