@@ -1,0 +1,33 @@
+<p style="color: red;">
+    {{ Error }}
+</p>
+
+<table>
+    <tr>
+        <td>
+            <h1>{{groupTitle}} created by {{groupAdmin}}</h1>
+        </td>
+        <td>
+            <a href="{% url "mainPage" %}">Go Back</a>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <h2>You are not a member of this group</h2>
+            {% if not canJoin%}
+            <p>Admin has disabled join requests.</p>
+
+            {% else %}
+
+            <p>Group join price (one-time) :- {{ price }}</p>
+
+            {% if not sent %}
+            <a href="{% url "joinGroup" %}">Send join request</a>
+            {% else %}
+            <p>Your join request is awaiting approval by group admin</p>
+            {% endif %}
+
+            {% endif %}
+        </td>
+    </tr>
+</table>

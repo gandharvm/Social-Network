@@ -1,0 +1,10 @@
+<p>{{Msg}}</p>
+<form action="{% url 'otp' %}" method="POST">
+    {% csrf_token %}
+    OTP:<br>
+    <input type="password" name="otp" required><br>
+
+    <input type="submit" value="Verify"><br>
+</form>
+
+<a href="{% url "signUpForm" %}">Go Back</a>

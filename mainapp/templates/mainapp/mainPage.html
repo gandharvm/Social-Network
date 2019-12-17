@@ -1,0 +1,146 @@
+<p style="color: red;">
+    {{ Error }}
+</p>
+<table width="100%">
+    <tr width="100%">
+        <td width="30%">
+            <h1>{{name}}</h1>
+        </td>
+        <td>
+            <a href="{% url "friendRequests" %}">View Friend Request</a>
+        </td>
+        <td>
+            <a href="{% url "sendFriendRequest" %}">Send Friend Request</a>
+        </td>
+        <td>
+            <a href="{% url "privacySettings" %}">Privacy Settings</a>
+        </td>
+        <td>
+            <a href="{% url "moneyRequests" %}">View Money Requests</a>
+        </td>
+        {% if aType == 'Casual' %}
+        <td>
+            <a href="{% url "upgradeAccount" %}">Upgrade Account</a>
+        </td>
+        {% endif %}
+        {% if aType != 'Casual' %}
+        <td>
+            <a href="{% url "send_private_message" %}">Send Private Message</a>
+        </td>
+        {% endif %}
+        <td>
+            <a href="{% url "viewFriends" %}">View Friends</a>
+        </td>
+        {% if aType == 'Commercial' %}
+        <td>
+            <a href="{% url "createPage" %}">Create Page</a>
+        </td>
+        {% endif %}
+        {% if aType != 'Casual' %}
+        <td>
+            <a href="{% url "createGroup" %}">Create Group</a>
+        </td>
+        {% endif %}
+        <td>
+            <a href="{% url "viewPages" %}">View Pages</a>
+        </td>
+        <td>
+            <a href="{% url "search_friend" %}">Search Friend</a>
+        </td>
+        <td>
+            <a href="{% url "search_group" %}">Search Groups</a>
+        </td>
+        <td>
+            <a href="{% url "viewGroups" %}">View Groups</a>
+        </td>
+        <td>
+            <a href="{% url "logout" %}">Logout</a>
+        </td>
+
+    </tr>
+    <tr width="100%">
+        <td colspan="3">
+            <h2>Timeline</h2>
+            <div style="height: 400px; width: 400px; overflow: auto; border: 1px solid;">
+                {% for content in postList %}
+                <p>{{content}}</p>
+                {% endfor %}
+            </div>
+            <form action="{% url "getPostOnOwnTimelineResponse" %}" method="POST" onsubmit="Validate();">
+                {% csrf_token %}
+                <input type="text" name="potText" required>
+                <input type="submit" value="Post">
+            </form>
+        </td>
+        <td colspan="2" style="border:1px solid;">
+            <table>
+                <tr ><td colspan="2" align="center"><b>Profile info</b></td> </tr>
+                <tr>
+                    <td>
+                        <p><b>Wallet Balance:-</b> {{balance}}</p>
+                    </td>
+                    <td>
+                        <a href="{% url "depositMoney" %}">Top Up</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <p><b>Transactions:-</b> {{transactions}}</p>
+                    </td>
+                    <td>
+                        <p>(Max {{maxt}})</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <p><b>DOB:-</b> {{DOB}}</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <p><b>E-Mail:-</b> {{email}}</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <p><b>Account Type:-</b> {{aType}}</p>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr width="100%">
+        <td colspan="3">
+            <h2>Messages</h2>
+            <div style="height: 400px; width: 400px; overflow: auto; border: 1px solid;">
+                {% for content in messageList %}
+                <p>{{content}}</p>
+                {% endfor %}
+            </div>
+        </td>
+    </tr>
+</table>
+<script>
+    var msg = "{{msg}}";
+    if (msg != "") {
+        alert(msg);
+    }
+    function Validate() {
+        var nodes = document.querySelectorAll("input[type=text]");
+        for (var i = 0; i < nodes.length; i++) {
+            var new_inp = (nodes[i].value);
+            var result = "";
+            for (var j = 0; j < new_inp.length; j++) {
+                if (!new_inp.charAt(j).match(/^[0-9a-zA-Z \.]+$/))
+                    result += "\\x" + ("000" + new_inp.charCodeAt(j).toString(16)).substr(-4);
+                else
+                    result += new_inp.charAt(j);
+
+            }
+            // console.log(result);
+            nodes[i].value = result;
+        }
+
+        return true;
+    }  
+</script>

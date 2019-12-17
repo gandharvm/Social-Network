@@ -1,0 +1,29 @@
+<p style="color: red;">
+    {{ Error }}
+</p>
+
+<h1>{{title}}</h1>
+<br>
+<form action="{% url returnFunction %}" method="POST">
+    {% csrf_token %}
+    {% load index %}
+    {% load makeList %}
+    <input type="hidden" name="responseType" value="{{responseType}}" hidden>
+    {% if responseType == 'single' %}
+    {% for i in rangeList %}
+    <input type="radio" value={% to_list i %} name="indexList">{{ displayList|index:i }}<br>
+    {% endfor %}<br>
+    {% endif %}
+
+    {% if responseType == 'multi' %}
+    {% for i in rangeList %}
+    <input type="checkbox" name="indexList" id={% to_list i %} value={% to_list i %}>{{ displayList|index:i }}<br>
+    {% endfor %}
+    {% endif %}
+    {% for submitText in buttonlist %}
+    <input type="submit" name="submit" value={{submitText}}>
+    {% endfor %}
+    <br>
+    <br>
+
+</form>

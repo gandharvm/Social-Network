@@ -1,0 +1,11 @@
+from mainapp.models import *
+import datetime
+
+
+
+
+
+u=CasualUser.create("Harsimar2",datetime.datetime.now(),"k@g.com")
+u=CasualUser.create("Udayaan2",datetime.datetime.now(),"k@g.com")
+u=CommercialUser.create("Abhivandan2",datetime.datetime.now(),"k@g.com")
+u=CommercialUser.create("Gandharv2",datetime.datetime.now(),"k@g.com")

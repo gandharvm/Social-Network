@@ -1,0 +1,38 @@
+[2019-10-26 18:34:51] INFO Udayaan deposited 1000.0 to their wallet
+[2019-10-26 18:47:11] INFO Harsimar deposited 1000.0 to their wallet
+[2019-10-26 19:05:01] INFO Harsimar sent money request to Udayaan for 100.0 amount
+[2019-10-26 21:04:21] INFO Harsimar sent money request to Udayaan for 1000.0 amount
+[2019-10-26 21:08:13] INFO Udayaan accepted money request from Harsimar for 100.0 amount
+[2019-10-26 21:08:26] INFO Udayaan accepted money request from Harsimar for 1000.0 amount
+[2019-10-28 13:06:45] INFO Udayaan deposited 1000000.0 to their wallet
+[2019-10-28 13:10:51] INFO Udayaan sent money request to Harsimar for 10.0 amount
+[2019-10-29 14:21:22] INFO Udayaan deposited 100.0 to their wallet
+[2019-10-29 14:22:19] INFO Udayaan deposited 100.0 to their wallet
+[2019-10-29 16:17:27] INFO Gandharv deposited 1000.0 to their wallet
+[2019-10-29 17:07:17] INFO Gandharv deposited 10000.0 to their wallet
+[2019-10-29 17:13:22] INFO Gandharv deposited 1000.0 to their wallet
+[2019-10-29 17:33:35] INFO Gandharv deposited 1000000.0 to their wallet
+[2019-10-29 18:40:44] INFO Gandharv deposited 111.0 to their wallet
+[2019-10-29 18:40:50] INFO Gandharv deposited 1000000.0 to their wallet
+[2019-10-30 01:18:35] INFO demo deposited 1000000.0 to their wallet
+[2019-10-30 02:59:48] INFO demo sent money request to udayaan for 10000.0 amount
+[2019-10-30 03:01:06] INFO udayaan accepted money request from demo for 10000.0 amount
+[2019-10-30 10:58:57] INFO Harsimar2 deposited 1000000.0 to their wallet
+[2019-10-30 11:26:46] INFO Gandharv deposited 1000000.0 to their wallet
+[2019-10-30 11:32:45] INFO Harsimar deposited 1000000.0 to their wallet
+[2019-10-30 11:36:23] INFO Abhivandan deposited 1000000.0 to their wallet
+[2019-10-30 12:01:41] INFO Udayaan deposited 1000000.0 to their wallet
+[2019-10-30 12:08:06] INFO Harsimar deposited 1000000.0 to their wallet
+[2019-10-30 12:16:11] INFO Harsimar deposited 100000 to their wallet
+[2019-10-30 12:16:34] INFO Abhivandan deposited 100000 to their wallet
+[2019-10-30 12:17:08] INFO Gandharv deposited 100000 to their wallet
+[2019-10-30 12:17:35] INFO Udayaan deposited 10000000 to their wallet
+[2019-10-30 16:41:02] INFO udayaan17119Commercial deposited 1000000.0 to their wallet
+<<<<<<< HEAD
+[2019-10-30 17:52:08] INFO Gandharv2 deposited 1000000.0 to their wallet
+=======
+[2019-10-30 17:33:15] INFO udayaanPremium deposited 1000000.0 to their wallet
+>>>>>>> 35db2fa76b415a944241209f3632a09e8885c66a
+[2019-10-30 18:55:56] INFO abhi deposited 5050.0 to their wallet
+[2019-10-30 19:02:52] INFO abhi5 deposited 8888.0 to their wallet
+[2019-10-30 21:13:56] INFO harsimar2509 deposited 1000000.0 to their wallet
